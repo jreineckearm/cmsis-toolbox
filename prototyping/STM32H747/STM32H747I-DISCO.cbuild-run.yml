@@ -158,18 +158,18 @@ cbuild-run:
       // GENERATED FROM SDF DURING *.cbuild-run.yml GENERATION
       // ******************************************************
 
-      // Funnel 0
+      // Funnel CSTF
       __var FUNNEL_ADDRESS_0    = 0xE00F3000; // Trace funnel address CSTF funnel instance
       __var FUNNEL_AP_0         = 0x00000002; // Trace funnel address CSTF funnel instance
       __var FUNNEL_INPUT_MASK_0 = 0x0000000F; // Trace funnel input mask CSTF funnel instance
-      // Funnel 1
+      // Funnel SWTF
       __var FUNNEL_ADDRESS_1    = 0xE00F3000; // Trace funnel address SWTF funnel instance
       __var FUNNEL_AP_1         = 0x00000002; // Trace funnel address SWTF funnel instance
       __var FUNNEL_INPUT_MASK_1 = 0x00000003; // Trace funnel input mask SWTF funnel instance
-      // ETF 0
+      // ETF
       __var ETF_ADDRESS_0       = 0xE00F4000;
       __var ETF_AP_0            = 0x00000002;
-      // TPIU 0
+      // TPIU
       __var TPIU_ADDRESS_0      = 0xE00F5000;
       __var TPIU_AP_0           = 0x00000002;
 
@@ -243,7 +243,7 @@ cbuild-run:
             __var traceTPIU   = (TEMP_TRACEOUT & 0x2) != 0;                               // Synchronous trace port enabled?
 
             // CALL TEARDOWN OF TRACE FIRST
-            Sequenece("TraceStopExt");   // Add additional Trace Stop configuration if needed, e.g. to flush the ETF or TPIU FIFOs before stopping trace
+            Sequence("TraceStopExt");   // Add additional Trace Stop configuration if needed, e.g. to flush the ETF or TPIU FIFOs before stopping trace
 
         - if: traceSWO
           execute: |
@@ -572,17 +572,30 @@ cbuild-run:
     - name: Configure_Funnel_0
       blocks:
       - execute: |
+          // TEMP_TRACEOUT: replace with __traceout when available from debugger,
+          //                or move trace mode decision to new built-in variable.
+          __var swoTrace    = TEMP_TRACEOUT & 0x1;
+          __var syncTrace   = TEMP_TRACEOUT & 0x2;
+          __var bufferTrace = TEMP_TRACEOUT & 0x4;
+
           // Helper variables
           __var savedAP    = __ap;
+          __var funnelMask = 0x00000000;
           __var value      = 0x00000000;
 
           Message(0, "Begin Configure_Funnel_0 @0x%08X, AP 0x%08X", FUNNEL_ADDRESS_0, FUNNEL_AP_0);
 
+      - if: syncTrace != 0 || bufferTrace != 0
+        blocks:
+          - execute: |
+              funnelMask = FUNNEL_INPUT_MASK_0;
+
+      - execute: |
           __ap = FUNNEL_AP_0; // Set AP
 
           value = Read32(FUNNEL_ADDRESS_0 + 0x000);
-          value &= ~0xFF;                // Clear existing funnel input enables, keep hold time
-          value |= FUNNEL_INPUT_MASK_0;  // Keep hold time as is for now, could be made configurable if needed
+          value &= ~0xFF;       // Clear existing funnel input enables, keep hold time
+          value |= funnelMask;  // Keep hold time as is for now, could be made configurable if needed
 
       - execute: |
           Write32(FUNNEL_ADDRESS_0 + 0x000, value); // Configure CoreSight Trace Funnel to enable selected trace sources
@@ -593,16 +606,31 @@ cbuild-run:
     - name: Configure_Funnel_1
       blocks:
       - execute: |
+          // TEMP_TRACEOUT: replace with __traceout when available from debugger,
+          //                or move trace mode decision to new built-in variable.
+          __var swoTrace    = TEMP_TRACEOUT & 0x1;
+          __var syncTrace   = TEMP_TRACEOUT & 0x2;
+          __var bufferTrace = TEMP_TRACEOUT & 0x4;
+
           // Helper variables
           __var savedAP    = __ap;
+          __var funnelMask = 0x00000000;
           __var value      = 0x00000000;
 
           Message(0, "Begin Configure_Funnel_1 @0x%08X, AP 0x%08X", FUNNEL_ADDRESS_1, FUNNEL_AP_1);
 
+          // BASED ON SDF FILE
+          // Determine funnel inputs
+      - if: swoTrace != 0
+        blocks:
+        - execute: |
+            funnelMask |= FUNNEL_INPUT_MASK_1; // Enable SWO trace input to funnel
+
+        - execute: |
             __ap = FUNNEL_AP_1; // Set AP
             value = Read32(FUNNEL_ADDRESS_1 + 0x000);
-            value &= ~0xFF;                // Clear existing funnel input enables, keep hold time
-            value |= FUNNEL_INPUT_MASK_1;  // Keep hold time as is for now, could be made configurable if needed
+            value &= ~0xFF;       // Clear existing funnel input enables, keep hold time
+            value |= funnelMask;  // Keep hold time as is for now, could be made configurable if needed
 
       - execute: |
           Write32(FUNNEL_ADDRESS_1 + 0x000, value); // Configure CoreSight Trace Funnel to enable selected trace sources

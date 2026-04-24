@@ -1,0 +1,1787 @@
+cbuild-run:
+  generated-by: csolution version 2.13.0
+  solution: ../multicore.csolution.yml
+  target-type: CM4
+  compiler: AC6
+  device: Infineon::CYT2BL5CAS
+  device-pack: Infineon::T2G-B-E_DFP@1.0.0
+  output:
+    - file: CM4/CM4/CM4.axf
+      info: generate by CM4+CM4
+      type: elf
+      load: image+symbols
+      pname: Cortex-M4
+  system-resources:
+    memory:
+      - name: IRAM1
+        access: rwx
+        start: 0x08000000
+        size: 0x00080000
+        from-pack: Infineon::T2G-B-E_DFP@1.0.0
+      - name: IROM1
+        access: rx
+        start: 0x10000000
+        size: 0x00410000
+        from-pack: Infineon::T2G-B-E_DFP@1.0.0
+  system-descriptions:
+    - file: ${CMSIS_PACK_ROOT}/Infineon/T2G-B-E_DFP/1.0.0/Libraries/mtb-pdl-cat1/devices/COMPONENT_CAT1A/svd/tviibe4m.svd
+      type: svd
+      pname: Cortex-M0p
+    - file: ${CMSIS_PACK_ROOT}/Infineon/T2G-B-E_DFP/1.0.0/Libraries/mtb-pdl-cat1/devices/COMPONENT_CAT1A/svd/tviibe4m.svd
+      type: svd
+      pname: Cortex-M4
+  debugger:
+    name: CMSIS-DAP@pyOCD
+    protocol: swd
+    clock: 2000000
+    dbgconf: ../.cmsis/multicore+CM4.dbgconf
+    start-pname: Cortex-M4
+    gdbserver:
+      - port: 3333
+        pname: Cortex-M4
+      - port: 3334
+        pname: Cortex-M0p
+  debug-vars:
+    vars: |
+      __var __TPIU_pinlocation = 1;                      // Select one of the possible TPIU pin locations
+      __var __TPIU_clocksetup = 1;                       // Enable(1) or Disable(0) setup of trace source clock
+      __var __TPIU_clockdivval = 0;                      // Clock divider value for trace clock
+      // TraceClock configuration data
+      __var TRACE_CLOCK_CTL_ADDR = 0x40000C00;           // Clock control register for cpuss.clock_trace_in
+      __var TRACE_CLOCK_DIV_CTL_ADDR = 0x40001000;       // Divider control (for 8.0 divider)
+      __var TRACE_CLOCK_DIV_CMD_ADDR = 0x40000400;       // Divider command
+      __var PERI_CLOCK_CTL_DIV_SEL = 0x1F;               // CYT2BL devices have 32 of 8-bit dividers - use the lastest available for tracing
+      __var PERI_DIV_PA_SEL_MASK = 0x000003FF;           // PA_TYPE_SEL + PA_DIV_SEL fields mask (size)
+      __var PERI_DIV_CMD_PA_SEL_ROL = 0x00000010;        // PA_TYPE_SEL + PA_DIV_SEL fields offset in PERI_DIV_CMD
+      // TPIU pins configuration data
+      __var hsiomPrt18PortSel0Addr = 0x40300120;  // HSIOM_PRT[port]_PORT_SEL0·register·address. Port 18 selection 0
+      __var hsiomPrt22PortSel0Addr = 0x40300160;  // HSIOM_PRT[port]_PORT_SEL0·register·address. Port 22 selection 0
+      __var hsiomPrt23PortSel0Addr = 0x40300170;  // HSIOM_PRT[port]_PORT_SEL0·register·address. Port 23 selection 0
+      __var gpioPrt18CfgAddr = 0x40310944;        // GPIO_PRT[port]_CFG register address. Port 18 configuration
+      __var gpioPrt22CfgAddr = 0x40310B44;        // GPIO_PRT[port]_CFG register address. Port 22 configuration
+      __var gpioPrt23CfgAddr = 0x40310BC4;        // GPIO_PRT[port]_CFG register address. Port 23 configuration
+      __var gpioPrt18CfgOutAddr = 0x4031094C;     // GPIO_PRT[port]_CFG_OUT register address. Port 18 output buffer configuration
+      __var gpioPrt22CfgOutAddr = 0x40310B4C;     // GPIO_PRT[port]_CFG_OUT register address. Port 22 output buffer configuration
+      __var gpioPrt23CfgOutAddr = 0x40310BCC;     // GPIO_PRT[port]_CFG_OUT register address. Port 23 output buffer configuration
+      // SFLASH base address
+      __var SFLASH_BASE_ADDR = 0x17000000;
+
+
+      // TEMPORARY HACK, use __traceout instead
+      __var TEMP_TRACEOUT = 0x00000000;  // OFF
+      // __var TEMP_TRACEOUT = 0x00040002;  // TPIU
+      // __var TEMP_TRACEOUT = 0x00000004;  // TRACE BUFFER
+
+      // ******************************************************
+      // GENERATED FROM SDF DURING *.cbuild-run.yml GENERATION
+      // ******************************************************
+
+      // TODO: ADDRESSES AND APS!!!!!!!!!!!!!!!
+
+      // Funnel
+      __var FUNNEL_ADDRESS    = 0x00000000;
+      __var FUNNEL_AP         = 0x00000000;
+      __var FUNNEL_INPUT_MASK = 0x00000000; // Mask of trace inputs connected to funnel, enable all valid inputs by default.
+
+      // TPIU
+      __var TPIU_ADDRESS    = 0xE0040000;  // Default TPIU Location for single-core systems
+      __var TPIU_AP         = 0x00000000;
+      __var TPIU_PRESCALER  = 0x00000000; // TPIU Asynchronous Clock Prescaler Register
+
+      // ETB
+      __var ETB_ADDRESS       = 0x00000000;
+      __var ETB_AP            = 0x00000000;
+      __var ETB_TRIGGER_COUNT = 0x0;
+
+  debug-sequences:
+    - name: ResetProcessor
+      blocks:
+        - execute: |
+            Write32(0x40201000, 0x05FA0000); // Reset CM0+ via "ENABLED" bit in CPUSS_CM0_CTL (M0+ Control Register)
+        - while: (Read32(0xE000EDF0) & 0x02000000)
+          timeout: 500000
+      pname: Cortex-M0p
+    - name: ResetSystem
+      blocks:
+        - info: Halt CPU and determine application entry point
+          execute: |
+            // System Control Space (SCS) offset as defined in Armv6-M/Armv7-M.
+            __var SCS_Addr = 0xE000E000;
+            __var AIRCR_Addr = SCS_Addr + 0xD0C;
+            __var DHCSR_Addr = SCS_Addr + 0xDF0;
+            __var BP_CTRL = 0xE0002000;
+            __var BP_COMPx = 0xE0002008;
+            __var DP_CTRL_STAT = 0x4;
+            __var appValid = 0;
+            __var vtBase = 0;
+            __var resetAddress = 0;
+
+            // Read VT_BASE register
+            vtBase = Read32(0x40201120);
+            vtBase = vtBase & 0xFFFF0000;
+            appValid = (vtBase != 0) && ((vtBase & 0xFFFF0000) != 0xFFFF0000);
+        - if: appValid
+          blocks:
+            - info: Set BP at app entry and issue a reset
+              execute: |
+                //Get application address at reset vector
+                resetAddress = Read32(vtBase + 4);
+            - if: resetAddress
+              blocks:
+                - execute: |
+                    // Enable debug, and halt the CPU
+                    Write32(DHCSR_Addr, 0xA05F0003);
+
+                    // Enable Breakpoint unit using the BP_CTRL
+                    Write32(0xE0002000, 0x00000003);
+
+                    // Map the address bits to the breakpoint compare register
+                    resetAddress = (resetAddress & 0x1FFFFFFC) | 0xC0000001;
+
+                    // Update the breakpoint compare register
+                    Write32(0xE0002008, resetAddress);
+
+                    // Issue software reset using the AIRCR (Application Interrupt and Reset
+                    // Control Register). Note: do not check for ACK_OK of this operation
+                    __errorcontrol = 1;
+                    Write32(AIRCR_Addr, 0x05FA0004);
+                    sequence("DAP_poll");
+                - while: (Read32(DHCSR_Addr) & 0x02000000)
+                  timeout: 500000
+                - execute: |
+                    __errorcontrol = 0;
+      pname: Cortex-M0p
+    - name: DebugCoreStart
+      blocks:
+        - execute: |
+            // System Control Space (SCS) offset as defined in Armv6-M/Armv7-M.
+            __var SCS_Addr   = 0xE000E000;
+            __var DHCSR_Addr = SCS_Addr + 0xDF0;
+            // Enable Core Debug via DHCSR
+            Write32(DHCSR_Addr, 0xA05F0001);
+        - if: ((__connection & 0x00000001) != 0) && ((__traceout & 0x00000007) != 0)
+          execute: |
+            Sequence("SetupTraceClock");
+      pname: Cortex-M4
+    - name: SetupTraceClock
+      blocks:
+        - execute: |
+            __var PERI_CLOCK_CTL_DIV_SEL_MASK = 0x0000000F;    // PERI_CLOCK_CTL.DIV_SEL
+            __var PERI_DIV_CMD_ENABLE_MASK = 0x80000000;       // ENABLE field in PERI_DIV_CMD
+            __var PERI_DIV_CMD_DISABLE_MASK = 0x40000000;      // DISABLE field in PERI_DIV_CMD
+            // Peripheral clock divider index to use for trace clock
+            __var ClockDivSel = PERI_CLOCK_CTL_DIV_SEL & PERI_CLOCK_CTL_DIV_SEL_MASK;
+            __var ClockDivVal = 0 & PERI_DIV_PA_SEL_MASK;  // Peripheral clock divider value for trace clock
+            // Actual divider is (1+ClockDivVal)
+            __var ClockCtlVal = Read32(TRACE_CLOCK_CTL_ADDR);
+            __var ClockDivCtlVal = Read32(TRACE_CLOCK_DIV_CTL_ADDR + (ClockDivSel * 4));
+        - if: (ClockCtlVal != ClockDivSel) || (ClockDivCtlVal != ((ClockDivVal << PERI_DIV_CMD_PA_SEL_ROL) | 0x1))
+          execute: |
+            Message(0, "Setup trace clock");
+            // DISABLE 8.0 DIV in PERI_DIV_CMD:
+            __var ClockDivCmd = PERI_DIV_CMD_DISABLE_MASK | (PERI_DIV_PA_SEL_MASK << PERI_DIV_CMD_PA_SEL_ROL) | ClockDivSel;
+            Write32(TRACE_CLOCK_DIV_CMD_ADDR, ClockDivCmd);
+            // Use selected divider (8.0) for cpuss.clock_trace_in
+            Write32(TRACE_CLOCK_CTL_ADDR, ClockDivSel);
+            // Set 8.0 DIV = ClockDivVal
+            Write32((TRACE_CLOCK_DIV_CTL_ADDR + (ClockDivSel * 4)), (ClockDivVal << 8));
+            // ENABLE 8.0 DIV
+            ClockDivCmd = PERI_DIV_CMD_ENABLE_MASK | (PERI_DIV_PA_SEL_MASK << PERI_DIV_CMD_PA_SEL_ROL) | ClockDivSel;
+            Write32(TRACE_CLOCK_DIV_CMD_ADDR, ClockDivCmd);
+      pname: Cortex-M4
+    - name: TraceStart
+      blocks:
+        - info: Serial Wire Output (SWO) Trace enabled
+          if: (__traceout & 0x00000001) != 0
+          execute: |
+            sequence("SetupSWOPin");
+        - info: Parallel Trace Port enabled
+          if: (__traceout & 0x00000002) != 0
+          blocks:
+            - execute: |
+                __var tpWidth = (__traceout & 0x003F0000) >> 16;
+            - info: KIT_T2G-B-E-LITE like
+              if: __TPIU_pinlocation == 1
+              blocks:
+                - execute: |
+                    sequence("SetupTracePin_P18_3");
+                    sequence("SetupTracePin_P18_4");
+                - if: tpWidth > 1
+                  execute: |
+                    sequence("SetupTracePin_P18_5");
+                - if: tpWidth > 2
+                  execute: |
+                    sequence("SetupTracePin_P18_6");
+                    sequence("SetupTracePin_P18_7");
+            - info: P22 Like
+              if: __TPIU_pinlocation == 2
+              blocks:
+                - execute: |
+                    sequence("SetupTracePin_P22_4");
+                    sequence("SetupTracePin_P22_0");
+                - if: tpWidth > 1
+                  execute: |
+                    sequence("SetupTracePin_P22_1");
+                - if: tpWidth > 2
+                  execute: |
+                    sequence("SetupTracePin_P22_2");
+                    sequence("SetupTracePin_P22_3");
+
+        # ADD ADDITIONAL TRACE CONFIGURATION
+        - execute: |
+            // Additional Trace configuration can be added here if needed, e.g. configuring the trace funnel or ETF
+            Sequence("TraceStartExt");
+
+      pname: Cortex-M4
+    - name: SetupTracePin_P18_3
+      blocks:
+        - execute: |
+            __var pin = 3;                            // Pin number
+            __var ioSelVal = 0x1B;                    // IO[pin]_SEL field value (connection) for HSIOM_PRT[port]_PORT_SEL register. Connection route for 'cpuss.trace_clock' signals (P18)
+            __var reg0;
+            __var reg1;
+            __var offset;
+            __var hsiomRegAddr; // Address of HSIOM_PRT[port]_PORT_SEL0 or HSIOM_PRT[port]_PORT_SEL1
+            __var pMode = 6;  // pin drive mode
+            //  0: HIGHZ:         Output buffer is off creating a high impedance input (default)
+            //  1: RESERVED:      This mode is reserved and should not be used
+            //  2: PULLUP:        Resistive pull up
+            //  3: PULLDOWN:      Resistive pull down
+            //  4: OD_DRIVESLOW:  Open drain, drives low
+            //  5: OD_DRIVESHIGH: Open drain, drives high
+            //  6: STRONG:        Strong D_OUTput buffer
+            //  7: PULLUP_DOWN:   Pull up or pull down
+            __var pSlew = 0;  // pin slew rate
+            //  0 - Fast slew rate (default)
+            //  1 - Slow slew rate
+            __var pStrange = 2;   // pin drive strange
+            //  0 - FULL_DRIVE:        Full drive strength: GPIO drives current at its max rated spec.
+            //  1 - ONE_HALF_DRIVE:    1/2 drive strength: GPIO drives current at 1/2 of its max rated spec (default)
+            //  2 - ONE_QUARTER_DRIVE: 1/4 drive strength: GPIO drives current at 1/4 of its max rated spec.
+            //  3 - ONE_EIGHTH_DRIVE:  1/8 drive strength: GPIO drives current at 1/8 of its max rated spec.
+            __var confChanged = 0; // Pin's configuration change flag
+            __var PRT_IO_SEL_MASK = 0x1F;    // Mask for IO[pin]_SEL field in HSIOM_PRT[port]_PORT_SEL[0/1] register
+            __var PRT_DRIVE_MODE_MASK = 0xF; // Mask for IN_EN[pin] and DRIVE_MODE[pin] fields in GPIO_PRT[port]_CFG register
+            __var PRT_SLOW_MASK = 0x1;       // Mask for SLOW[pin] field in GPIO_PRT[port]_CFG_OUT register
+            __var PRT_DRIVE_SEL_MASK = 0x3;  // Mask for DRIVE_SEL[pin] field in GPIO_PRT[port]_CFG_OUT register
+        - if: pin < 4
+          execute: |
+            // Pin[0-3] selection is in HSIOM_PRT[port]_PORT_SEL0 register
+            hsiomRegAddr = hsiomPrt18PortSel0Addr; // Use HSIOM_PRT[port]_PORT_SEL0
+            offset = pin * 8; // Offset of the IO[pin]_SEL field for required pin number,
+            // where 8 = 5 bits for IO[pin]_SEL field + 3 not used bits
+        - if: pin > 3
+          execute: |
+            // Pin[4-7] selection is in HSIOM_PRT[port]_PORT_SEL1 register
+            hsiomRegAddr = hsiomPrt18PortSel0Addr + 4; // Use HSIOM_PRT[port]_PORT_SEL1
+            offset = (pin & 3) * 8; // Offset of the IO[pin]_SEL field for required pin number,
+            // where 8 = 5 bits for IO[pin]_SEL field + 3 not used bits
+        - execute: |
+            reg0 = Read32(hsiomRegAddr);
+            reg1 = (reg0 & ~(PRT_IO_SEL_MASK << offset)) | (ioSelVal << offset); // Update value in IO[pin]_SEL field
+        - if: reg0 |= reg1
+          execute: |
+            Write32(hsiomRegAddr, reg1);
+            confChanged = 1;
+        - execute: |
+            reg0 = Read32(gpioPrt18CfgAddr);
+            offset = pin * 4;   // Offset of the DRIVE_MODE[pin] field for required pin number,
+            // where 4 = 3 bits for DRIVE_MODE[pin] + 1 bit for IN_EN fields
+            reg1 = (reg0 & ~(PRT_DRIVE_MODE_MASK << offset)) | (pMode << offset); // Update value in IN_EN[pin] and DRIVE_MODE[pin] fields
+        - if: reg0 |= reg1
+          execute: |
+            Write32(gpioPrt18CfgAddr, reg1);
+            confChanged = 1;
+        - execute: |
+            reg0 = Read32(gpioPrt18CfgOutAddr);
+            offset = pin;
+            reg1 = (reg0 & ~(PRT_SLOW_MASK << offset)) | (pSlew << offset); // Update value in SLOW[pin] field
+            offset = 16 + pin * 2; // Offset of the DRIVE_SEL[pin] field for required pin number,
+            // where '16' is the offset of DRIVE_SEL[pin] for pin 0 and '2' is the size of DRIVE_SEL[pin]
+            reg1 = (reg1 & ~(PRT_DRIVE_SEL_MASK << offset)) | (pStrange << offset); // Update value in DRIVE_SEL[pin] field
+        - if: reg0 |= reg1
+          execute: |
+            Write32(gpioPrt18CfgOutAddr, reg1);
+            confChanged = 1;
+        - if: confChanged |= 0
+          execute: |
+            Message(0, "Set TRACECLK to P18_3");
+      pname: Cortex-M4
+    - name: SetupTracePin_P18_4
+      blocks:
+        - execute: |
+            __var pin = 4;                            // Pin number
+            __var ioSelVal = 0x1B;                    // IO[pin]_SEL field value (connection) for HSIOM_PRT[port]_PORT_SEL register. Connection route for 'cpuss.trace_data0' signals (P18)
+            __var reg0;
+            __var reg1;
+            __var offset;
+            __var hsiomRegAddr; // Address of HSIOM_PRT[port]_PORT_SEL0 or HSIOM_PRT[port]_PORT_SEL1
+            __var pMode = 6;  // pin drive mode
+            //  0: HIGHZ:         Output buffer is off creating a high impedance input (default)
+            //  1: RESERVED:      This mode is reserved and should not be used
+            //  2: PULLUP:        Resistive pull up
+            //  3: PULLDOWN:      Resistive pull down
+            //  4: OD_DRIVESLOW:  Open drain, drives low
+            //  5: OD_DRIVESHIGH: Open drain, drives high
+            //  6: STRONG:        Strong D_OUTput buffer
+            //  7: PULLUP_DOWN:   Pull up or pull down
+            __var pSlew = 0;  // pin slew rate
+            //  0 - Fast slew rate (default)
+            //  1 - Slow slew rate
+            __var pStrange = 2;   // pin drive strange
+            //  0 - FULL_DRIVE:        Full drive strength: GPIO drives current at its max rated spec.
+            //  1 - ONE_HALF_DRIVE:    1/2 drive strength: GPIO drives current at 1/2 of its max rated spec (default)
+            //  2 - ONE_QUARTER_DRIVE: 1/4 drive strength: GPIO drives current at 1/4 of its max rated spec.
+            //  3 - ONE_EIGHTH_DRIVE:  1/8 drive strength: GPIO drives current at 1/8 of its max rated spec.
+            __var confChanged = 0; // Pin's configuration change flag
+            __var PRT_IO_SEL_MASK = 0x1F;    // Mask for IO[pin]_SEL field in HSIOM_PRT[port]_PORT_SEL[0/1] register
+            __var PRT_DRIVE_MODE_MASK = 0xF; // Mask for IN_EN[pin] and DRIVE_MODE[pin] fields in GPIO_PRT[port]_CFG register
+            __var PRT_SLOW_MASK = 0x1;       // Mask for SLOW[pin] field in GPIO_PRT[port]_CFG_OUT register
+            __var PRT_DRIVE_SEL_MASK = 0x3;  // Mask for DRIVE_SEL[pin] field in GPIO_PRT[port]_CFG_OUT register
+        - if: pin < 4
+          execute: |
+            // Pin[0-3] selection is in HSIOM_PRT[port]_PORT_SEL0 register
+            hsiomRegAddr = hsiomPrt18PortSel0Addr; // Use HSIOM_PRT[port]_PORT_SEL0
+            offset = pin * 8; // Offset of the IO[pin]_SEL field for required pin number,
+            // where 8 = 5 bits for IO[pin]_SEL field + 3 not used bits
+        - if: pin > 3
+          execute: |
+            // Pin[4-7] selection is in HSIOM_PRT[port]_PORT_SEL1 register
+            hsiomRegAddr = hsiomPrt18PortSel0Addr + 4; // Use HSIOM_PRT[port]_PORT_SEL1
+            offset = (pin & 3) * 8; // Offset of the IO[pin]_SEL field for required pin number,
+            // where 8 = 5 bits for IO[pin]_SEL field + 3 not used bits
+        - execute: |
+            reg0 = Read32(hsiomRegAddr);
+            reg1 = (reg0 & ~(PRT_IO_SEL_MASK << offset)) | (ioSelVal << offset); // Update value in IO[pin]_SEL field
+        - if: reg0 |= reg1
+          execute: |
+            Write32(hsiomRegAddr, reg1);
+            confChanged = 1;
+        - execute: |
+            reg0 = Read32(gpioPrt18CfgAddr);
+            offset = pin * 4;   // Offset of the DRIVE_MODE[pin] field for required pin number,
+            // where 4 = 3 bits for DRIVE_MODE[pin] + 1 bit for IN_EN fields
+            reg1 = (reg0 & ~(PRT_DRIVE_MODE_MASK << offset)) | (pMode << offset); // Update value in IN_EN[pin] and DRIVE_MODE[pin] fields
+        - if: reg0 |= reg1
+          execute: |
+            Write32(gpioPrt18CfgAddr, reg1);
+            confChanged = 1;
+        - execute: |
+            reg0 = Read32(gpioPrt18CfgOutAddr);
+            offset = pin;
+            reg1 = (reg0 & ~(PRT_SLOW_MASK << offset)) | (pSlew << offset); // Update value in SLOW[pin] field
+            offset = 16 + pin * 2; // Offset of the DRIVE_SEL[pin] field for required pin number,
+            // where '16' is the offset of DRIVE_SEL[pin] for pin 0 and '2' is the size of DRIVE_SEL[pin]
+            reg1 = (reg1 & ~(PRT_DRIVE_SEL_MASK << offset)) | (pStrange << offset); // Update value in DRIVE_SEL[pin] field
+        - if: reg0 |= reg1
+          execute: |
+            Write32(gpioPrt18CfgOutAddr, reg1);
+            confChanged = 1;
+        - if: confChanged |= 0
+          execute: |
+            Message(0, "Set TRACEDATA[0] to P18_4");
+      pname: Cortex-M4
+    - name: SetupTracePin_P18_5
+      blocks:
+        - execute: |
+            __var pin = 5;                            // Pin number
+            __var ioSelVal = 0x1B;                    // IO[pin]_SEL field value (connection) for HSIOM_PRT[port]_PORT_SEL register. Connection route for 'cpuss.trace_data1' signals (P18)
+            __var reg0;
+            __var reg1;
+            __var offset;
+            __var hsiomRegAddr; // Address of HSIOM_PRT[port]_PORT_SEL0 or HSIOM_PRT[port]_PORT_SEL1
+            __var pMode = 6;  // pin drive mode
+            //  0: HIGHZ:         Output buffer is off creating a high impedance input (default)
+            //  1: RESERVED:      This mode is reserved and should not be used
+            //  2: PULLUP:        Resistive pull up
+            //  3: PULLDOWN:      Resistive pull down
+            //  4: OD_DRIVESLOW:  Open drain, drives low
+            //  5: OD_DRIVESHIGH: Open drain, drives high
+            //  6: STRONG:        Strong D_OUTput buffer
+            //  7: PULLUP_DOWN:   Pull up or pull down
+            __var pSlew = 0;  // pin slew rate
+            //  0 - Fast slew rate (default)
+            //  1 - Slow slew rate
+            __var pStrange = 2;   // pin drive strange
+            //  0 - FULL_DRIVE:        Full drive strength: GPIO drives current at its max rated spec.
+            //  1 - ONE_HALF_DRIVE:    1/2 drive strength: GPIO drives current at 1/2 of its max rated spec (default)
+            //  2 - ONE_QUARTER_DRIVE: 1/4 drive strength: GPIO drives current at 1/4 of its max rated spec.
+            //  3 - ONE_EIGHTH_DRIVE:  1/8 drive strength: GPIO drives current at 1/8 of its max rated spec.
+            __var confChanged = 0; // Pin's configuration change flag
+            __var PRT_IO_SEL_MASK = 0x1F;    // Mask for IO[pin]_SEL field in HSIOM_PRT[port]_PORT_SEL[0/1] register
+            __var PRT_DRIVE_MODE_MASK = 0xF; // Mask for IN_EN[pin] and DRIVE_MODE[pin] fields in GPIO_PRT[port]_CFG register
+            __var PRT_SLOW_MASK = 0x1;       // Mask for SLOW[pin] field in GPIO_PRT[port]_CFG_OUT register
+            __var PRT_DRIVE_SEL_MASK = 0x3;  // Mask for DRIVE_SEL[pin] field in GPIO_PRT[port]_CFG_OUT register
+        - if: pin < 4
+          execute: |
+            // Pin[0-3] selection is in HSIOM_PRT[port]_PORT_SEL0 register
+            hsiomRegAddr = hsiomPrt18PortSel0Addr; // Use HSIOM_PRT[port]_PORT_SEL0
+            offset = pin * 8; // Offset of the IO[pin]_SEL field for required pin number,
+            // where 8 = 5 bits for IO[pin]_SEL field + 3 not used bits
+        - if: pin > 3
+          execute: |
+            // Pin[4-7] selection is in HSIOM_PRT[port]_PORT_SEL1 register
+            hsiomRegAddr = hsiomPrt18PortSel0Addr + 4; // Use HSIOM_PRT[port]_PORT_SEL1
+            offset = (pin & 3) * 8; // Offset of the IO[pin]_SEL field for required pin number,
+            // where 8 = 5 bits for IO[pin]_SEL field + 3 not used bits
+        - execute: |
+            reg0 = Read32(hsiomRegAddr);
+            reg1 = (reg0 & ~(PRT_IO_SEL_MASK << offset)) | (ioSelVal << offset); // Update value in IO[pin]_SEL field
+        - if: reg0 |= reg1
+          execute: |
+            Write32(hsiomRegAddr, reg1);
+            confChanged = 1;
+        - execute: |
+            reg0 = Read32(gpioPrt18CfgAddr);
+            offset = pin * 4;   // Offset of the DRIVE_MODE[pin] field for required pin number,
+            // where 4 = 3 bits for DRIVE_MODE[pin] + 1 bit for IN_EN fields
+            reg1 = (reg0 & ~(PRT_DRIVE_MODE_MASK << offset)) | (pMode << offset); // Update value in IN_EN[pin] and DRIVE_MODE[pin] fields
+        - if: reg0 |= reg1
+          execute: |
+            Write32(gpioPrt18CfgAddr, reg1);
+            confChanged = 1;
+        - execute: |
+            reg0 = Read32(gpioPrt18CfgOutAddr);
+            offset = pin;
+            reg1 = (reg0 & ~(PRT_SLOW_MASK << offset)) | (pSlew << offset); // Update value in SLOW[pin] field
+            offset = 16 + pin * 2; // Offset of the DRIVE_SEL[pin] field for required pin number,
+            // where '16' is the offset of DRIVE_SEL[pin] for pin 0 and '2' is the size of DRIVE_SEL[pin]
+            reg1 = (reg1 & ~(PRT_DRIVE_SEL_MASK << offset)) | (pStrange << offset); // Update value in DRIVE_SEL[pin] field
+        - if: reg0 |= reg1
+          execute: |
+            Write32(gpioPrt18CfgOutAddr, reg1);
+            confChanged = 1;
+        - if: confChanged |= 0
+          execute: |
+            Message(0, "Set TRACEDATA[1] to P18_5");
+      pname: Cortex-M4
+    - name: SetupTracePin_P18_6
+      blocks:
+        - execute: |
+            __var pin = 6;                            // Pin number
+            __var ioSelVal = 0x1B;                    // IO[pin]_SEL field value (connection) for HSIOM_PRT[port]_PORT_SEL register. Connection route for 'cpuss.trace_data2' signals (P18)
+            __var reg0;
+            __var reg1;
+            __var offset;
+            __var hsiomRegAddr; // Address of HSIOM_PRT[port]_PORT_SEL0 or HSIOM_PRT[port]_PORT_SEL1
+            __var pMode = 6;  // pin drive mode
+            //  0: HIGHZ:         Output buffer is off creating a high impedance input (default)
+            //  1: RESERVED:      This mode is reserved and should not be used
+            //  2: PULLUP:        Resistive pull up
+            //  3: PULLDOWN:      Resistive pull down
+            //  4: OD_DRIVESLOW:  Open drain, drives low
+            //  5: OD_DRIVESHIGH: Open drain, drives high
+            //  6: STRONG:        Strong D_OUTput buffer
+            //  7: PULLUP_DOWN:   Pull up or pull down
+            __var pSlew = 0;  // pin slew rate
+            //  0 - Fast slew rate (default)
+            //  1 - Slow slew rate
+            __var pStrange = 2;   // pin drive strange
+            //  0 - FULL_DRIVE:        Full drive strength: GPIO drives current at its max rated spec.
+            //  1 - ONE_HALF_DRIVE:    1/2 drive strength: GPIO drives current at 1/2 of its max rated spec (default)
+            //  2 - ONE_QUARTER_DRIVE: 1/4 drive strength: GPIO drives current at 1/4 of its max rated spec.
+            //  3 - ONE_EIGHTH_DRIVE:  1/8 drive strength: GPIO drives current at 1/8 of its max rated spec.
+            __var confChanged = 0; // Pin's configuration change flag
+            __var PRT_IO_SEL_MASK = 0x1F;    // Mask for IO[pin]_SEL field in HSIOM_PRT[port]_PORT_SEL[0/1] register
+            __var PRT_DRIVE_MODE_MASK = 0xF; // Mask for IN_EN[pin] and DRIVE_MODE[pin] fields in GPIO_PRT[port]_CFG register
+            __var PRT_SLOW_MASK = 0x1;       // Mask for SLOW[pin] field in GPIO_PRT[port]_CFG_OUT register
+            __var PRT_DRIVE_SEL_MASK = 0x3;  // Mask for DRIVE_SEL[pin] field in GPIO_PRT[port]_CFG_OUT register
+        - if: pin < 4
+          execute: |
+            // Pin[0-3] selection is in HSIOM_PRT[port]_PORT_SEL0 register
+            hsiomRegAddr = hsiomPrt18PortSel0Addr; // Use HSIOM_PRT[port]_PORT_SEL0
+            offset = pin * 8; // Offset of the IO[pin]_SEL field for required pin number,
+            // where 8 = 5 bits for IO[pin]_SEL field + 3 not used bits
+        - if: pin > 3
+          execute: |
+            // Pin[4-7] selection is in HSIOM_PRT[port]_PORT_SEL1 register
+            hsiomRegAddr = hsiomPrt18PortSel0Addr + 4; // Use HSIOM_PRT[port]_PORT_SEL1
+            offset = (pin & 3) * 8; // Offset of the IO[pin]_SEL field for required pin number,
+            // where 8 = 5 bits for IO[pin]_SEL field + 3 not used bits
+        - execute: |
+            reg0 = Read32(hsiomRegAddr);
+            reg1 = (reg0 & ~(PRT_IO_SEL_MASK << offset)) | (ioSelVal << offset); // Update value in IO[pin]_SEL field
+        - if: reg0 |= reg1
+          execute: |
+            Write32(hsiomRegAddr, reg1);
+            confChanged = 1;
+        - execute: |
+            reg0 = Read32(gpioPrt18CfgAddr);
+            offset = pin * 4;   // Offset of the DRIVE_MODE[pin] field for required pin number,
+            // where 4 = 3 bits for DRIVE_MODE[pin] + 1 bit for IN_EN fields
+            reg1 = (reg0 & ~(PRT_DRIVE_MODE_MASK << offset)) | (pMode << offset); // Update value in IN_EN[pin] and DRIVE_MODE[pin] fields
+        - if: reg0 |= reg1
+          execute: |
+            Write32(gpioPrt18CfgAddr, reg1);
+            confChanged = 1;
+        - execute: |
+            reg0 = Read32(gpioPrt18CfgOutAddr);
+            offset = pin;
+            reg1 = (reg0 & ~(PRT_SLOW_MASK << offset)) | (pSlew << offset); // Update value in SLOW[pin] field
+            offset = 16 + pin * 2; // Offset of the DRIVE_SEL[pin] field for required pin number,
+            // where '16' is the offset of DRIVE_SEL[pin] for pin 0 and '2' is the size of DRIVE_SEL[pin]
+            reg1 = (reg1 & ~(PRT_DRIVE_SEL_MASK << offset)) | (pStrange << offset); // Update value in DRIVE_SEL[pin] field
+        - if: reg0 |= reg1
+          execute: |
+            Write32(gpioPrt18CfgOutAddr, reg1);
+            confChanged = 1;
+        - if: confChanged |= 0
+          execute: |
+            Message(0, "Set TRACEDATA[2] to P18_6");
+      pname: Cortex-M4
+    - name: SetupTracePin_P18_7
+      blocks:
+        - execute: |
+            __var pin = 7;                            // Pin number
+            __var ioSelVal = 0x1B;                    // IO[pin]_SEL field value (connection) for HSIOM_PRT[port]_PORT_SEL register. Connection route for 'cpuss.trace_data3' signals (P18)
+            __var reg0;
+            __var reg1;
+            __var offset;
+            __var hsiomRegAddr; // Address of HSIOM_PRT[port]_PORT_SEL0 or HSIOM_PRT[port]_PORT_SEL1
+            __var pMode = 6;  // pin drive mode
+            //  0: HIGHZ:         Output buffer is off creating a high impedance input (default)
+            //  1: RESERVED:      This mode is reserved and should not be used
+            //  2: PULLUP:        Resistive pull up
+            //  3: PULLDOWN:      Resistive pull down
+            //  4: OD_DRIVESLOW:  Open drain, drives low
+            //  5: OD_DRIVESHIGH: Open drain, drives high
+            //  6: STRONG:        Strong D_OUTput buffer
+            //  7: PULLUP_DOWN:   Pull up or pull down
+            __var pSlew = 0;  // pin slew rate
+            //  0 - Fast slew rate (default)
+            //  1 - Slow slew rate
+            __var pStrange = 2;   // pin drive strange
+            //  0 - FULL_DRIVE:        Full drive strength: GPIO drives current at its max rated spec.
+            //  1 - ONE_HALF_DRIVE:    1/2 drive strength: GPIO drives current at 1/2 of its max rated spec (default)
+            //  2 - ONE_QUARTER_DRIVE: 1/4 drive strength: GPIO drives current at 1/4 of its max rated spec.
+            //  3 - ONE_EIGHTH_DRIVE:  1/8 drive strength: GPIO drives current at 1/8 of its max rated spec.
+            __var confChanged = 0; // Pin's configuration change flag
+            __var PRT_IO_SEL_MASK = 0x1F;    // Mask for IO[pin]_SEL field in HSIOM_PRT[port]_PORT_SEL[0/1] register
+            __var PRT_DRIVE_MODE_MASK = 0xF; // Mask for IN_EN[pin] and DRIVE_MODE[pin] fields in GPIO_PRT[port]_CFG register
+            __var PRT_SLOW_MASK = 0x1;       // Mask for SLOW[pin] field in GPIO_PRT[port]_CFG_OUT register
+            __var PRT_DRIVE_SEL_MASK = 0x3;  // Mask for DRIVE_SEL[pin] field in GPIO_PRT[port]_CFG_OUT register
+        - if: pin < 4
+          execute: |
+            // Pin[0-3] selection is in HSIOM_PRT[port]_PORT_SEL0 register
+            hsiomRegAddr = hsiomPrt18PortSel0Addr; // Use HSIOM_PRT[port]_PORT_SEL0
+            offset = pin * 8; // Offset of the IO[pin]_SEL field for required pin number,
+            // where 8 = 5 bits for IO[pin]_SEL field + 3 not used bits
+        - if: pin > 3
+          execute: |
+            // Pin[4-7] selection is in HSIOM_PRT[port]_PORT_SEL1 register
+            hsiomRegAddr = hsiomPrt18PortSel0Addr + 4; // Use HSIOM_PRT[port]_PORT_SEL1
+            offset = (pin & 3) * 8; // Offset of the IO[pin]_SEL field for required pin number,
+            // where 8 = 5 bits for IO[pin]_SEL field + 3 not used bits
+        - execute: |
+            reg0 = Read32(hsiomRegAddr);
+            reg1 = (reg0 & ~(PRT_IO_SEL_MASK << offset)) | (ioSelVal << offset); // Update value in IO[pin]_SEL field
+        - if: reg0 |= reg1
+          execute: |
+            Write32(hsiomRegAddr, reg1);
+            confChanged = 1;
+        - execute: |
+            reg0 = Read32(gpioPrt18CfgAddr);
+            offset = pin * 4;   // Offset of the DRIVE_MODE[pin] field for required pin number,
+            // where 4 = 3 bits for DRIVE_MODE[pin] + 1 bit for IN_EN fields
+            reg1 = (reg0 & ~(PRT_DRIVE_MODE_MASK << offset)) | (pMode << offset); // Update value in IN_EN[pin] and DRIVE_MODE[pin] fields
+        - if: reg0 |= reg1
+          execute: |
+            Write32(gpioPrt18CfgAddr, reg1);
+            confChanged = 1;
+        - execute: |
+            reg0 = Read32(gpioPrt18CfgOutAddr);
+            offset = pin;
+            reg1 = (reg0 & ~(PRT_SLOW_MASK << offset)) | (pSlew << offset); // Update value in SLOW[pin] field
+            offset = 16 + pin * 2; // Offset of the DRIVE_SEL[pin] field for required pin number,
+            // where '16' is the offset of DRIVE_SEL[pin] for pin 0 and '2' is the size of DRIVE_SEL[pin]
+            reg1 = (reg1 & ~(PRT_DRIVE_SEL_MASK << offset)) | (pStrange << offset); // Update value in DRIVE_SEL[pin] field
+        - if: reg0 |= reg1
+          execute: |
+            Write32(gpioPrt18CfgOutAddr, reg1);
+            confChanged = 1;
+        - if: confChanged |= 0
+          execute: |
+            Message(0, "Set TRACEDATA[3] to P18_7");
+      pname: Cortex-M4
+    - name: SetupTracePin_P22_4
+      blocks:
+        - execute: |
+            __var pin = 4;                            // Pin number
+            __var ioSelVal = 0x1B;                    // IO[pin]_SEL field value (connection) for HSIOM_PRT[port]_PORT_SEL register. Connection route for 'cpuss.trace_clock' signals (P22)
+            __var reg0;
+            __var reg1;
+            __var offset;
+            __var hsiomRegAddr; // Address of HSIOM_PRT[port]_PORT_SEL0 or HSIOM_PRT[port]_PORT_SEL1
+            __var pMode = 6;  // pin drive mode
+            //  0: HIGHZ:         Output buffer is off creating a high impedance input (default)
+            //  1: RESERVED:      This mode is reserved and should not be used
+            //  2: PULLUP:        Resistive pull up
+            //  3: PULLDOWN:      Resistive pull down
+            //  4: OD_DRIVESLOW:  Open drain, drives low
+            //  5: OD_DRIVESHIGH: Open drain, drives high
+            //  6: STRONG:        Strong D_OUTput buffer
+            //  7: PULLUP_DOWN:   Pull up or pull down
+            __var pSlew = 0;  // pin slew rate
+            //  0 - Fast slew rate (default)
+            //  1 - Slow slew rate
+            __var pStrange = 2;   // pin drive strange
+            //  0 - FULL_DRIVE:        Full drive strength: GPIO drives current at its max rated spec.
+            //  1 - ONE_HALF_DRIVE:    1/2 drive strength: GPIO drives current at 1/2 of its max rated spec (default)
+            //  2 - ONE_QUARTER_DRIVE: 1/4 drive strength: GPIO drives current at 1/4 of its max rated spec.
+            //  3 - ONE_EIGHTH_DRIVE:  1/8 drive strength: GPIO drives current at 1/8 of its max rated spec.
+            __var confChanged = 0; // Pin's configuration change flag
+            __var PRT_IO_SEL_MASK = 0x1F;    // Mask for IO[pin]_SEL field in HSIOM_PRT[port]_PORT_SEL[0/1] register
+            __var PRT_DRIVE_MODE_MASK = 0xF; // Mask for IN_EN[pin] and DRIVE_MODE[pin] fields in GPIO_PRT[port]_CFG register
+            __var PRT_SLOW_MASK = 0x1;       // Mask for SLOW[pin] field in GPIO_PRT[port]_CFG_OUT register
+            __var PRT_DRIVE_SEL_MASK = 0x3;  // Mask for DRIVE_SEL[pin] field in GPIO_PRT[port]_CFG_OUT register
+        - if: pin < 4
+          execute: |
+            // Pin[0-3] selection is in HSIOM_PRT[port]_PORT_SEL0 register
+            hsiomRegAddr = hsiomPrt22PortSel0Addr; // Use HSIOM_PRT[port]_PORT_SEL0
+            offset = pin * 8; // Offset of the IO[pin]_SEL field for required pin number,
+            // where 8 = 5 bits for IO[pin]_SEL field + 3 not used bits
+        - if: pin > 3
+          execute: |
+            // Pin[4-7] selection is in HSIOM_PRT[port]_PORT_SEL1 register
+            hsiomRegAddr = hsiomPrt22PortSel0Addr + 4; // Use HSIOM_PRT[port]_PORT_SEL1
+            offset = (pin & 3) * 8; // Offset of the IO[pin]_SEL field for required pin number,
+            // where 8 = 5 bits for IO[pin]_SEL field + 3 not used bits
+        - execute: |
+            reg0 = Read32(hsiomRegAddr);
+            reg1 = (reg0 & ~(PRT_IO_SEL_MASK << offset)) | (ioSelVal << offset); // Update value in IO[pin]_SEL field
+        - if: reg0 |= reg1
+          execute: |
+            Write32(hsiomRegAddr, reg1);
+            confChanged = 1;
+        - execute: |
+            reg0 = Read32(gpioPrt22CfgAddr);
+            offset = pin * 4;   // Offset of the DRIVE_MODE[pin] field for required pin number,
+            // where 4 = 3 bits for DRIVE_MODE[pin] + 1 bit for IN_EN fields
+            reg1 = (reg0 & ~(PRT_DRIVE_MODE_MASK << offset)) | (pMode << offset); // Update value in IN_EN[pin] and DRIVE_MODE[pin] fields
+        - if: reg0 |= reg1
+          execute: |
+            Write32(gpioPrt22CfgAddr, reg1);
+            confChanged = 1;
+        - execute: |
+            reg0 = Read32(gpioPrt22CfgOutAddr);
+            offset = pin;
+            reg1 = (reg0 & ~(PRT_SLOW_MASK << offset)) | (pSlew << offset); // Update value in SLOW[pin] field
+            offset = 16 + pin * 2; // Offset of the DRIVE_SEL[pin] field for required pin number,
+            // where '16' is the offset of DRIVE_SEL[pin] for pin 0 and '2' is the size of DRIVE_SEL[pin]
+            reg1 = (reg1 & ~(PRT_DRIVE_SEL_MASK << offset)) | (pStrange << offset); // Update value in DRIVE_SEL[pin] field
+        - if: reg0 |= reg1
+          execute: |
+            Write32(gpioPrt22CfgOutAddr, reg1);
+            confChanged = 1;
+        - if: confChanged |= 0
+          execute: |
+            Message(0, "Set TRACECLK to P22_4");
+      pname: Cortex-M4
+    - name: SetupTracePin_P22_0
+      blocks:
+        - execute: |
+            __var pin = 0;                            // Pin number
+            __var ioSelVal = 0x1B;                    // IO[pin]_SEL field value (connection) for HSIOM_PRT[port]_PORT_SEL register. Connection route for 'cpuss.trace_data0' signals (P22)
+            __var reg0;
+            __var reg1;
+            __var offset;
+            __var hsiomRegAddr; // Address of HSIOM_PRT[port]_PORT_SEL0 or HSIOM_PRT[port]_PORT_SEL1
+            __var pMode = 6;  // pin drive mode
+            //  0: HIGHZ:         Output buffer is off creating a high impedance input (default)
+            //  1: RESERVED:      This mode is reserved and should not be used
+            //  2: PULLUP:        Resistive pull up
+            //  3: PULLDOWN:      Resistive pull down
+            //  4: OD_DRIVESLOW:  Open drain, drives low
+            //  5: OD_DRIVESHIGH: Open drain, drives high
+            //  6: STRONG:        Strong D_OUTput buffer
+            //  7: PULLUP_DOWN:   Pull up or pull down
+            __var pSlew = 0;  // pin slew rate
+            //  0 - Fast slew rate (default)
+            //  1 - Slow slew rate
+            __var pStrange = 2;   // pin drive strange
+            //  0 - FULL_DRIVE:        Full drive strength: GPIO drives current at its max rated spec.
+            //  1 - ONE_HALF_DRIVE:    1/2 drive strength: GPIO drives current at 1/2 of its max rated spec (default)
+            //  2 - ONE_QUARTER_DRIVE: 1/4 drive strength: GPIO drives current at 1/4 of its max rated spec.
+            //  3 - ONE_EIGHTH_DRIVE:  1/8 drive strength: GPIO drives current at 1/8 of its max rated spec.
+            __var confChanged = 0; // Pin's configuration change flag
+            __var PRT_IO_SEL_MASK = 0x1F;    // Mask for IO[pin]_SEL field in HSIOM_PRT[port]_PORT_SEL[0/1] register
+            __var PRT_DRIVE_MODE_MASK = 0xF; // Mask for IN_EN[pin] and DRIVE_MODE[pin] fields in GPIO_PRT[port]_CFG register
+            __var PRT_SLOW_MASK = 0x1;       // Mask for SLOW[pin] field in GPIO_PRT[port]_CFG_OUT register
+            __var PRT_DRIVE_SEL_MASK = 0x3;  // Mask for DRIVE_SEL[pin] field in GPIO_PRT[port]_CFG_OUT register
+        - if: pin < 4
+          execute: |
+            // Pin[0-3] selection is in HSIOM_PRT[port]_PORT_SEL0 register
+            hsiomRegAddr = hsiomPrt22PortSel0Addr; // Use HSIOM_PRT[port]_PORT_SEL0
+            offset = pin * 8; // Offset of the IO[pin]_SEL field for required pin number,
+            // where 8 = 5 bits for IO[pin]_SEL field + 3 not used bits
+        - if: pin > 3
+          execute: |
+            // Pin[4-7] selection is in HSIOM_PRT[port]_PORT_SEL1 register
+            hsiomRegAddr = hsiomPrt22PortSel0Addr + 4; // Use HSIOM_PRT[port]_PORT_SEL1
+            offset = (pin & 3) * 8; // Offset of the IO[pin]_SEL field for required pin number,
+            // where 8 = 5 bits for IO[pin]_SEL field + 3 not used bits
+        - execute: |
+            reg0 = Read32(hsiomRegAddr);
+            reg1 = (reg0 & ~(PRT_IO_SEL_MASK << offset)) | (ioSelVal << offset); // Update value in IO[pin]_SEL field
+        - if: reg0 |= reg1
+          execute: |
+            Write32(hsiomRegAddr, reg1);
+            confChanged = 1;
+        - execute: |
+            reg0 = Read32(gpioPrt22CfgAddr);
+            offset = pin * 4;   // Offset of the DRIVE_MODE[pin] field for required pin number,
+            // where 4 = 3 bits for DRIVE_MODE[pin] + 1 bit for IN_EN fields
+            reg1 = (reg0 & ~(PRT_DRIVE_MODE_MASK << offset)) | (pMode << offset); // Update value in IN_EN[pin] and DRIVE_MODE[pin] fields
+        - if: reg0 |= reg1
+          execute: |
+            Write32(gpioPrt22CfgAddr, reg1);
+            confChanged = 1;
+        - execute: |
+            reg0 = Read32(gpioPrt22CfgOutAddr);
+            offset = pin;
+            reg1 = (reg0 & ~(PRT_SLOW_MASK << offset)) | (pSlew << offset); // Update value in SLOW[pin] field
+            offset = 16 + pin * 2; // Offset of the DRIVE_SEL[pin] field for required pin number,
+            // where '16' is the offset of DRIVE_SEL[pin] for pin 0 and '2' is the size of DRIVE_SEL[pin]
+            reg1 = (reg1 & ~(PRT_DRIVE_SEL_MASK << offset)) | (pStrange << offset); // Update value in DRIVE_SEL[pin] field
+        - if: reg0 |= reg1
+          execute: |
+            Write32(gpioPrt22CfgOutAddr, reg1);
+            confChanged = 1;
+        - if: confChanged |= 0
+          execute: |
+            Message(0, "Set TRACEDATA[0] to P22_0");
+      pname: Cortex-M4
+    - name: SetupTracePin_P22_1
+      blocks:
+        - execute: |
+            __var pin = 1;                            // Pin number
+            __var ioSelVal = 0x1B;                    // IO[pin]_SEL field value (connection) for HSIOM_PRT[port]_PORT_SEL register. Connection route for 'cpuss.trace_data1' signals (P22)
+            __var reg0;
+            __var reg1;
+            __var offset;
+            __var hsiomRegAddr; // Address of HSIOM_PRT[port]_PORT_SEL0 or HSIOM_PRT[port]_PORT_SEL1
+            __var pMode = 6;  // pin drive mode
+            //  0: HIGHZ:         Output buffer is off creating a high impedance input (default)
+            //  1: RESERVED:      This mode is reserved and should not be used
+            //  2: PULLUP:        Resistive pull up
+            //  3: PULLDOWN:      Resistive pull down
+            //  4: OD_DRIVESLOW:  Open drain, drives low
+            //  5: OD_DRIVESHIGH: Open drain, drives high
+            //  6: STRONG:        Strong D_OUTput buffer
+            //  7: PULLUP_DOWN:   Pull up or pull down
+            __var pSlew = 0;  // pin slew rate
+            //  0 - Fast slew rate (default)
+            //  1 - Slow slew rate
+            __var pStrange = 2;   // pin drive strange
+            //  0 - FULL_DRIVE:        Full drive strength: GPIO drives current at its max rated spec.
+            //  1 - ONE_HALF_DRIVE:    1/2 drive strength: GPIO drives current at 1/2 of its max rated spec (default)
+            //  2 - ONE_QUARTER_DRIVE: 1/4 drive strength: GPIO drives current at 1/4 of its max rated spec.
+            //  3 - ONE_EIGHTH_DRIVE:  1/8 drive strength: GPIO drives current at 1/8 of its max rated spec.
+            __var confChanged = 0; // Pin's configuration change flag
+            __var PRT_IO_SEL_MASK = 0x1F;    // Mask for IO[pin]_SEL field in HSIOM_PRT[port]_PORT_SEL[0/1] register
+            __var PRT_DRIVE_MODE_MASK = 0xF; // Mask for IN_EN[pin] and DRIVE_MODE[pin] fields in GPIO_PRT[port]_CFG register
+            __var PRT_SLOW_MASK = 0x1;       // Mask for SLOW[pin] field in GPIO_PRT[port]_CFG_OUT register
+            __var PRT_DRIVE_SEL_MASK = 0x3;  // Mask for DRIVE_SEL[pin] field in GPIO_PRT[port]_CFG_OUT register
+        - if: pin < 4
+          execute: |
+            // Pin[0-3] selection is in HSIOM_PRT[port]_PORT_SEL0 register
+            hsiomRegAddr = hsiomPrt22PortSel0Addr; // Use HSIOM_PRT[port]_PORT_SEL0
+            offset = pin * 8; // Offset of the IO[pin]_SEL field for required pin number,
+            // where 8 = 5 bits for IO[pin]_SEL field + 3 not used bits
+        - if: pin > 3
+          execute: |
+            // Pin[4-7] selection is in HSIOM_PRT[port]_PORT_SEL1 register
+            hsiomRegAddr = hsiomPrt22PortSel0Addr + 4; // Use HSIOM_PRT[port]_PORT_SEL1
+            offset = (pin & 3) * 8; // Offset of the IO[pin]_SEL field for required pin number,
+            // where 8 = 5 bits for IO[pin]_SEL field + 3 not used bits
+        - execute: |
+            reg0 = Read32(hsiomRegAddr);
+            reg1 = (reg0 & ~(PRT_IO_SEL_MASK << offset)) | (ioSelVal << offset); // Update value in IO[pin]_SEL field
+        - if: reg0 |= reg1
+          execute: |
+            Write32(hsiomRegAddr, reg1);
+            confChanged = 1;
+        - execute: |
+            reg0 = Read32(gpioPrt22CfgAddr);
+            offset = pin * 4;   // Offset of the DRIVE_MODE[pin] field for required pin number,
+            // where 4 = 3 bits for DRIVE_MODE[pin] + 1 bit for IN_EN fields
+            reg1 = (reg0 & ~(PRT_DRIVE_MODE_MASK << offset)) | (pMode << offset); // Update value in IN_EN[pin] and DRIVE_MODE[pin] fields
+        - if: reg0 |= reg1
+          execute: |
+            Write32(gpioPrt22CfgAddr, reg1);
+            confChanged = 1;
+        - execute: |
+            reg0 = Read32(gpioPrt22CfgOutAddr);
+            offset = pin;
+            reg1 = (reg0 & ~(PRT_SLOW_MASK << offset)) | (pSlew << offset); // Update value in SLOW[pin] field
+            offset = 16 + pin * 2; // Offset of the DRIVE_SEL[pin] field for required pin number,
+            // where '16' is the offset of DRIVE_SEL[pin] for pin 0 and '2' is the size of DRIVE_SEL[pin]
+            reg1 = (reg1 & ~(PRT_DRIVE_SEL_MASK << offset)) | (pStrange << offset); // Update value in DRIVE_SEL[pin] field
+        - if: reg0 |= reg1
+          execute: |
+            Write32(gpioPrt22CfgOutAddr, reg1);
+            confChanged = 1;
+        - if: confChanged |= 0
+          execute: |
+            Message(0, "Set TRACEDATA[1] to P22_1");
+      pname: Cortex-M4
+    - name: SetupTracePin_P22_2
+      blocks:
+        - execute: |
+            __var pin = 2;                            // Pin number
+            __var ioSelVal = 0x1B;                    // IO[pin]_SEL field value (connection) for HSIOM_PRT[port]_PORT_SEL register. Connection route for 'cpuss.trace_data2' signals (P22)
+            __var reg0;
+            __var reg1;
+            __var offset;
+            __var hsiomRegAddr; // Address of HSIOM_PRT[port]_PORT_SEL0 or HSIOM_PRT[port]_PORT_SEL1
+            __var pMode = 6;  // pin drive mode
+            //  0: HIGHZ:         Output buffer is off creating a high impedance input (default)
+            //  1: RESERVED:      This mode is reserved and should not be used
+            //  2: PULLUP:        Resistive pull up
+            //  3: PULLDOWN:      Resistive pull down
+            //  4: OD_DRIVESLOW:  Open drain, drives low
+            //  5: OD_DRIVESHIGH: Open drain, drives high
+            //  6: STRONG:        Strong D_OUTput buffer
+            //  7: PULLUP_DOWN:   Pull up or pull down
+            __var pSlew = 0;  // pin slew rate
+            //  0 - Fast slew rate (default)
+            //  1 - Slow slew rate
+            __var pStrange = 2;   // pin drive strange
+            //  0 - FULL_DRIVE:        Full drive strength: GPIO drives current at its max rated spec.
+            //  1 - ONE_HALF_DRIVE:    1/2 drive strength: GPIO drives current at 1/2 of its max rated spec (default)
+            //  2 - ONE_QUARTER_DRIVE: 1/4 drive strength: GPIO drives current at 1/4 of its max rated spec.
+            //  3 - ONE_EIGHTH_DRIVE:  1/8 drive strength: GPIO drives current at 1/8 of its max rated spec.
+            __var confChanged = 0; // Pin's configuration change flag
+            __var PRT_IO_SEL_MASK = 0x1F;    // Mask for IO[pin]_SEL field in HSIOM_PRT[port]_PORT_SEL[0/1] register
+            __var PRT_DRIVE_MODE_MASK = 0xF; // Mask for IN_EN[pin] and DRIVE_MODE[pin] fields in GPIO_PRT[port]_CFG register
+            __var PRT_SLOW_MASK = 0x1;       // Mask for SLOW[pin] field in GPIO_PRT[port]_CFG_OUT register
+            __var PRT_DRIVE_SEL_MASK = 0x3;  // Mask for DRIVE_SEL[pin] field in GPIO_PRT[port]_CFG_OUT register
+        - if: pin < 4
+          execute: |
+            // Pin[0-3] selection is in HSIOM_PRT[port]_PORT_SEL0 register
+            hsiomRegAddr = hsiomPrt22PortSel0Addr; // Use HSIOM_PRT[port]_PORT_SEL0
+            offset = pin * 8; // Offset of the IO[pin]_SEL field for required pin number,
+            // where 8 = 5 bits for IO[pin]_SEL field + 3 not used bits
+        - if: pin > 3
+          execute: |
+            // Pin[4-7] selection is in HSIOM_PRT[port]_PORT_SEL1 register
+            hsiomRegAddr = hsiomPrt22PortSel0Addr + 4; // Use HSIOM_PRT[port]_PORT_SEL1
+            offset = (pin & 3) * 8; // Offset of the IO[pin]_SEL field for required pin number,
+            // where 8 = 5 bits for IO[pin]_SEL field + 3 not used bits
+        - execute: |
+            reg0 = Read32(hsiomRegAddr);
+            reg1 = (reg0 & ~(PRT_IO_SEL_MASK << offset)) | (ioSelVal << offset); // Update value in IO[pin]_SEL field
+        - if: reg0 |= reg1
+          execute: |
+            Write32(hsiomRegAddr, reg1);
+            confChanged = 1;
+        - execute: |
+            reg0 = Read32(gpioPrt22CfgAddr);
+            offset = pin * 4;   // Offset of the DRIVE_MODE[pin] field for required pin number,
+            // where 4 = 3 bits for DRIVE_MODE[pin] + 1 bit for IN_EN fields
+            reg1 = (reg0 & ~(PRT_DRIVE_MODE_MASK << offset)) | (pMode << offset); // Update value in IN_EN[pin] and DRIVE_MODE[pin] fields
+        - if: reg0 |= reg1
+          execute: |
+            Write32(gpioPrt22CfgAddr, reg1);
+            confChanged = 1;
+        - execute: |
+            reg0 = Read32(gpioPrt22CfgOutAddr);
+            offset = pin;
+            reg1 = (reg0 & ~(PRT_SLOW_MASK << offset)) | (pSlew << offset); // Update value in SLOW[pin] field
+            offset = 16 + pin * 2; // Offset of the DRIVE_SEL[pin] field for required pin number,
+            // where '16' is the offset of DRIVE_SEL[pin] for pin 0 and '2' is the size of DRIVE_SEL[pin]
+            reg1 = (reg1 & ~(PRT_DRIVE_SEL_MASK << offset)) | (pStrange << offset); // Update value in DRIVE_SEL[pin] field
+        - if: reg0 |= reg1
+          execute: |
+            Write32(gpioPrt22CfgOutAddr, reg1);
+            confChanged = 1;
+        - if: confChanged |= 0
+          execute: |
+            Message(0, "Set TRACEDATA[2] to P22_2");
+      pname: Cortex-M4
+    - name: SetupTracePin_P22_3
+      blocks:
+        - execute: |
+            __var pin = 3;                            // Pin number
+            __var ioSelVal = 0x1B;                    // IO[pin]_SEL field value (connection) for HSIOM_PRT[port]_PORT_SEL register. Connection route for 'cpuss.trace_data3' signals (P22)
+            __var reg0;
+            __var reg1;
+            __var offset;
+            __var hsiomRegAddr; // Address of HSIOM_PRT[port]_PORT_SEL0 or HSIOM_PRT[port]_PORT_SEL1
+            __var pMode = 6;  // pin drive mode
+            //  0: HIGHZ:         Output buffer is off creating a high impedance input (default)
+            //  1: RESERVED:      This mode is reserved and should not be used
+            //  2: PULLUP:        Resistive pull up
+            //  3: PULLDOWN:      Resistive pull down
+            //  4: OD_DRIVESLOW:  Open drain, drives low
+            //  5: OD_DRIVESHIGH: Open drain, drives high
+            //  6: STRONG:        Strong D_OUTput buffer
+            //  7: PULLUP_DOWN:   Pull up or pull down
+            __var pSlew = 0;  // pin slew rate
+            //  0 - Fast slew rate (default)
+            //  1 - Slow slew rate
+            __var pStrange = 2;   // pin drive strange
+            //  0 - FULL_DRIVE:        Full drive strength: GPIO drives current at its max rated spec.
+            //  1 - ONE_HALF_DRIVE:    1/2 drive strength: GPIO drives current at 1/2 of its max rated spec (default)
+            //  2 - ONE_QUARTER_DRIVE: 1/4 drive strength: GPIO drives current at 1/4 of its max rated spec.
+            //  3 - ONE_EIGHTH_DRIVE:  1/8 drive strength: GPIO drives current at 1/8 of its max rated spec.
+            __var confChanged = 0; // Pin's configuration change flag
+            __var PRT_IO_SEL_MASK = 0x1F;    // Mask for IO[pin]_SEL field in HSIOM_PRT[port]_PORT_SEL[0/1] register
+            __var PRT_DRIVE_MODE_MASK = 0xF; // Mask for IN_EN[pin] and DRIVE_MODE[pin] fields in GPIO_PRT[port]_CFG register
+            __var PRT_SLOW_MASK = 0x1;       // Mask for SLOW[pin] field in GPIO_PRT[port]_CFG_OUT register
+            __var PRT_DRIVE_SEL_MASK = 0x3;  // Mask for DRIVE_SEL[pin] field in GPIO_PRT[port]_CFG_OUT register
+        - if: pin < 4
+          execute: |
+            // Pin[0-3] selection is in HSIOM_PRT[port]_PORT_SEL0 register
+            hsiomRegAddr = hsiomPrt22PortSel0Addr; // Use HSIOM_PRT[port]_PORT_SEL0
+            offset = pin * 8; // Offset of the IO[pin]_SEL field for required pin number,
+            // where 8 = 5 bits for IO[pin]_SEL field + 3 not used bits
+        - if: pin > 3
+          execute: |
+            // Pin[4-7] selection is in HSIOM_PRT[port]_PORT_SEL1 register
+            hsiomRegAddr = hsiomPrt22PortSel0Addr + 4; // Use HSIOM_PRT[port]_PORT_SEL1
+            offset = (pin & 3) * 8; // Offset of the IO[pin]_SEL field for required pin number,
+            // where 8 = 5 bits for IO[pin]_SEL field + 3 not used bits
+        - execute: |
+            reg0 = Read32(hsiomRegAddr);
+            reg1 = (reg0 & ~(PRT_IO_SEL_MASK << offset)) | (ioSelVal << offset); // Update value in IO[pin]_SEL field
+        - if: reg0 |= reg1
+          execute: |
+            Write32(hsiomRegAddr, reg1);
+            confChanged = 1;
+        - execute: |
+            reg0 = Read32(gpioPrt22CfgAddr);
+            offset = pin * 4;   // Offset of the DRIVE_MODE[pin] field for required pin number,
+            // where 4 = 3 bits for DRIVE_MODE[pin] + 1 bit for IN_EN fields
+            reg1 = (reg0 & ~(PRT_DRIVE_MODE_MASK << offset)) | (pMode << offset); // Update value in IN_EN[pin] and DRIVE_MODE[pin] fields
+        - if: reg0 |= reg1
+          execute: |
+            Write32(gpioPrt22CfgAddr, reg1);
+            confChanged = 1;
+        - execute: |
+            reg0 = Read32(gpioPrt22CfgOutAddr);
+            offset = pin;
+            reg1 = (reg0 & ~(PRT_SLOW_MASK << offset)) | (pSlew << offset); // Update value in SLOW[pin] field
+            offset = 16 + pin * 2; // Offset of the DRIVE_SEL[pin] field for required pin number,
+            // where '16' is the offset of DRIVE_SEL[pin] for pin 0 and '2' is the size of DRIVE_SEL[pin]
+            reg1 = (reg1 & ~(PRT_DRIVE_SEL_MASK << offset)) | (pStrange << offset); // Update value in DRIVE_SEL[pin] field
+        - if: reg0 |= reg1
+          execute: |
+            Write32(gpioPrt22CfgOutAddr, reg1);
+            confChanged = 1;
+        - if: confChanged |= 0
+          execute: |
+            Message(0, "Set TRACEDATA[3] to P22_3");
+      pname: Cortex-M4
+    - name: SetupSWOPin
+      blocks:
+        - execute: |
+            __var pin = 4;                            // Pin number
+            __var ioSelVal = 0x1D;                    // IO[pin]_SEL field value (connection) for HSIOM_PRT[port]_PORT_SEL register. Connection route for 'cpuss.swj_swo_tdo' signals (P23_4)
+            __var reg0;
+            __var reg1;
+            __var offset;
+            __var hsiomRegAddr; // Address of HSIOM_PRT[port]_PORT_SEL0 or HSIOM_PRT[port]_PORT_SEL1
+            __var pMode = 6;  // pin drive mode
+            //  0: HIGHZ:         Output buffer is off creating a high impedance input (default)
+            //  1: RESERVED:      This mode is reserved and should not be used
+            //  2: PULLUP:        Resistive pull up
+            //  3: PULLDOWN:      Resistive pull down
+            //  4: OD_DRIVESLOW:  Open drain, drives low
+            //  5: OD_DRIVESHIGH: Open drain, drives high
+            //  6: STRONG:        Strong D_OUTput buffer
+            //  7: PULLUP_DOWN:   Pull up or pull down
+            __var pSlew = 0;  // pin slew rate
+            //  0 - Fast slew rate (default)
+            //  1 - Slow slew rate
+            __var pStrange = 2;   // pin drive strange
+            //  0 - FULL_DRIVE:        Full drive strength: GPIO drives current at its max rated spec.
+            //  1 - ONE_HALF_DRIVE:    1/2 drive strength: GPIO drives current at 1/2 of its max rated spec (default)
+            //  2 - ONE_QUARTER_DRIVE: 1/4 drive strength: GPIO drives current at 1/4 of its max rated spec.
+            //  3 - ONE_EIGHTH_DRIVE:  1/8 drive strength: GPIO drives current at 1/8 of its max rated spec.
+            __var confChanged = 0; // Pin's configuration change flag
+            __var PRT_IO_SEL_MASK = 0x1F;    // Mask for IO[pin]_SEL field in HSIOM_PRT[port]_PORT_SEL[0/1] register
+            __var PRT_DRIVE_MODE_MASK = 0xF; // Mask for IN_EN[pin] and DRIVE_MODE[pin] fields in GPIO_PRT[port]_CFG register
+            __var PRT_SLOW_MASK = 0x1;       // Mask for SLOW[pin] field in GPIO_PRT[port]_CFG_OUT register
+            __var PRT_DRIVE_SEL_MASK = 0x3;  // Mask for DRIVE_SEL[pin] field in GPIO_PRT[port]_CFG_OUT register
+        - if: pin < 4
+          execute: |
+            // Pin[0-3] selection is in HSIOM_PRT[port]_PORT_SEL0 register
+            hsiomRegAddr = hsiomPrt23PortSel0Addr; // Use HSIOM_PRT[port]_PORT_SEL0
+            offset = pin * 8; // Offset of the IO[pin]_SEL field for required pin number,
+            // where 8 = 5 bits for IO[pin]_SEL field + 3 not used bits
+        - if: pin > 3
+          execute: |
+            // Pin[4-7] selection is in HSIOM_PRT[port]_PORT_SEL1 register
+            hsiomRegAddr = hsiomPrt23PortSel0Addr + 4; // Use HSIOM_PRT[port]_PORT_SEL1
+            offset = (pin & 3) * 8; // Offset of the IO[pin]_SEL field for required pin number,
+            // where 8 = 5 bits for IO[pin]_SEL field + 3 not used bits
+        - execute: |
+            reg0 = Read32(hsiomRegAddr);
+            reg1 = (reg0 & ~(PRT_IO_SEL_MASK << offset)) | (ioSelVal << offset); // Update value in IO[pin]_SEL field
+        - if: reg0 |= reg1
+          execute: |
+            Write32(hsiomRegAddr, reg1);
+            confChanged = 1;
+        - execute: |
+            reg0 = Read32(gpioPrt23CfgAddr);
+            offset = pin * 4;   // Offset of the DRIVE_MODE[pin] field for required pin number,
+            // where 4 = 3 bits for DRIVE_MODE[pin] + 1 bit for IN_EN fields
+            reg1 = (reg0 & ~(PRT_DRIVE_MODE_MASK << offset)) | (pMode << offset); // Update value in IN_EN[pin] and DRIVE_MODE[pin] fields
+        - if: reg0 |= reg1
+          execute: |
+            Write32(gpioPrt23CfgAddr, reg1);
+            confChanged = 1;
+        - execute: |
+            reg0 = Read32(gpioPrt23CfgOutAddr);
+            offset = pin;
+            reg1 = (reg0 & ~(PRT_SLOW_MASK << offset)) | (pSlew << offset); // Update value in SLOW[pin] field
+            offset = 16 + pin * 2; // Offset of the DRIVE_SEL[pin] field for required pin number,
+            // where '16' is the offset of DRIVE_SEL[pin] for pin 0 and '2' is the size of DRIVE_SEL[pin]
+            reg1 = (reg1 & ~(PRT_DRIVE_SEL_MASK << offset)) | (pStrange << offset); // Update value in DRIVE_SEL[pin] field
+        - if: reg0 |= reg1
+          execute: |
+            Write32(gpioPrt23CfgOutAddr, reg1);
+            confChanged = 1;
+        - if: confChanged |= 0
+          execute: |
+            Message(0, "Set SWO to P23_4");
+      pname: Cortex-M4
+    - name: DAP_Handshake
+      blocks:
+        - execute: |
+            __var isSWJ      = ((__protocol & 0x00010000) != 0);
+            __var protType   = __protocol & 0x0000FFFF;
+            __var DPIDR = 0;
+            __Result = 0;
+        - if: protType == 1
+          blocks:
+            - if: isSWJ
+              atomic: 
+              execute: |
+                // Ensure current debug interface is in reset state
+                DAP_SWJ_Sequence(51, 0x0007FFFFFFFFFFFF);
+                // Execute SWJ-DP Switch Sequence SWD to JTAG (0xE73C)
+                // Change if SWJ-DP uses deprecated switch code (0xAEAE)
+                DAP_SWJ_Sequence(16, 0xE73C);
+            - atomic: 
+              execute: |
+                // JTAG "Soft" Reset
+                DAP_JTAG_Sequence(6, 1, 0x00);                        // Test-Logic-Reset
+                // Get IDCODE to make shure that JTAG-DP is available
+                DAP_JTAG_Sequence(4, 0, 0x00);                        // 4*Run-Test/Idle
+                DAP_JTAG_Sequence(2, 1, 0x00);                        // ~ Select-DR ~ Select-IR
+                DAP_JTAG_Sequence(2, 0, 0x00);                        // ~ Capture-IR ~ Shift-IR
+                DAP_JTAG_Sequence(8, 0, 0xFE);                        // Shift-IR (IDCODE BYPASS)
+                DAP_JTAG_Sequence(5, 1, 0x00);                        // ~ Exit1-IR (IDCODE BYPASS) ~ Update-IR ~ Test-Logic-Reset
+                DAP_JTAG_Sequence(4, 0, 0x00);                        // Make sure that we go through Idle state in TAP controller
+                DAP_JTAG_Sequence(1, 1, 0x00);                        // Select-DR
+                DAP_JTAG_Sequence(2, 0, 0x00);                        // ~ Capture-DR ~ Shift-DR
+                DPIDR = DAP_JTAG_Sequence(33, 0, 0x00000000);         // Shift 33-bits data
+                DAP_JTAG_Sequence(5, 1, 0x00);                        // ~ Exit1-DR ~ Update-DR ~ ~ Select-DR ~ Select-IR ~ Test-Logic-Reset
+                DAP_JTAG_Sequence(4, 0, 0x00);                        // Make sure that we go through Idle state in TAP controller
+        - if: protType == 2
+          blocks:
+            - if: isSWJ
+              atomic: 
+              execute: |
+                // Ensure current debug interface is in reset state
+                DAP_SWJ_Sequence(51, 0x0007FFFFFFFFFFFF);
+                // Execute SWJ-DP Switch Sequence JTAG to SWD (0xE79E)
+                // Change if SWJ-DP uses deprecated switch code (0xEDB6)
+                DAP_SWJ_Sequence(16, 0xE79E);
+                // Enter SWD Line Reset State
+                DAP_SWJ_Sequence(51, 0x0007FFFFFFFFFFFF); // More than 50 cycles SWDIO/TMS High
+                DAP_SWJ_Sequence(3,  0x00);               // At least 2 idle cycles (SWDIO/TMS Low)
+            - if: "!isSWJ"
+              atomic: 
+              execute: |
+                // Enter SWD Line Reset State
+                DAP_SWJ_Sequence(51, 0x0007FFFFFFFFFFFF); // More than 50 cycles SWDIO/TMS High
+                DAP_SWJ_Sequence(3,  0x00);               // At least 2 idle cycles (SWDIO/TMS Low)
+            - execute: |
+                DPIDR = ReadDP(0x0); // Read DPIDR to enable SWD interface (SW-DPv1 and SW-DPv2)
+        - if: (DPIDR & 0xFFF00FFF) != 0x6BA00477
+          execute: |
+            __Result = -1; // DAP is unavailable
+    - name: DAP_poll
+      blocks:
+        - execute: |
+            __Result = -1; // Assume DAP is not available yet
+        - while: __Result != 0
+          timeout: 600000
+          execute: |
+            sequence("DAP_Handshake"); // Poll DP until bootloader allows access to device (can be up to 600ms)
+        - if: __Result != 0
+          execute: |
+            Message(1, "The Debug Access Port is unavailable.");
+    - name: DebugPortSetup
+      blocks:
+        - execute: |
+            sequence("DAP_Handshake");
+        - if: __Result != 0
+          blocks:
+            - execute: |
+                __var nReset      = 0x80;
+                __var canReadPins = 0;
+                canReadPins = (DAP_SWJ_Pins(0x00, nReset, 0) != 0xFFFFFFFF); // Deassert nRESET line
+            - while: 1
+              timeout: 50000
+            - if: canReadPins
+              blocks:
+                - while: (DAP_SWJ_Pins(nReset, nReset, 0) & nReset) == 0
+                  timeout: 1000000
+            - if: "!canReadPins"
+              blocks:
+                - execute: |
+                    DAP_SWJ_Pins(nReset, nReset, 0); // Assert nRESET line
+                - while: 1
+                  timeout: 100000
+            - execute: |
+                sequence("DAP_poll");
+    - name: ResetHardware
+      blocks:
+        - execute: |
+            __var nReset      = 0x80;
+            __var canReadPins = 0;
+            canReadPins = (DAP_SWJ_Pins(0x00, nReset, 0) != 0xFFFFFFFF); // Deassert nRESET line
+        - while: 1
+          timeout: 50000
+        - if: canReadPins
+          blocks:
+            - while: (DAP_SWJ_Pins(nReset, nReset, 0) & nReset) == 0
+              timeout: 1000000
+        - if: "!canReadPins"
+          blocks:
+            - execute: |
+                DAP_SWJ_Pins(nReset, nReset, 0); // Assert nRESET line
+            - while: 1
+              timeout: 100000
+        - execute: |
+            // Give the CAT1A bootloader time to finish (can be up to 600ms)
+            DAP_Delay(600000);
+    - name: PrintDeviceInfo
+      blocks:
+        - execute: |
+            __var siId;
+            __var siRev;
+            __var siFamily;
+            __var fbVerHi;
+            __var sflashSvnVer;
+            __var protection;
+            __var v;
+            Message(0, "****************************************************");
+            // Get Si Id, Family and Rev.
+            v = Read32(SFLASH_BASE_ADDR);
+            siId = (v & 0xFFFF0000) >> 16;
+            siRev = (v & 0x0000FF00) >> 8;
+            v = Read32(SFLASH_BASE_ADDR + 0xC);
+            siFamily = v & 0x00000FFF;
+            Message(0, "** Silicon: 0x%04X, Family: 0x%03X, Rev.: 0x%02X", siId, siFamily, siRev);
+            // Get FlashBboot verison
+            fbVerHi = Read32(SFLASH_BASE_ADDR + 0x2004);
+        - if: fbVerHi == 0
+          execute: |
+            Message(1, "Invalid FlashBoot: High version word of Flash Boot is zero");
+        - if: fbVerHi != 0
+          blocks:
+            - execute: |
+                __var fbVerLo = Read32(SFLASH_BASE_ADDR + 0x2018);
+                __var b0 = fbVerHi >> 28;
+                __var b1 = (fbVerHi >> 24) & 0x0F;
+                __var b2 = (fbVerHi >> 16) & 0xFF;
+                __var b3 = fbVerHi & 0x0000FFFF;
+            - if: b0 > 2
+              execute: |
+                Message(1, "Unsupported Flash Boot Version - Flash Boot Version [31:28] = 0x%X", b0);
+            - if: b0 <= 2
+              blocks:
+                - if: b3 != 0x8001
+                  execute: |
+                    Message(1, "Flash Boot is corrupted or non Flash Boot image programmed");
+                - if: b3 == 0x8001
+                  blocks:
+                    - if: b0 == 0
+                      blocks:
+                        - if: b1 == 1
+                          execute: |
+                            Message(0, "** Flash Boot version: 1.%02u", b2);
+                        - if: b1 == 2
+                          blocks:
+                            - if: b2 < 20
+                              execute: |
+                                Message(0, "** Flash Boot version: 1.0.0.%u", b2);
+                            - if: (b2 >= 20) && (b2 < 29)
+                              execute: |
+                                Message(0, "** Flash Boot version: 1.0.1.%u", b2);
+                            - if: b2 >= 29
+                              execute: |
+                                Message(0, "** Flash Boot version: 1.20.1.%u", b2);
+                    - if: b0 == 1
+                      execute: |
+                        Message(0, "** Flash Boot version: 2.0.0.%u", b2);
+                    - if: b0 == 2
+                      execute: |
+                        __var patch = fbVerLo >> 24;
+                        __var build = fbVerLo & 0x0000FFFF;
+                        Message(0, "** Flash Boot version: %u.%u.%u.%u", b1, b2, patch, build);
+        - execute: |
+            sflashSvnVer = Read32(SFLASH_BASE_ADDR + 0x28); // Get SFLASH version
+        - if: (sflashSvnVer != 0) && (sflashSvnVer != 0xFFFFFFFF)
+          execute: |
+            Message(0, "** SFlash version: %u", sflashSvnVer);
+        - if: siFamily == 0x100
+          execute: |
+            protection = Read32(0x40210500); // PSoC 6-BLE2 family
+        - if: siFamily != 0x100
+          execute: |
+            protection = Read32(0x402020C4); // PSoC 6-2M family
+        - if: protection == 1
+          execute: |
+            Message(0, "** Chip Protection: VIRGIN");
+        - if: protection == 2
+          execute: |
+            Message(0, "** Chip Protection: NORMAL");
+        - if: protection == 3
+          execute: |
+            Message(0, "** Chip Protection: SECURE");
+        - if: protection == 4
+          execute: |
+            Message(0, "** Chip Protection: DEAD");
+        - if: (protection == 0) || (protection > 4)
+          execute: |
+            Message(0, "** Chip Protection: UNKNOWN");
+        - execute: |
+            Message(0, "****************************************************");
+    - name: DebugPortStart
+      blocks:
+        - info: Read DP CTRL/STAT
+          execute: |
+            __var SW_DP_ABORT  = 0x0;
+            __var DP_CTRL_STAT = 0x4;
+            __var DP_SELECT    = 0x8;
+            __var powered_down = 0;
+            // Switch to DP Register Bank 0. Explicitly set APSEL to current AP selection
+            WriteDP(DP_SELECT, __ap << 24);
+            // Read DP CTRL/STAT Register and check if CSYSPWRUPACK and CDBGPWRUPACK bits are set
+            powered_down = ((ReadDP(DP_CTRL_STAT) & 0xA0000000) != 0xA0000000);
+        - if: powered_down
+          blocks:
+            - info: Power Up System & Debug
+              execute: |
+                // Request Debug/System Power-Up
+                // Ignore error here: even there is a polling in the next block, CMSIS-DAP transports reads DP.RDBUFF register
+                // right after write to DP.CTRL_STAT. This will fail for some cases - for example if device is waking from DeepSleep.
+                __errorcontrol = 1;
+                WriteDP(DP_CTRL_STAT, 0x50000000);
+                __errorcontrol = 0;
+            - info: Wait for power acknowledged
+              while: (ReadDP(DP_CTRL_STAT) & 0xA0000000) != 0xA0000000
+              timeout: 1000000
+            - info: "JTAG: Clear Sticky Bits"
+              if: (__protocol & 0xFFFF) == 1
+              execute: |
+                // Init AP Transfer Mode, Transaction Counter, and Lane Mask (Normal Transfer Mode, Include all Byte Lanes)
+                // Additionally clear STICKYORUN, STICKYCMP, and STICKYERR bits by writing '1'
+                WriteDP(DP_CTRL_STAT, 0x50000F32);
+            - info: "SWD: Init SWD & Clear Sticky Bits"
+              if: (__protocol & 0xFFFF) == 2
+              execute: |
+                // Init AP Transfer Mode, Transaction Counter, and Lane Mask (Normal Transfer Mode, Include all Byte Lanes)
+                WriteDP(DP_CTRL_STAT, 0x50000F00);
+                // Clear WDATAERR, STICKYORUN, STICKYCMP, and STICKYERR bits of CTRL/STAT Register by write to ABORT register
+                WriteDP(SW_DP_ABORT, 0x0000001E);
+        - if: (__connection & 3) == 2
+          execute: |
+            // Prepare MCU for flash operations
+            Sequence("FlashPreparation");
+        - if: (__connection & 3) == 1
+          execute: |
+            // Checking core readiness for debugging
+            Sequence("DebuggingReadiness");
+        - execute: |
+            // Print device info
+            Sequence("PrintDeviceInfo");
+    - name: FlashPreparation
+      blocks:
+        - if: __ap == 2
+          execute: |
+            // Use CM0+ ap for nested sequences
+            __ap = 1;
+            Sequence("PrepareCM0");
+            Sequence("PowerUpCM4");
+    - name: DebuggingReadiness
+      blocks:
+        - if: __ap == 1
+          execute: |
+            Sequence("PowerUpCM4");
+        - if: __ap == 2
+          execute: |
+            // Use CM0+ ap for nested sequences
+            __ap = 1;
+            Sequence("CheckPowerCM4");
+    - name: PrepareCM0
+      blocks:
+        - execute: |
+            __var WFI_LOOP_ADDR = 0x08000000 + 0x800;
+            __var CM0_SP_ADDR = WFI_LOOP_ADDR + 0x40;
+            // Halt CM0+
+            Write32(0xE000EDF0, 0xA05F0003);
+        - info: Wait for core halts
+          while: (Read32(0xE000EDF0) & 0x00030000) != 0x00030000
+          timeout: 1000000
+        - execute: |
+            // Write WFI loop in RAM
+            Write32(WFI_LOOP_ADDR, 0xE7FDBF30);
+            // Set VECTCLRACTIVE in AIRCR for CM0+
+            Write32(0xE000ED0C, 0x05FA0002);
+            // Write CM0+ xPSR
+            Write32(0xE000EDF8, 0x01000000);
+            Write32(0xE000EDF4, 0x00010010);
+        - info: Wait for register transfer to complete
+          while: (Read32(0xE000EDF0) & 0x00010000) != 0x00010000
+          timeout: 1000000
+        - execute: |
+            // Write CM0+ CONTROL, PRIMASK
+            Write32(0xE000EDF8, 0x00000000);
+            Write32(0xE000EDF4, 0x00010014);
+        - info: Wait for register transfer to complete
+          while: (Read32(0xE000EDF0) & 0x00010000) != 0x00010000
+          timeout: 1000000
+        - execute: |
+            // Write CM0+ PC
+            Write32(0xE000EDF8, WFI_LOOP_ADDR);
+            Write32(0xE000EDF4, 0x0001000F);
+        - info: Wait for register transfer to complete
+          while: (Read32(0xE000EDF0) & 0x00010000) != 0x00010000
+          timeout: 1000000
+        - execute: |
+            // Write CM0+ SP
+            Write32(0xE000EDF8, CM0_SP_ADDR);
+            Write32(0xE000EDF4, 0x0001000D);
+        - info: Wait for register transfer to complete
+          while: (Read32(0xE000EDF0) & 0x00010000) != 0x00010000
+          timeout: 1000000
+        - execute: |
+            // Write CM0+ VTOR
+            Write32(0xE000ED08, 0x00000000);
+            // Clear all pending interrupts in CM0+
+            Write32(0xE000E280, 0x0000FFFF);
+            // Enable only CM0+ IRQ0/1
+            Write32(0xE000E180, 0xFFFFFFFC);
+            Write32(0xE000E100, 0x00000003);
+            // Set priority of IRQ0=1, IRQ1=0. Need to make sure IRQ1 is triggered even if IRQ0 is pending.
+            Write32(0xE000E400, 0x00000040);
+            // Release CM0+ from halt state
+            Write32(0xE000EDF0, 0xA05F0001);
+    - name: PowerUpCM4
+      blocks:
+        - execute: |
+            __var CM4_PWR_CTL_ADDR = 0x40201200;
+            __var CM4_PWR_CTL = Read32(CM4_PWR_CTL_ADDR);
+        - if: (CM4_PWR_CTL & 0x3) != 0x3
+          execute: |
+            // Set power mode of CM4
+            Write32(CM4_PWR_CTL_ADDR, 0x05FA0003);
+            Message(0, "The power mode of Cortex-M4 core was set to ENABLED.");
+    - name: CheckPowerCM4
+      blocks:
+        - execute: |
+            __var CM4_PWR_CTL_ADDR = 0x40201200;
+            __var CM4_PWR_CTL = Read32(CM4_PWR_CTL_ADDR);
+        - if: (CM4_PWR_CTL & 0x3) != 0x3
+          execute: |
+            Message(2, "The power mode of Cortex-M4 core was NOT ENABLED by the CM0+ application. Further debugging is not possible.");
+
+
+    - name: TraceStop
+      blocks:
+        - execute: |
+            // CALL TEARDOWN OF TRACE FIRST
+            Sequence("TraceStopExt");   // Add additional Trace Stop configuration if needed, e.g. to flush the ETF or TPIU FIFOs before stopping trace
+
+    - name: TraceStartExt
+      blocks:
+        - execute: |
+            // CoreSight Trace Component Setup
+            // Temporary - Parameters, set from debugger going forward
+
+            // TEMP_TRACEOUT: replace with __traceout when available from debugger,
+            //                or move trace mode decision to new built-in variable.
+            __var syncTrace   = TEMP_TRACEOUT & 0x2;
+            __var bufferTrace = TEMP_TRACEOUT & 0x4;
+
+        - if: syncTrace != 0
+          execute: |
+            Sequence("Configure_Funnel");
+            Sequence("Configure_TPIU");
+
+        - if: bufferTrace != 0
+          execute: |
+            // Configure ETB
+            Sequence("Configure_Funnel");
+            Sequence("Configure_ETB");
+
+    - name: TraceStopExt
+      blocks:
+        - execute: |
+            // CoreSight Trace Component Teardown
+
+            // Final flush which also leaves TPIU and ETB turned off.
+            Sequence("TraceFlush");
+
+    - name: TraceCapture
+      blocks:
+        - execute: |
+            // CoreSight Trace Component Capture Preps
+            // Temporary - Parameters, set from debugger going forward
+
+            // TEMP_TRACEOUT: replace with __traceout when available from debugger,
+            //                or move trace mode decision to new built-in variable.
+            __var syncTrace   = TEMP_TRACEOUT & 0x2;
+            __var bufferTrace = TEMP_TRACEOUT & 0x4;
+
+        - if: syncTrace != 0
+          execute: |
+            Sequence("Capture_TPIU");
+
+        - if: bufferTrace != 0
+          execute: |
+            Sequence("Capture_ETB");
+
+    - name: TraceFlush
+      blocks:
+        - execute: |
+            // CoreSight Trace Component Flush
+            // Temporary - Parameters, set from debugger going forward
+
+            // TEMP_TRACEOUT: replace with __traceout when available from debugger,
+            //                or move trace mode decision to new built-in variable.
+            __var syncTrace   = TEMP_TRACEOUT & 0x2;
+            __var bufferTrace = TEMP_TRACEOUT & 0x4;
+
+        - if: syncTrace != 0
+          execute: |
+            Sequence("Flush_TPIU");
+
+        - if: bufferTrace != 0
+          execute: |
+            Sequence("Flush_ETB");
+
+# TRC Funnel
+    - name: Configure_Funnel
+      blocks:
+      - execute: |
+          // Helper variables
+          __var savedAP    = __ap;
+          __var value      = 0x00000000;
+
+          Message(0, "Begin ConfigureFunnel @0x%08X, AP 0x%08X", FUNNEL_ADDRESS, FUNNEL_AP);
+
+          __ap = FUNNEL_AP; // Set AP
+
+          value = Read32(FUNNEL_ADDRESS + 0x000);
+          value &= ~0xFF;              // Clear existing funnel input enables, keep hold time
+          value |= FUNNEL_INPUT_MASK;  // Keep hold time as is for now, could be made configurable if needed
+
+      - execute: |
+          Write32(FUNNEL_ADDRESS + 0x000, value); // Configure CoreSight Trace Funnel to enable selected trace sources
+
+          __ap = savedAP;
+          Message(0, "End Configure_Funnel @0x%08X, AP 0x%08X", FUNNEL_ADDRESS, FUNNEL_AP);
+
+# TRC TPIU
+    - name: Flush_TPIU
+      blocks:
+        - execute: |
+            // Helper variables
+            __var savedAP     = __ap;
+            __var ffcrValue   = 0x00000000;
+            __var ffsrValue   = 0x00000000;
+
+            Message(0, "Begin Flush_TPIU @0x%08X, AP 0x%08X", TPIU_ADDRESS, TPIU_AP);
+            
+            __ap = TPIU_AP;  // Set AP
+
+        - execute: |
+            // Configure "local" TPIU for Sync Trace
+            ffsrValue = Read32(TPIU_ADDRESS + 0x300);
+        - if: ffsrValue & 0x2 == 0
+          info: "Formatter not stopped, do it now"
+          blocks:
+
+          - execute: |
+              // Flush the TPIU formatter so pending packets leave the trace port.
+              ffcrValue = Read32(TPIU_ADDRESS + 0x304);
+              ffcrValue &= ~(0x00001040); // Clear StopOnFlush and FlushOnManual
+              ffcrValue |= 0x00001000;    // Stop after the manual flush completes
+              Write32(TPIU_ADDRESS + 0x304, ffcrValue);
+              ffcrValue |= 0x00000040;    // Trigger manual flush
+              Write32(TPIU_ADDRESS + 0x304, ffcrValue);
+
+          - execute: |
+              ffcrValue = Read32(TPIU_ADDRESS + 0x304);
+          - while: (ffcrValue & 0x40) != 0
+            info: "Wait for TPIU manual flush to complete"
+            timeout: 100
+            blocks:
+              - execute: |
+                  ffcrValue = Read32(TPIU_ADDRESS + 0x304);
+
+          - execute: |
+              ffsrValue = Read32(TPIU_ADDRESS + 0x300);
+          - while: (ffsrValue & 0x1) != 0
+            info: "Wait for TPIU flush in progress to clear"
+            timeout: 100
+            blocks:
+              - execute: |
+                  ffsrValue = Read32(TPIU_ADDRESS + 0x300);
+
+        - execute: |
+            __ap = savedAP;
+            Message(0, "End Flush_TPIU @0x%08X, AP 0x%08X", TPIU_ADDRESS, TPIU_AP);
+
+    - name: Configure_TPIU
+      blocks:
+          - execute: |
+                // Temporary - Parameters, set from debugger going forward
+
+                // TEMP_TRACEOUT: replace with __traceout when available from debugger,
+                //                or move trace mode decision to new built-in variable.
+                __var syncTrace   = TEMP_TRACEOUT & 0x2;
+                __var bufferTrace = TEMP_TRACEOUT & 0x4;
+                __var tracePortWidth = (TEMP_TRACEOUT >> 16) & 0x3F; // Parallel trace port size
+
+                // Helper variables
+                __var LAR_KEY   = 0xC5ACCE55;
+                __var savedAP = __ap;
+
+                Message(0, "Begin Configure_TPIU @0x%08X, AP 0x%08X", TPIU_ADDRESS, TPIU_AP);
+
+                __ap = TPIU_AP; // Set AP
+
+          - if: syncTrace != 0
+            blocks:
+              - execute: |
+                  Write32(TPIU_ADDRESS + 0xFB0, LAR_KEY);        // TODO: Double-check if still necessary
+                  Write32(TPIU_ADDRESS + 0x010, TPIU_PRESCALER); // TPIU Asynchronous Clock Prescaler Register: No prescaling
+                  Write32(TPIU_ADDRESS + 0x004, 1 << (tracePortWidth - 1));  // TPIU Current Synchronous Port Width
+                  Write32(TPIU_ADDRESS + 0x0F0, 0x00000000);     // TPIU Selected Pin Protocol Register: Select Sync Trace Port
+                  ffcrValue  = Read32(TPIU_ADDRESS + 0x304);
+                  ffcrValue |= 0x00000002;                    // Enable formatter
+                  Write32(TPIU_ADDRESS + 0x304, ffcrValue);      // TPIU FFCR
+
+          - execute: |
+                __ap = savedAP;
+                Message(0, "End Configure_TPIU @0x%08X, AP 0x%08X", TPIU_ADDRESS, TPIU_AP);
+
+    - name: TraceCapture_TPIU
+      blocks:
+      - execute: |
+          // Helper variables
+          __var LAR_KEY   = 0xC5ACCE55;
+          __var savedAP = __ap;
+
+          Message(0, "Begin TraceCapture_TPIU @0x%08X, AP 0x%08X", TPIU_ADDRESS, TPIU_AP);
+
+          // Ensure involved components are in a well-defined state.
+          Sequence("TraceFlush");
+
+          // Configure TPIU if needed and enable formatter
+          __ap = TPIU_AP; // Set AP
+          ffcrValue  = Read32(TPIU_ADDRESS + 0x304);
+          ffcrValue |= 0x00000002;                                // Enable formatter
+          Write32(TPIU_ADDRESS + 0x304, ffcrValue);                  // TPIU FFCR
+          __ap = savedAP;
+          Message(0, "End TraceCapture_TPIU @0x%08X, AP 0x%08X", TPIU_ADDRESS, TPIU_AP);
+
+# TRC ETB
+    - name: Flush_ETB
+      blocks:
+        - execute: |
+            // Helper variables
+            __var savedAP     = __ap;
+            __var ffcrValue   = 0x00000000;
+            __var etbStatus   = 0x00000000;
+
+            Message(0, "Begin Flush_ETB @0x%08X, AP 0x%08X", ETB_ADDRESS, ETB_AP);
+
+            __ap = ETB_AP; // Set AP
+
+        - execute: |
+            // Flush ETB first
+            ffcrValue = Read32(ETB_ADDRESS + 0x304);
+            ffcrValue &= ~(0x00001040); // Clear StopOnFlush and FlushOnManual
+            ffcrValue |= 0x00001000;    // Stop after the manual flush completes
+            Write32(ETB_ADDRESS + 0x304, ffcrValue);
+            ffcrValue |= 0x00000040;    // Trigger manual flush
+            Write32(ETB_ADDRESS + 0x304, ffcrValue);
+
+        - execute: |
+            ffcrValue = Read32(ETB_ADDRESS + 0x304);
+        - while: (ffcrValue & 0x40) != 0
+          info: "Wait for ETB manual flush to complete"
+          timeout: 100
+          blocks:
+            - execute: |
+                ffcrValue = Read32(ETB_ADDRESS + 0x304);
+
+        - execute: |
+            etbStatus = Read32(ETB_ADDRESS + 0x00C);
+        - while: (etbStatus & 0x4) == 0
+          info: "Wait for ETB to become ready"
+          timeout: 100
+          blocks:
+            - execute: |
+                etbStatus = Read32(ETB_ADDRESS + 0x00C);
+
+        - execute: |
+            // Disable ETB after flush until next run/step
+            Write32(ETB_ADDRESS + 0x020, 0x00000000);
+            etbStatus = Read32(ETB_ADDRESS + 0x00C);
+        - while: (etbStatus & 0x4) == 0
+          info: "Wait for AcqComp"
+          timeout: 100
+          blocks:
+            - execute: |
+                etbStatus = Read32(ETB_ADDRESS + 0x00C);
+
+        - execute: |
+            __ap = savedAP;
+            Message(0, "End Flush_ETB @0x%08X, AP 0x%08X", ETB_ADDRESS, ETB_AP);
+
+    - name: Configure_ETB
+      blocks:
+      - execute: |
+            // Helper variables
+            __var savedAP = __ap;
+            __var ffcrValue = 0x00000000;
+            __var etbStatus = 0x00000000;
+
+            Message(0, "Begin Configure_ETB @0x%08X, AP 0x%08X", ETB_ADDRESS, ETB_AP);
+            __ap = ETB_AP; // Set AP
+
+            // Configure ETB
+            Write32(ETB_ADDRESS + 0x020, 0x00000000);  // Disable ETB before configuring
+            etbStatus = Read32(ETB_ADDRESS + 0x00C);
+      - while: (etbStatus & 0x4) == 0
+        info: "Wait for AcqComp"
+        timeout: 100
+        blocks:
+          - execute: |
+              etbStatus = Read32(ETB_ADDRESS + 0x00C);
+
+      - execute: |
+          // Configure
+          Write32(ETB_ADDRESS + 0x304, 0x00000003);  // FFCR: Enable Formatter and Trigger Insertion
+          Write32(ETB_ADDRESS + 0x01C, ETB_TRIGGER_COUNT); // TRG: Number of words to capture after trigger
+          Write32(ETB_ADDRESS + 0x018, 0x00000000);  // Init RwP
+          Write32(ETB_ADDRESS + 0x014, 0x00000000);  // Init RRP
+
+          Write32(ETB_ADDRESS + 0x020, 0x00000001);  // Enable ETB
+
+      - execute: |
+          __ap = savedAP;
+          Message(0, "End Configure_ETB @0x%08X, AP 0x%08X", ETB_ADDRESS, ETB_AP);
+    
+    - name: TraceCapture_ETB
+      blocks:
+      - execute: |
+          // Helper variables
+          __var ffcrValue = 0x00000000;
+          __var savedAP = __ap;
+
+          Message(0, "Begin TraceCapture_ETB @0x%08X, AP 0x%08X", ETB_ADDRESS, ETB_AP);
+
+          // Ensure involved components are in a well-defined state.
+          Sequence("TraceFlush");
+
+          __ap = ETB_AP; // Set AP
+          ffcrValue  = Read32(ETB_ADDRESS + 0x304);
+          ffcrValue |= 0x00000002;               // FFCR: Enable Formatter
+          Write32(ETB_ADDRESS + 0x304, ffcrValue);
+          Write32(ETB_ADDRESS + 0x01C, ETB_TRIGGER_COUNT); // TRG: Number of words to capture after trigger
+          Write32(ETB_ADDRESS + 0x018, 0x00000000);  // Init RwP
+          Write32(ETB_ADDRESS + 0x014, 0x00000000);  // Init RRP
+          Write32(ETB_ADDRESS + 0x020, 0x00000001);  // Enable ETB
+          __ap = savedAP;
+
+          Message(0, "End TraceCapture_ETB @0x%08X, AP 0x%08X", ETB_ADDRESS, ETB_AP);
+
+
+  programming:
+    - algorithm: ${CMSIS_PACK_ROOT}/Infineon/T2G-B-E_DFP/1.0.0/Flash/CYT2BL.FLM
+      start: 0x10000000
+      size: 0x00410000
+      ram-start: 0x08001000
+      ram-size: 0x0000EFF0
+      pname: Cortex-M0p
+    - algorithm: ${CMSIS_PACK_ROOT}/Infineon/T2G-B-E_DFP/1.0.0/Flash/CYT2Bx_WFLASH_128.FLM
+      start: 0x14000000
+      size: 0x00020000
+      ram-start: 0x08001000
+      ram-size: 0x0000EFF0
+      pname: Cortex-M0p
+    - algorithm: ${CMSIS_PACK_ROOT}/Infineon/T2G-B-E_DFP/1.0.0/Flash/CYT2Bx_SFLASH_USER.FLM
+      start: 0x17000800
+      size: 0x00000800
+      ram-start: 0x08001000
+      ram-size: 0x0000EFF0
+      pname: Cortex-M0p
+    - algorithm: ${CMSIS_PACK_ROOT}/Infineon/T2G-B-E_DFP/1.0.0/Flash/CYT2Bx_SFLASH_PKEY.FLM
+      start: 0x17006400
+      size: 0x00000C00
+      ram-start: 0x08001000
+      ram-size: 0x0000EFF0
+      pname: Cortex-M0p
+    - algorithm: ${CMSIS_PACK_ROOT}/Infineon/T2G-B-E_DFP/1.0.0/Flash/CYT2Bx_SFLASH_TOC2.FLM
+      start: 0x17007C00
+      size: 0x00000200
+      ram-start: 0x08001000
+      ram-size: 0x0000EFF0
+      pname: Cortex-M0p
+    - algorithm: ${CMSIS_PACK_ROOT}/Infineon/T2G-B-E_DFP/1.0.0/Flash/CYT2BL.FLM
+      start: 0x10000000
+      size: 0x00410000
+      ram-start: 0x08001000
+      ram-size: 0x0000EFF0
+      pname: Cortex-M4
+    - algorithm: ${CMSIS_PACK_ROOT}/Infineon/T2G-B-E_DFP/1.0.0/Flash/CYT2Bx_WFLASH_128.FLM
+      start: 0x14000000
+      size: 0x00020000
+      ram-start: 0x08001000
+      ram-size: 0x0000EFF0
+      pname: Cortex-M4
+    - algorithm: ${CMSIS_PACK_ROOT}/Infineon/T2G-B-E_DFP/1.0.0/Flash/CYT2Bx_SFLASH_USER.FLM
+      start: 0x17000800
+      size: 0x00000800
+      ram-start: 0x08001000
+      ram-size: 0x0000EFF0
+      pname: Cortex-M4
+    - algorithm: ${CMSIS_PACK_ROOT}/Infineon/T2G-B-E_DFP/1.0.0/Flash/CYT2Bx_SFLASH_PKEY.FLM
+      start: 0x17006400
+      size: 0x00000C00
+      ram-start: 0x08001000
+      ram-size: 0x0000EFF0
+      pname: Cortex-M4
+    - algorithm: ${CMSIS_PACK_ROOT}/Infineon/T2G-B-E_DFP/1.0.0/Flash/CYT2Bx_SFLASH_TOC2.FLM
+      start: 0x17007C00
+      size: 0x00000200
+      ram-start: 0x08001000
+      ram-size: 0x0000EFF0
+      pname: Cortex-M4
+  debug-topology:
+    debugports:
+      - dpid: 0
+        accessports:
+          - apid: 0
+            index: 1
+          - apid: 1
+            index: 2
+    processors:
+      - pname: Cortex-M0p
+        apid: 0
+        reset-sequence: ResetProcessor
+      - pname: Cortex-M4
+        apid: 1
+        reset-sequence: ResetSystem
