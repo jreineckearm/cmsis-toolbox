@@ -1,0 +1,772 @@
+debug-adapters:
+  - name: "CMSIS-DAP@pyOCD"
+    alias-name: ["CMSIS-DAP", "DAP-Link"]                  # alternative names that map to this debug adapter
+    template: CMSIS-DAP-pyOCD.adapter.json                 # template files
+    defaults:                                              # default values to use when nowhere specified
+      gdbserver:
+        active:                                            # add gdbserver: node under debugger: in cbuild-run.yml
+        port: 3333
+      telnet:
+        port: 4444
+      protocol: swd
+      clock: 10000000
+    user-interface:
+      - section: Debug Interface
+        description: Interface configuration for the debug port
+        options:
+          - name: Clock (kHz)
+            description: Debug clock speed
+            yml-node: clock
+            type: number
+            range: [10, 30000]
+            scale: 1000
+            default: 10000
+          - name: Protocol
+            description: Debug protocol
+            yml-node: protocol
+            type: enum
+            values:
+              - name: JTAG
+                value: jtag
+                description: Use JTAG interface (4 pins)
+              - name: SWD
+                value: swd
+                description: Use Serial Wire Debug (SWD) interface (2 pins)
+            default: swd
+      - section: Telnet
+        description: Serial input/output via semihosting or RTT channel 0
+        yml-node: telnet
+        select: on
+        pname-options:
+        options:
+          - name: Telnet Mode
+            description: Configure Serial I/O redirect
+            yml-node: mode
+            type: enum
+            default: monitor
+            values:
+              - name: Telnet Server
+                value: server
+                description:  Serial I/O to Telnet server port
+              - name: Debug Console
+                value: console
+                description:  Serial output to console (Debug console in VS Code)
+              - name: Serial Monitor
+                value: monitor
+                description:  Serial I/O via TCP/IP port to VS Code Serial Monitor
+              - name: Text File
+                value: file
+                description:  Serial output to file (default ./out/<solution-name>+<target-type>.<pname>.out)
+              - name: Disabled
+                value: off
+                description:  Serial I/O disabled
+      - section: Trace Interface
+        description: Trace interface setup
+        yml-node: trace-interface
+        select: on
+        options:
+          - name: Mode
+            description: Configure trace interface mode
+            yml-node: mode
+            type: enum
+            default: swo-uart
+            values:
+              - name: SWO UART
+                value: swo-uart
+                description:  Trace output via SWO UART
+              - name: SWO Manchester
+                value: swo-manchester
+                description:  Trace output via SWO Manchester
+              - name: On-Chip Trace Buffer
+                value: buffer
+                description:  Trace output via On-Chip Trace Buffer
+              - name: Synchronous Trace Port
+                value: trace-port
+                description:  Trace output via Synchronous Trace Port
+          - name: Trace Interface Input Clock (kHz)
+            description: Configure clock that is input to the trace interface component (SWO, Trace Port, or Trace Buffer)
+            yml-node: trace-clock-in
+            type: number
+            range: [10, 200000]
+            default: 10000
+          - name: Trace Configuration File
+            description: Path to file with trace generation settings
+            yml-node: trace-config-file
+            type: file
+            path-type: relative
+            default: stm32h747_trc_swo.dbgconf
+          #- name: Trace Output Clock (kHz)
+          #  description: Configure clock that is output from the trace interface component
+          #  yml-node: trace-clock-out
+          #  type: number
+          #  range: [10, 20000]
+          #  default: 10000
+
+  - name: "ULINKplus@pyOCD"
+    alias-name: ["ULINKplus"]                              # alternative names that map to this debug adapter
+    template: CMSIS-DAP-pyOCD.adapter.json                 # template files  (initially same as CMSIS-DAP@pyOCD)
+    defaults:                                              # default values to use when nowhere specified
+      gdbserver:
+        active:                                            # add gdbserver: node under debugger: in cbuild-run.yml
+        port: 3333
+      telnet:
+        port: 4444
+      protocol: swd
+      clock: 10000000
+    user-interface:
+      - section: Debug Interface
+        description: Interface configuration for the debug port
+        options:
+          - name: Clock (kHz)
+            description: Debug clock speed
+            yml-node: clock
+            type: number
+            range: [10, 10000]
+            scale: 1000
+            default: 10000
+          - name: Protocol
+            description: Debug protocol
+            yml-node: protocol
+            type: enum
+            values:
+              - name: JTAG
+                value: jtag
+                description: Use JTAG interface (4 pins)
+              - name: SWD
+                value: swd
+                description: Use Serial Wire Debug (SWD) interface (2 pins)
+            default: swd
+      - section: Telnet
+        description: Serial input/output via semihosting or RTT channel 0
+        yml-node: telnet
+        select: on
+        pname-options:
+        options:
+          - name: Telnet Mode
+            description: Configure Serial I/O redirect
+            yml-node: mode
+            type: enum
+            default: monitor
+            values:
+              - name: Telnet Server
+                value: server
+                description:  Serial I/O to Telnet server port
+              - name: Debug Console
+                value: console
+                description:  Serial output to console (Debug console in VS Code)
+              - name: Serial Monitor
+                value: monitor
+                description:  Serial I/O via TCP/IP port to VS Code Serial Monitor
+              - name: Text File
+                value: file
+                description:  Serial output to file (default ./out/<solution-name>+<target-type>.<pname>.out)
+              - name: Disabled
+                value: off
+                description:  Serial I/O disabled
+
+
+  - name: "MCU-Link@pyOCD"
+    alias-name: ["MCU-Link"]                               # alternative names that map to this debug adapter
+    template: CMSIS-DAP-pyOCD.adapter.json                 # template files  (initially same as CMSIS-DAP@pyOCD)
+    defaults:                                              # default values to use when nowhere specified
+      gdbserver:
+        active:                                            # add gdbserver: node under debugger: in cbuild-run.yml
+        port: 3333
+      telnet:
+        port: 4444
+      protocol: swd
+      clock: 10000000
+    user-interface:
+      - section: Debug Interface
+        description: Interface configuration for the debug port
+        options:
+          - name: Clock (kHz)
+            description: Debug clock speed
+            yml-node: clock
+            type: number
+            range: [10, 10000]
+            scale: 1000
+            default: 10000
+          - name: Protocol
+            description: Debug protocol
+            yml-node: protocol
+            type: enum
+            values:
+              - name: JTAG
+                value: jtag
+                description: Use JTAG interface (4 pins)
+              - name: SWD
+                value: swd
+                description: Use Serial Wire Debug (SWD) interface (2 pins)
+            default: swd
+      - section: Telnet
+        description: Serial input/output via semihosting or RTT channel 0
+        yml-node: telnet
+        select: on
+        pname-options:
+        options:
+          - name: Telnet Mode
+            description: Configure Serial I/O redirect
+            yml-node: mode
+            type: enum
+            default: monitor
+            values:
+              - name: Telnet Server
+                value: server
+                description:  Serial I/O to Telnet server port
+              - name: Debug Console
+                value: console
+                description:  Serial output to console (Debug console in VS Code)
+              - name: Serial Monitor
+                value: monitor
+                description:  Serial I/O via TCP/IP port to VS Code Serial Monitor
+              - name: Text File
+                value: file
+                description:  Serial output to file (default ./out/<solution-name>+<target-type>.<pname>.out)
+              - name: Disabled
+                value: off
+                description:  Serial I/O disabled
+
+
+  - name: "Nu-Link@pyOCD"
+    alias-name: ["Nu-Link", "Nu-Link-Pro"]                 # alternative names that map to this debug adapter
+    template: CMSIS-DAP-pyOCD.adapter.json                 # template files  (initially same as CMSIS-DAP@pyOCD)
+    defaults:                                              # default values to use when nowhere specified
+      gdbserver:
+        active:                                            # add gdbserver: node under debugger: in cbuild-run.yml
+        port: 3333
+      telnet:
+        port: 4444
+      protocol: swd
+      clock: 10000000
+    user-interface:
+      - section: Debug Interface
+        description: Interface configuration for the debug port
+        options:
+          - name: Clock (kHz)
+            description: Debug clock speed
+            yml-node: clock
+            type: number
+            range: [10, 10000]
+            scale: 1000
+            default: 10000
+          - name: Protocol
+            description: Debug protocol
+            yml-node: protocol
+            type: enum
+            values:
+              - name: JTAG
+                value: jtag
+                description: Use JTAG interface (4 pins)
+              - name: SWD
+                value: swd
+                description: Use Serial Wire Debug (SWD) interface (2 pins)
+            default: swd
+      - section: Telnet
+        description: Serial input/output via semihosting or RTT channel 0
+        yml-node: telnet
+        select: on
+        pname-options:
+        options:
+          - name: Telnet Mode
+            description: Configure Serial I/O redirect
+            yml-node: mode
+            type: enum
+            default: monitor
+            values:
+              - name: Telnet Server
+                value: server
+                description:  Serial I/O to Telnet server port
+              - name: Debug Console
+                value: console
+                description:  Serial output to console (Debug console in VS Code)
+              - name: Serial Monitor
+                value: monitor
+                description:  Serial I/O via TCP/IP port to VS Code Serial Monitor
+              - name: Text File
+                value: file
+                description:  Serial output to file (default ./out/<solution-name>+<target-type>.<pname>.out)
+              - name: Disabled
+                value: off
+                description:  Serial I/O disabled
+
+  - name: "PICkit@pyOCD"
+    alias-name: ["PICkit Basic"]                           # alternative names that map to this debug adapter
+    template: CMSIS-DAP-pyOCD.adapter.json                 # template files  (initially same as CMSIS-DAP@pyOCD)
+    defaults:                                              # default values to use when nowhere specified
+      gdbserver:
+        active:                                            # add gdbserver: node under debugger: in cbuild-run.yml
+        port: 3333
+      telnet:
+        port: 4444
+      protocol: swd
+      clock: 10000000
+    user-interface:
+      - section: Debug Interface
+        description: Interface configuration for the debug port
+        options:
+          - name: Clock (kHz)
+            description: Debug clock speed
+            yml-node: clock
+            type: number
+            range: [10, 10000]
+            scale: 1000
+            default: 10000
+          - name: Protocol
+            description: Debug protocol
+            yml-node: protocol
+            type: enum
+            values:
+              - name: JTAG
+                value: jtag
+                description: Use JTAG interface (4 pins)
+              - name: SWD
+                value: swd
+                description: Use Serial Wire Debug (SWD) interface (2 pins)
+            default: swd
+      - section: Telnet
+        description: Serial input/output via semihosting or RTT channel 0
+        yml-node: telnet
+        select: on
+        pname-options:
+        options:
+          - name: Telnet Mode
+            description: Configure Serial I/O redirect
+            yml-node: mode
+            type: enum
+            default: monitor
+            values:
+              - name: Telnet Server
+                value: server
+                description:  Serial I/O to Telnet server port
+              - name: Debug Console
+                value: console
+                description:  Serial output to console (Debug console in VS Code)
+              - name: Serial Monitor
+                value: monitor
+                description:  Serial I/O via TCP/IP port to VS Code Serial Monitor
+              - name: Text File
+                value: file
+                description:  Serial output to file (default ./out/<solution-name>+<target-type>.<pname>.out)
+              - name: Disabled
+                value: off
+                description:  Serial I/O disabled
+
+  - name: "KitProg3@pyOCD"
+    alias-name: ["KitProg3"]                               # alternative names that map to this debug adapter
+    template: CMSIS-DAP-pyOCD.adapter.json                 # template files  (initially same as CMSIS-DAP@pyOCD)
+    defaults:                                              # default values to use when nowhere specified
+      gdbserver:
+        active:                                            # add gdbserver: node under debugger: in cbuild-run.yml
+        port: 3333
+      telnet:
+        port: 4444
+      protocol: swd
+      clock: 10000000
+    user-interface:
+      - section: Debug Interface
+        description: Interface configuration for the debug port
+        options:
+          - name: Clock (kHz)
+            description: Debug clock speed
+            yml-node: clock
+            type: number
+            range: [10, 10000]
+            scale: 1000
+            default: 10000
+          - name: Protocol
+            description: Debug protocol
+            yml-node: protocol
+            type: enum
+            values:
+              - name: JTAG
+                value: jtag
+                description: Use JTAG interface (4 pins)
+              - name: SWD
+                value: swd
+                description: Use Serial Wire Debug (SWD) interface (2 pins)
+            default: swd
+      - section: Telnet
+        description: Serial input/output via semihosting or RTT channel 0
+        yml-node: telnet
+        select: on
+        pname-options:
+        options:
+          - name: Telnet Mode
+            description: Configure Serial I/O redirect
+            yml-node: mode
+            type: enum
+            default: monitor
+            values:
+              - name: Telnet Server
+                value: server
+                description:  Serial I/O to Telnet server port
+              - name: Debug Console
+                value: console
+                description:  Serial output to console (Debug console in VS Code)
+              - name: Serial Monitor
+                value: monitor
+                description:  Serial I/O via TCP/IP port to VS Code Serial Monitor
+              - name: Text File
+                value: file
+                description:  Serial output to file (default ./out/<solution-name>+<target-type>.<pname>.out)
+              - name: Disabled
+                value: off
+                description:  Serial I/O disabled
+
+  - name: "RPiDebugProbe@pyOCD"
+    alias-name: ["RaspberryPiDebugProbe", "RPiDebugProbe"] # alternative names that map to this debug adapter
+    template: CMSIS-DAP-pyOCD.adapter.json                 # template files
+    defaults:                                              # default values to use when nowhere specified
+      gdbserver:
+        active:                                            # add gdbserver: node under debugger: in cbuild-run.yml
+        port: 3333
+      telnet:
+        port: 4444
+      protocol: swd
+      clock: 1000000
+    user-interface:
+      - section: Debug Interface
+        description: Interface configuration for the debug port
+        options:
+          - name: Clock (kHz)
+            description: Debug clock speed
+            yml-node: clock
+            type: number
+            range: [10, 10000]
+            scale: 1000
+            default: 1000
+          - name: Protocol
+            description: Debug protocol
+            yml-node: protocol
+            type: enum
+            values:
+              - name: SWD
+                value: swd
+                description: Use Serial Wire Debug (SWD) interface (2 pins)
+            default: swd
+      - section: Telnet
+        description: Serial input/output via semihosting or RTT channel 0
+        yml-node: telnet
+        select: on
+        pname-options:
+        options:
+          - name: Telnet Mode
+            description: Configure Serial I/O redirect
+            yml-node: mode
+            type: enum
+            default: monitor
+            values:
+              - name: Telnet Server
+                value: server
+                description:  Serial I/O to Telnet server port
+              - name: Debug Console
+                value: console
+                description:  Serial output to console (Debug console in VS Code)
+              - name: Serial Monitor
+                value: monitor
+                description:  Serial I/O via TCP/IP port to VS Code Serial Monitor
+              - name: Text File
+                value: file
+                description:  Serial output to file (default ./out/<solution-name>+<target-type>.<pname>.out)
+              - name: Disabled
+                value: off
+                description:  Serial I/O disabled
+
+  - name: "ST-Link@pyOCD"
+    alias-name: ["ST-LINK"]                                # alternative names that map to this debug adapter
+    template: STLink-pyOCD.adapter.json                    # template files
+    defaults:                                              # default values to use when nowhere specified
+      gdbserver:
+        active:                                            # add gdbserver: node under debugger: in cbuild-run.yml
+        port: 3333
+      telnet:
+        port: 4444
+      protocol: swd
+      clock: 4000000
+    user-interface:
+      - section: Debug Interface
+        description: Interface configuration for the debug port
+        options:
+          - name: Clock (kHz)
+            description: Debug clock speed
+            yml-node: clock
+            type: number
+            range: [10, 24000]
+            scale: 1000
+            default: 4000
+          - name: Protocol
+            description: Debug protocol
+            yml-node: protocol
+            type: enum
+            values:
+              - name: JTAG
+                value: jtag
+                description: Use JTAG interface (4 pins)
+              - name: SWD
+                value: swd
+                description: Use Serial Wire Debug (SWD) interface (2 pins)
+            default: swd
+      - section: Telnet
+        description: Serial input/output via semihosting or RTT channel 0
+        yml-node: telnet
+        select: on
+        pname-options:
+        options:
+          - name: Telnet Mode
+            description: Configure Serial I/O redirect
+            yml-node: mode
+            type: enum
+            default: monitor
+            values:
+              - name: Telnet Server
+                value: server
+                description:  Serial I/O to Telnet server port
+              - name: Debug Console
+                value: console
+                description:  Serial output to console (Debug console in VS Code)
+              - name: Serial Monitor
+                value: monitor
+                description:  Serial I/O via TCP/IP port to VS Code Serial Monitor
+              - name: Text File
+                value: file
+                description:  Serial output to file (default ./out/<solution-name>+<target-type>.<pname>.out)
+              - name: Disabled
+                value: off
+                description:  Serial I/O disabled
+
+  - name: "J-Link Server"
+    alias-name: ["J-Link", "JLink Server"]                 # alternative names that map to this debug adapter
+    template: JLink.adapter.json                           # template files
+    defaults:                                              # default values to use when nowhere specified
+      gdbserver:
+        active:                                            # add gdbserver: node under debugger: in cbuild-run.yml
+        port: 3333
+      telnet:
+        active:                                            # add telnet: node under debugger: in cbuild-run.yml
+        port: 4444
+        mode: off
+      protocol: swd
+      clock: 4000000
+    user-interface:
+      - section: Debug Interface
+        description: Interface configuration for the debug port
+        options:
+          - name: Clock (kHz)
+            description: Debug clock speed
+            yml-node: clock
+            type: number
+            range: [10, 50000]
+            scale: 1000
+            default: 4000
+          - name: Protocol
+            description: Debug protocol
+            yml-node: protocol
+            type: enum
+            values:
+              - name: JTAG
+                value: jtag
+                description: Use JTAG interface (4 pins)
+              - name: SWD
+                value: swd
+                description: Use Serial Wire Debug (SWD) interface (2 pins)
+            default: swd
+      - section: Telnet
+        description: Serial input/output via semihosting or RTT channel 0
+        yml-node: telnet
+        select: on
+        pname-options:
+        options:
+          - name: Telnet Mode
+            description: Configure Serial I/O redirect
+            yml-node: mode
+            type: enum
+            default: monitor
+            values:
+              - name: Telnet Server
+                value: server
+                description:  Serial I/O to Telnet server port
+              - name: Debug Console
+                value: console
+                description:  Serial output to console (Debug console in VS Code)
+              - name: Serial Monitor
+                value: monitor
+                description:  Serial I/O via TCP/IP port to VS Code Serial Monitor
+              - name: Disabled
+                value: off
+                description:  Serial I/O disabled
+
+  - name: "CMSIS-DAP@Arm-Debugger"
+    alias-name: ["CMSIS-DAP@armdbg"]
+    template: CMSIS-DAP-Arm-Debugger.adapter.json          # template files
+    defaults:                                              # default values to use when nowhere specified
+      protocol-armdbg: auto
+      clock-armdbg: auto
+    user-interface:
+      - section: Debug Interface
+        description: Interface configuration for the debug port
+        options:
+          - name: Clock
+            description: Debug clock speed
+            yml-node: clock-armdbg
+            type: enum
+            values:
+              - name: auto
+                value: auto
+                description: Auto-detection of optimal debug clock
+              - name: 50MHz
+              - name: 33MHz
+              - name: 25MHz
+              - name: 20MHz
+              - name: 10MHz
+              - name: 5MHz
+              - name: 2MHz
+              - name: 1MHz
+              - name: 500kHz
+              - name: 200kHz
+              - name: 100kHz
+              - name: 50kHz
+              - name: 20kHz
+              - name: 10kHz
+              - name: 5kHz
+            default: auto
+          - name: Protocol
+            description: Debug protocol
+            yml-node: protocol-armdbg
+            type: enum
+            values:
+              - name: auto
+                value: auto
+                description: Use target specific default protocol for debugging
+              - name: JTAG
+                value: JTAG
+                description: Use JTAG interface (4 pins)
+              - name: SWD
+                value: SWD
+                description: Use Serial Wire Debug (SWD) interface (2 pins)
+            default: auto
+
+  - name: "ST-Link@Arm-Debugger"
+    alias-name: ["ST-Link@armdbg"]
+    template: STLink-Arm-Debugger.adapter.json             # template files
+    defaults:                                              # default values to use when nowhere specified
+      protocol-armdbg: auto
+      clock-armdbg: auto
+    user-interface:
+      - section: Debug Interface
+        description: Interface configuration for the debug port
+        options:
+          - name: Clock
+            description: Clock configuration
+            yml-node: clock-armdbg
+            type: enum
+            values:
+              - name: auto
+                value: auto
+                description: auto detection of optimal debug clock
+              - name: 50MHz
+              - name: 33MHz
+              - name: 25MHz
+              - name: 20MHz
+              - name: 10MHz
+              - name: 5MHz
+              - name: 2MHz
+              - name: 1MHz
+              - name: 500kHz
+              - name: 200kHz
+              - name: 100kHz
+              - name: 50kHz
+              - name: 20kHz
+              - name: 10kHz
+              - name: 5kHz
+            default: auto
+          - name: Protocol
+            description: Protocol configuration
+            yml-node: protocol-armdbg
+            type: enum
+            values:
+              - name: auto
+                value: auto
+                description: Use target specific default protocol for debugging
+              - name: JTAG
+                value: JTAG
+                description: Use JTAG interface (4 pins)
+              - name: SWD
+                value: SWD
+                description: Use Serial Wire Debug (SWD) interface (2 pins)
+            default: auto
+
+  - name: "Arm-FVP"
+    template: FVP.adapter.json                             # template files
+    defaults:
+      model: "FVP_MPS2_Cortex-M3"
+    user-interface:
+      - section: Model
+        description: Arm FVP simulation model setup
+        options:
+          - name: Model
+            description: Filename (optionally with path) of the FVP executable
+            yml-node: model
+            type: enum
+            values:
+              - name: FVP_Corstone_SSE-300
+                description: Arm Corstone-300 Reference Platform with Cortex-M55
+              - name: FVP_Corstone_SSE-300_Ethos-U55
+                description: Arm Corstone-300 Reference Platform with Cortex-M55 and Ethos-U55
+              - name: FVP_Corstone_SSE-300_Ethos-U65
+                description: Arm Corstone-300 Reference Platform with Cortex-M55 and Ethos-U65
+              - name: FVP_Corstone_SSE-310
+                description: Arm Corstone 310 Reference Platform with Cortex-M85 and Ethos-U55
+              - name: FVP_Corstone_SSE-310_Ethos-U65
+                description: Arm Corstone-310  Reference Platform with Cortex-M85 and Ethos-U65
+              - name: FVP_Corstone_SSE-315
+                description: Arm Corstone-315 Reference Platform with Cortex-M85, Ethos-U65, and Mali-C55
+              - name: FVP_Corstone_SSE-320
+                description: Arm Corstone-320 Reference Platform with Cortex-M85, Ethos-U85, and Mali-C55
+              - name: FVP_MPS2_Cortex-M0
+                description: Arm Microcontroller Prototyping System (MPS2) with Cortex-M0
+              - name: FVP_MPS2_Cortex-M0plus
+                description: Arm Microcontroller Prototyping System (MPS2) with Cortex-M0plus
+              - name: FVP_MPS2_Cortex-M3
+                description: Arm Microcontroller Prototyping System (MPS2) with Cortex-M3
+              - name: FVP_MPS2_Cortex-M4
+                description: Arm Microcontroller Prototyping System (MPS2) with Cortex-M4
+              - name: FVP_MPS2_Cortex-M7
+                description: Arm Microcontroller Prototyping System (MPS2) with Cortex-M7
+              - name: FVP_MPS2_Cortex-M23
+                description: Arm Microcontroller Prototyping System (MPS2) with Cortex-M23
+              - name: FVP_MPS2_Cortex-M33
+                description: Arm Microcontroller Prototyping System (MPS2) with Cortex-M33
+              - name: FVP_MPS2_Cortex-M35P
+                description: Arm Microcontroller Prototyping System (MPS2) with Cortex-M35P
+              - name: FVP_MPS2_Cortex-M52
+                description: Arm Microcontroller Prototyping System (MPS2) with Cortex-M52
+              - name: FVP_MPS2_Cortex-M55
+                description: Arm Microcontroller Prototyping System (MPS2) with Cortex-M55
+              - name: FVP_MPS2_Cortex-M85
+                description: Arm Microcontroller Prototyping System (MPS2) with Cortex-M85
+            default: FVP_MPS2_Cortex-M3
+          - name: Config File
+            description: Path and filename of the FVP configuration file
+            yml-node: config-file
+            type: file
+            path-type: relative
+          - name: Misc
+            description: Miscellaneous command line arguments
+            yml-node: args
+            type: string
+
+  - name: "Keil uVision"
+    template: uVision.adapter.json                         # template files
+    defaults:
+      uv4: "${env:LOCALAPPDATA}/Keil_v5/UV4/UV4.exe"
+    user-interface:
+      - section: Debug Interface
+        description: Interface configuration for the debug port
+        options:
+          - name: uVision
+            description: Path and filename of uVision executable
+            yml-node: uv4
+            type: file
+            path-type: absolute
+            default: "${env:LOCALAPPDATA}/Keil_v5/UV4/UV4.exe"
