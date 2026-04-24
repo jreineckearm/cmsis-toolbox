@@ -1,0 +1,962 @@
+cbuild-run:
+  generated-by: csolution version 2.13.0+p36-gd2240ffd
+  solution: ../SDS.csolution.yml
+  target-type: AppKit-E8-U85
+  target-set: <default>
+  compiler: AC6
+  board: Alif Semiconductor::AppKit-E8-AIML:A
+  board-pack: AlifSemiconductor::Ensemble@2.1.0
+  device: Alif Semiconductor::AE822FA0E5597BS0
+  device-pack: AlifSemiconductor::Ensemble@2.1.0
+  output:
+    - file: AlgorithmTest/AppKit-E8-U85/DebugRec/AlgorithmTest.axf
+      info: generate by AlgorithmTest.DebugRec+AppKit-E8-U85
+      type: elf
+      load: symbols
+      pname: M55_HP
+    - file: AlgorithmTest/AppKit-E8-U85/DebugRec/AlgorithmTest.hex
+      info: generate by AlgorithmTest.DebugRec+AppKit-E8-U85
+      type: hex
+      load: image
+      pname: M55_HP
+  system-resources:
+    memory:
+      - name: MRAM
+        access: rx
+        start: 0x80000000
+        size: 0x00580000
+        from-pack: AlifSemiconductor::Ensemble@2.1.0
+      - name: SRAM0
+        access: rwx
+        start: 0x02000000
+        size: 0x00400000
+        from-pack: AlifSemiconductor::Ensemble@2.1.0
+      - name: SRAM1
+        access: rwx
+        start: 0x08000000
+        size: 0x00400000
+        from-pack: AlifSemiconductor::Ensemble@2.1.0
+      - name: SRAM2
+        access: rwx
+        start: 0x50000000
+        size: 0x00040000
+        from-pack: AlifSemiconductor::Ensemble@2.1.0
+      - name: SRAM3
+        access: rwx
+        start: 0x50800000
+        size: 0x00100000
+        from-pack: AlifSemiconductor::Ensemble@2.1.0
+      - name: SRAM4
+        access: rwx
+        start: 0x58000000
+        size: 0x00040000
+        from-pack: AlifSemiconductor::Ensemble@2.1.0
+      - name: SRAM5
+        access: rwx
+        start: 0x58800000
+        size: 0x00040000
+        from-pack: AlifSemiconductor::Ensemble@2.1.0
+    processors:
+      - core: Cortex-M55
+        revision: r1p0
+        pname: M55_HE
+        endian: little
+        fpu: dp
+        mpu: present
+        dsp: present
+        trustzone: present
+        mve: fp
+        max-clock: 160000000
+      - core: Cortex-M55
+        revision: r1p0
+        pname: M55_HP
+        endian: little
+        fpu: dp
+        mpu: present
+        dsp: present
+        trustzone: present
+        mve: fp
+        max-clock: 400000000
+  system-descriptions:
+    - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.1.0/Debug/SVD/AE822FA0E5597BS0_CM55_HE_View.svd
+      type: svd
+      pname: M55_HE
+    - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.1.0/Debug/SVD/AE822FA0E5597BS0_CM55_HP_View.svd
+      type: svd
+      pname: M55_HP
+    - file: ${CMSIS_PACK_ROOT}/ARM/CMSIS-RTX/5.9.0/RTX5.scvd
+      type: scvd
+      pname: M55_HP
+    - file: ${CMSIS_PACK_ROOT}/ARM/CMSIS/6.2.0/CMSIS/Driver/VIO/cmsis_vio.scvd
+      type: scvd
+      pname: M55_HP
+    - file: ${CMSIS_PACK_ROOT}/Keil/MDK-Middleware/8.0.0/Components/USB/USB.scvd
+      type: scvd
+      pname: M55_HP
+  debugger:
+    name: ULINKplus@pyOCD
+    protocol: swd
+    clock: 10000000
+    start-pname: M55_HP
+    gdbserver:
+      - port: 3333
+        pname: M55_HP
+      - port: 3334
+        pname: M55_HE
+    telnet:
+      - mode: console
+        pname: M55_HP
+        port: 4444
+    rtt:
+      - pname: M55_HP
+        channel:
+          - number: 0
+            mode: stdio
+          - number: 1
+            mode: systemview
+
+  debug-vars:
+    vars: |
+        // M-Class Only for now
+
+        // SOC TPIU Funnel (!! E7 SDF file has broken port assignments??)
+        __var SOC_TPIU_FUNNEL_ADDRESS    = 0x00100000;
+        // __var SOC_TPIU_FUNNEL_APID       = 0x00000000;  // DP MEMSPACE
+        // __var SOC_TPIU_FUNNEL_INPUT_MASK = 0x0000001F; // Mask of trace inputs connected to funnel, enable all valid inputs by default.
+        // Turn off input from APPS Replicator (suspect Bit 0)
+        __var SOC_TPIU_FUNNEL_INPUT_MASK = 0x0000001E; // Mask of trace inputs connected to funnel, enable all valid inputs by default.
+
+        // SOC TPIU Replicator
+        __var SOC_TPIU_REPLICATOR_ADDRESS    = 0x00110000;
+        // __var SOC_TPIU_REPLICATOR_AP         = 0x00000000;  // DP MEMSPACE
+        __var SOC_TPIU_REPLICATOR_ID_FILTER0 = 0x00000000; // Default: all pass to output 0
+        __var SOC_TPIU_REPLICATOR_ID_FILTER1 = 0x00000000; // Default: all pass to output 1
+
+        // SOC TPIU
+        __var SOC_TPIU_ADDRESS    = 0x00120000;  // Default TPIU Location for single-core systems
+        // __var SOC_TPIU_AP         = 0x00000000;  // DP MEMSPACE
+        __var SOC_SWO_PRESCALER   = 0x00000000; // TPIU Asynchronous Clock Prescaler Register
+        __var SOC_TPIU_PRESCALER  = 0x00000000; // TPIU Asynchronous Clock Prescaler Register
+
+        // SOC ETR
+        __var SOC_ETR_ADDRESS           = 0x00140000;
+        // __var SOC_ETR_AP                = 0x00000000;  // DP MEMSPACE
+        __var SOC_ETR_SYNCCNT           = 0xA; // TODO: DEFAULT
+        __var SOC_ETR_TRIGGER_COUNT     = 0x0;
+        __var SOC_ETR_BUFFER_ADDRESS    = 0x00000000;
+        __var SOC_ETR_BUFFER_ADDRESS_HI = 0x00000000;
+        __var SOC_ETR_BUFFER_SIZE       = 0x00000000;
+        __var SOC_ETR_AXI_CTL           = 0x00000000; // [19:16]: RCACHE encoding
+                                                      // [11:8]: WrBurstLen
+                                                      // [5:2]: WCACHE encoding
+                                                      // [1]: Secure Access
+                                                      // [0]: Privileged Access
+        __var SOC_ETR_AXI_CTL1          = 0x00020000; // [27:16]: tlbXlateSlots
+                                                      // [7:6]: stashMode
+                                                      // [4:0]: tlbLimit
+        // SOC CATU
+        // Additional settings if CATU implemented
+        // TODO: Seems like better set up by target software
+        __var SOC_CATU_ADDRESS             = 0x00150000;
+        // __var SOC_CATU_AP                  = 0x00000000;  // DP MEMSPACE
+        __var SOC_CATU_MODE                = 0x00000000;              // [0]: 1- Translate, 0 - Pass-through
+        __var SOC_CATU_SCATTERLIST_ADDR    = 0x00000000;              // Lookup table in RAM for translation
+        __var SOC_CATU_SCATTERLIST_ADDR_HI = 0x00000000;
+        __var SOC_CATU_INPUT_ADDR          = SOC_ETR_BUFFER_ADDRESS;  // Virtual base address
+        __var SOC_CATU_INPUT_ADDR_HI       = SOC_ETR_BUFFER_ADDRESS_HI;
+        __var SOC_CATU_AXI_CTRL = (((SOC_ETR_AXI_CTL >> 16) & 0xF) << 4) | (SOC_ETR_AXI_CTL & 0x3); // [7:4]: ARCACHE, [1:0]: ARPROT (Secure|Privileged)
+        __var SOC_CATU_IRQEN               = 0x00000000;              // [0]: Enable/Disable
+
+        // APSS (A-Class) Parts
+
+        // APSS Funnel (!! E7 SDF file has broken port assignments??)
+        __var APSS_FUNNEL_ADDRESS    = 0x000A0000;
+        __var APSS_FUNNEL_APID       =          3;
+        __var APSS_FUNNEL_INPUT_MASK = 0x00000007; // Mask of trace inputs connected to funnel, enable all valid inputs by default.
+
+        // APSS Replicator
+        __var APSS_REPLICATOR_ADDRESS    = 0x00110000;
+        __var APSS_REPLICATOR_APID       =          3;
+        __var APSS_REPLICATOR_ID_FILTER0 = 0x00000000; // Default: all pass to output 0
+        __var APSS_REPLICATOR_ID_FILTER1 = 0x00000000; // Default: all pass to output 1
+
+        // APSS ETR
+        __var APSS_ETR_ADDRESS           = 0x00120000;
+        __var APSS_ETR_APID              =          3;
+        __var APSS_ETR_SYNCCNT           = 0xA; // TODO: DEFAULT
+        __var APSS_ETR_TRIGGER_COUNT     = 0x0;
+        __var APSS_ETR_BUFFER_ADDRESS    = 0x00000000;
+        __var APSS_ETR_BUFFER_ADDRESS_HI = 0x00000000;
+        __var APSS_ETR_BUFFER_SIZE       = 0x00000000;
+        __var APSS_ETR_AXI_CTL           = 0x00000000; // [19:16]: RCACHE encoding
+                                                       // [11:8]: WrBurstLen
+                                                       // [5:2]: WCACHE encoding
+                                                       // [1]: Secure Access
+                                                       // [0]: Privileged Access
+        __var APSS_ETR_AXI_CTL1          = 0x00020000; // [27:16]: tlbXlateSlots
+                                                       // [7:6]: stashMode
+                                                       // [4:0]: tlbLimit
+
+        // APSS CATU
+        // Additional settings if CATU implemented
+        // TODO: Seems like better set up by target software
+        __var APSS_CATU_ADDRESS             = 0x00130000;
+        __var APSS_CATU_APID                =          3;
+        __var APSS_CATU_MODE                = 0x00000000;                  // [0]: 1- Translate, 0 - Pass-through
+        __var APSS_CATU_SCATTERLIST_ADDR    = 0x00000000;                  // Lookup table in RAM for translation
+        __var APSS_CATU_SCATTERLIST_ADDR_HI = 0x00000000;
+        __var APSS_CATU_INPUT_ADDR          = APSS_ETR_BUFFER_ADDRESS;     // Virtual base address
+        __var APSS_CATU_INPUT_ADDR_HI       = APSS_ETR_BUFFER_ADDRESS_HI;
+        __var APSS_CATU_AXI_CTRL = (((APSS_ETR_AXI_CTL >> 16) & 0xF) << 4) | (APSS_ETR_AXI_CTL & 0x3); // [7:4]: ARCACHE, [1:0]: ARPROT (Secure|Privileged)
+        __var APSS_CATU_IRQEN               = 0x00000000;                  // [0]: Enable/Disable
+
+  debug-sequences:
+    - name: DisableWarmResetHandshake
+    - name: DebugDeviceUnlock
+      blocks:
+        - execute: |
+            __var value = 0;
+            DAP_Delay(500000);  // Delay for 500ms
+
+            // Experiments
+
+
+    - name: ResetSystem
+      blocks:
+        - execute: |
+            Sequence("DisableWarmResetHandshake");
+        - execute: |
+            // System Control Space (SCS) offset as defined in Armv6-M/Armv7-M.
+
+            __var SCS_Addr   = 0xE000E000;
+            __var AIRCR_Addr = SCS_Addr + 0xD0C;
+            __var DHCSR_Addr = SCS_Addr + 0xDF0;
+
+            // Execute SYSRESETREQ via AIRCR
+            Write32(AIRCR_Addr, 0x05FA0004);
+        - while: (Read32(DHCSR_Addr) & 0x02000000)
+          timeout: 500000
+    - name: TraceStart
+      blocks:
+        - execute: |
+            Message(0, "Begin TraceStart");
+            Message(0, "End TraceStart");
+
+        # ADD ADDITIONAL TRACE CONFIGURATION
+        - execute: |
+            // Additional Trace configuration can be added here if needed, e.g. configuring the trace funnel or ETF
+            Sequence("TraceStartExt");
+
+    - name: TraceStop
+      blocks:
+        - execute: |
+            Message(0, "Begin TraceStop");
+            Message(0, "End TraceStop");
+
+    - name: TraceStartExt
+      info: "M55 Subsystems only for now"
+      blocks:
+        - execute: |
+            Message(0, "Begin TraceStartExt");
+
+            Message(0, "End TraceStartExt");
+
+    - name: TraceCapture
+      info: "M55 Subsystems only for now"
+      blocks:
+        - execute: |
+            Message(0, "Begin TraceCapture");
+
+            Message(0, "End TraceCapture");
+
+    # SOC TPIU FUNNEL
+    # Component mapped to DP memory space, use ReadAccessAP/WriteAccessAP functions
+    - name: Configure_Funnel_SOC_TPIU
+      blocks:
+      - execute: |
+          // Helper variables
+          // __var savedAP    = __ap;
+          __var value      = 0x00000000;
+
+          Message(0, "Begin Configure_Funnel_SOC_TPIU @0x%08X, DP MEMSPACE", SOC_TPIU_FUNNEL_ADDRESS);
+
+          value = ReadAccessAP(SOC_TPIU_FUNNEL_ADDRESS + 0x000);
+          value &= ~0xFF;              // Clear existing funnel input enables, keep hold time
+          value |= SOC_TPIU_FUNNEL_INPUT_MASK;  // Keep hold time as is for now, could be made configurable if needed
+
+      - execute: |
+          WriteAccessAP(SOC_TPIU_FUNNEL_ADDRESS + 0x000, value); // Configure CoreSight Trace Funnel to enable selected trace sources
+          Message(0, "End Configure_Funnel_SOC_TPIU");
+
+    # SOC TPIU REPLICATOR
+    # Component mapped to DP memory space, use ReadAccessAP/WriteAccessAP functions
+    - name: Configure_Replicator_SOC_TPIU
+      blocks:
+      - execute: |
+          // Helper variables
+          __var value      = 0x00000000;
+
+          Message(0, "Begin Configure_Replicator_SOC_TPIU @0x%08X, DP MEMSPACE", SOC_TPIU_REPLICATOR_ADDRESS);
+
+          WriteAccessAP(SOC_TPIU_REPLICATOR_ADDRESS + 0x000, REPLICATOR_ID_FILTER0);
+          WriteAccessAP(SOC_TPIU_REPLICATOR_ADDRESS + 0x004, REPLICATOR_ID_FILTER1);
+
+          Message(0, "End Configure_Replicator_SOC_TPIU @0x%08X, DP MEMSPACE", SOC_TPIU_REPLICATOR_ADDRESS);
+
+    # SOC ETR
+    # Component mapped to DP memory space, use ReadAccessAP/WriteAccessAP functions
+    - name: Flush_ETR_SOC
+      blocks:
+        - execute: |
+            // Helper variables
+            __var ffcrValue   = 0x00000000;
+            __var etrStatus   = 0x00000000;
+
+            Message(0, "Begin Flush_ETR_SOC @0x%08X, DP MEMSPACE", SOC_ETR_ADDRESS);
+
+        - execute: |
+            // Flush ETR first so the HW FIFO drains towards the TPIU.
+            ffcrValue = ReadAccessAP(SOC_ETR_ADDRESS + 0x304);
+            ffcrValue &= ~(0x00001040); // Clear StopOnFlush and FlushOnManual
+            ffcrValue |= 0x00001000;    // Stop after the manual flush completes
+            WriteAccessAP(SOC_ETR_ADDRESS + 0x304, ffcrValue);
+            ffcrValue |= 0x00000040;    // Trigger manual flush
+            WriteAccessAP(SOC_ETR_ADDRESS + 0x304, ffcrValue);
+
+        - execute: |
+            ffcrValue = ReadAccessAP(SOC_ETR_ADDRESS + 0x304);
+        - while: (ffcrValue & 0x40) != 0
+          info: "Wait for ETR manual flush to complete"
+          timeout: 100
+          blocks:
+            - execute: |
+                ffcrValue = ReadAccessAP(SOC_ETR_ADDRESS + 0x304);
+
+        - execute: |
+            etrStatus = ReadAccessAP(SOC_ETR_ADDRESS + 0x00C);
+        - while: (etrStatus & 0x4) == 0
+          info: "Wait for ETR to become ready"
+          timeout: 100
+          blocks:
+            - execute: |
+                etrStatus = ReadAccessAP(SOC_ETR_ADDRESS + 0x00C);
+
+        - execute: |
+            // Disable ETR after flush until next run/step
+            WriteAccessAP(SOC_ETR_ADDRESS + 0x020, 0x00000000);
+            etrStatus = ReadAccessAP(SOC_ETR_ADDRESS + 0x00C);
+        - while: (etrStatus & 0x4) == 0
+          info: "Wait for TMCReady"
+          timeout: 100
+          blocks:
+            - execute: |
+                etrStatus = ReadAccessAP(SOC_ETR_ADDRESS + 0x00C);
+
+        - execute: |
+            Message(0, "End Flush_ETR_SOC @0x%08X, DP MEMSPACE", SOC_ETR_ADDRESS);
+
+    - name: Configure_ETR_CircularBuffer_SOC
+      blocks:
+      - execute: |
+            // Helper variables
+            __var ffcrValue = 0x00000000;
+            __var etrStatus = 0x00000000;
+
+            Message(0, "Begin Configure_ETR_CircularBuffer_SOC @0x%08X, DP MEMSPACE", SOC_ETR_ADDRESS);
+
+            // Configure ETR to HW FIFO for Sync Trace
+            WriteAccessAP(SOC_ETR_ADDRESS + 0x020, 0x00000000);  // Disable ETR before configuring
+            etrStatus = ReadAccessAP(SOC_ETR_ADDRESS + 0x00C);
+      - while: (etrStatus & 0x4) == 0
+        info: "Wait for TMCReady"
+        timeout: 100
+        blocks:
+          - execute: |
+              etrStatus = ReadAccessAP(SOC_ETR_ADDRESS + 0x00C);
+
+      - execute: |
+          // Configure
+          WriteAccessAP(SOC_ETR_ADDRESS + 0x028, 0x00000000);             // Set Circular Buffer mode
+          WriteAccessAP(SOC_ETR_ADDRESS + 0x034, 0x00000000);             // Watermark: Set threshold vacancy to 0 to use full buffer
+          WriteAccessAP(SOC_ETR_ADDRESS + 0x304, 0x00000003);             // FFCR: Enable Formatter and Trigger Insertion
+          WriteAccessAP(SOC_ETR_ADDRESS + 0x01C, ETR_TRIGGER_COUNT);      // TRG: Number of words to capture after trigger
+          WriteAccessAP(SOC_ETR_ADDRESS + 0x308, ETR_SYNCCNT);            // Set PSCR
+          WriteAccessAP(SOC_ETR_ADDRESS + 0x018, ETR_BUFFER_ADDRESS);     // Init RwP
+          WriteAccessAP(SOC_ETR_ADDRESS + 0x014, ETR_BUFFER_ADDRESS);     // Init RRP
+          WriteAccessAP(SOC_ETR_ADDRESS + 0x11C, ETR_BUFFER_ADDRESS_HI);  // Init DBAHI
+          WriteAccessAP(SOC_ETR_ADDRESS + 0x118, ETR_BUFFER_ADDRESS);     // Init DBALO
+          WriteAccessAP(SOC_ETR_ADDRESS + 0x004, ETR_BUFFER_SIZE);        // Init RSZ
+          WriteAccessAP(SOC_ETR_ADDRESS + 0x110, ETR_AXI_CTL);            // Init AXICTL
+          WriteAccessAP(SOC_ETR_ADDRESS + 0xED0, ETR_AXI_CTL1);           // Init AXICTL1
+          WriteAccessAP(SOC_ETR_ADDRESS + 0x03C, ETR_BUFFER_ADDRESS_HI);  // Init RWPHI
+          WriteAccessAP(SOC_ETR_ADDRESS + 0x038, ETR_BUFFER_ADDRESS_HI);  // Init RRPHI
+          WriteAccessAP(SOC_ETR_ADDRESS + 0x020, 0x00000001);             // Enable ETR
+
+      - execute: |
+          Message(0, "End Configure_ETR_CircularBuffer_SOC @0x%08X, DP MEMSPACE", SOC_ETR_ADDRESS);
+    
+    - name: TraceCapture_ETR_CircularBuffer_SOC
+      blocks:
+      - execute: |
+          // Helper variables
+          __var ffcrValue = 0x00000000;
+
+          Message(0, "Begin TraceCapture_ETR_CircularBuffer_SOC @0x%08X, DP MEMSPACE", SOC_ETR_ADDRESS);
+
+          // Ensure involved components are in a well-defined state.
+          Sequence("TraceFlush");
+
+          ffcrValue  = ReadAccessAP(SOC_ETR_ADDRESS + 0x304);
+          ffcrValue |= 0x00000002;                              // FFCR: Enable Formatter
+          WriteAccessAP(SOC_ETR_ADDRESS + 0x304, ffcrValue);
+          WriteAccessAP(SOC_ETR_ADDRESS + 0x01C, ETR_TRIGGER_COUNT);      // TRG: Number of words to capture after trigger
+          WriteAccessAP(SOC_ETR_ADDRESS + 0x308, ETR_SYNCCNT);            // Set PSCR
+          WriteAccessAP(SOC_ETR_ADDRESS + 0x018, ETR_BUFFER_ADDRESS);     // Init RwP
+          WriteAccessAP(SOC_ETR_ADDRESS + 0x014, ETR_BUFFER_ADDRESS);     // Init RRP
+          WriteAccessAP(SOC_ETR_ADDRESS + 0x11C, ETR_BUFFER_ADDRESS_HI);  // Init DBAHI
+          WriteAccessAP(SOC_ETR_ADDRESS + 0x118, ETR_BUFFER_ADDRESS);     // Init DBALO
+          WriteAccessAP(SOC_ETR_ADDRESS + 0x004, ETR_BUFFER_SIZE);        // Init RSZ
+          WriteAccessAP(SOC_ETR_ADDRESS + 0x110, ETR_AXI_CTL);            // Init AXICTL
+          WriteAccessAP(SOC_ETR_ADDRESS + 0xED0, ETR_AXI_CTL1);           // Init AXICTL1
+          WriteAccessAP(SOC_ETR_ADDRESS + 0x03C, ETR_BUFFER_ADDRESS_HI);  // Init RWPHI
+          WriteAccessAP(SOC_ETR_ADDRESS + 0x038, ETR_BUFFER_ADDRESS_HI);  // Init RRPHI
+          WriteAccessAP(SOC_ETR_ADDRESS + 0x020, 0x00000001);             // Enable ETR
+
+          Message(0, "End TraceCapture_ETR_CircularBuffer_SOC @0x%08X, DP MEMSPACE", SOC_ETR_ADDRESS);
+
+    # SOC ETR CATU
+    # Component mapped to DP memory space, use ReadAccessAP/WriteAccessAP functions
+    - name: Flush_ETR_CATU_SOC
+      info: "Flush any outstanding memory transactions"
+      blocks:
+      - execute: |
+            // Helper variables
+            __var status = 0x00000000;
+
+            Message(0, "Begin Flush_ETR_CATU_SOC @0x%08X, DP MEMSPACE", SOC_CATU_ADDRESS);
+
+            // Disable CATU before configuration
+            WriteAccessAP(SOC_CATU_ADDRESS + 0x000, 0x00000000);  
+
+            status = ReadAccessAP(SOC_CATU_ADDRESS + 0x100);
+      - while: (status & 0x0100) == 0
+        info: "Wait for READY"
+        timeout: 100
+        blocks:
+          - execute: |
+              status = ReadAccessAP(SOC_CATU_ADDRESS + 0x100);
+
+      - execute: |
+          Message(0, "End Flush_ETR_CATU_SOC @0x%08X, DP MEMSPACE", SOC_CATU_ADDRESS);
+
+    - name: Configure_ETR_CATU_SOC
+      info: "Scatterlist expected to be programmed separately, too complex"
+      blocks:
+      - execute: |
+            // Helper variables
+            __var status = 0x00000000;
+
+            Message(0, "Begin Configure_ETR_CATU_SOC @0x%08X, DP MEMSPACE", SOC_CATU_ADDRESS);
+
+            // Disable CATU before configuration
+            WriteAccessAP(SOC_CATU_ADDRESS + 0x000, 0x00000000);  
+
+            status = ReadAccessAP(SOC_CATU_ADDRESS + 0x100);
+      - while: (status & 0x0100) == 0
+        info: "Wait for READY"
+        timeout: 100
+        blocks:
+          - execute: |
+              status = ReadAccessAP(SOC_CATU_ADDRESS + 0x100);
+
+      - execute: |
+          // Configure
+          WriteAccessAP(SOC_CATU_ADDRESS + 0x004, CATU_MODE);                 // Set MODE
+          WriteAccessAP(SOC_CATU_ADDRESS + 0x008, CATU_AXI_CTRL);             // Set AXICTRL
+          WriteAccessAP(SOC_CATU_ADDRESS + 0x00C, CATU_IRQEN);                // Set IRQEN
+          WriteAccessAP(SOC_CATU_ADDRESS + 0x020, CATU_SCATTERLIST_ADDR);     // Set SLADDRLO
+          WriteAccessAP(SOC_CATU_ADDRESS + 0x024, CATU_SCATTERLIST_ADDR_HI);  // Set SLADDRHI
+          WriteAccessAP(SOC_CATU_ADDRESS + 0x028, CATU_INPUT_ADDR);           // Set INADDRLO
+          WriteAccessAP(SOC_CATU_ADDRESS + 0x02C, CATU_INPUT_ADDR_HI);        // Set INADDRHI
+
+          // Enable CATU after configuration
+          WriteAccessAP(SOC_CATU_ADDRESS + 0x000, 0x00000001);
+            status = ReadAccessAP(SOC_CATU_ADDRESS + 0x100);
+
+      - while: (status & 0x0100) == 1
+        info: "Wait for READY cleared"
+        timeout: 100
+        blocks:
+          - execute: |
+              status = ReadAccessAP(SOC_CATU_ADDRESS + 0x100);
+
+      - execute: |
+          Message(0, "End Configure_ETR_CATU_SOC @0x%08X, DP MEMSPACE", SOC_CATU_ADDRESS);
+
+    - name: Capture_ETR_CATU_SOC
+      info: "Restart address translation unit"
+      blocks:
+      - execute: |
+            // Helper variables
+            __var status = 0x00000000;
+
+            Message(0, "Begin Capture_ETR_CATU_SOC @0x%08X, DP MEMSPACE", SOC_CATU_ADDRESS);
+
+            // Ensure involved components are in a well-defined state.
+            Sequence("TraceFlush");
+
+            // Keep initial values and re-enable CATU before next capture.
+            // Clears any remaning error bits.
+            WriteAccessAP(SOC_CATU_ADDRESS + 0x000, 0x00000001);
+
+            status = ReadAccessAP(SOC_CATU_ADDRESS + 0x100);
+      - while: (status & 0x0100) == 1
+        info: "Wait for READY cleared"
+        timeout: 100
+        blocks:
+          - execute: |
+              status = ReadAccessAP(SOC_CATU_ADDRESS + 0x100);
+
+      - execute: |
+          Message(0, "End Capture_ETR_CATU_SOC @0x%08X, DP MEMSPACE", SOC_CATU_ADDRESS);
+
+    # APSS FUNNEL
+    - name: Configure_Funnel_APSS
+      blocks:
+      - execute: |
+          // Helper variables
+          __var savedAPID  = __apid;
+          __var value      = 0x00000000;
+
+          Message(0, "Begin Configure_Funnel_APSS @0x%08X, APID 0x%08X", APSS_FUNNEL_ADDRESS, APSS_FUNNEL_AP);
+
+          __apid = APSS_FUNNEL_APID; // Set APID
+
+          value = Read32(APSS_FUNNEL_ADDRESS + 0x000);
+          value &= ~0xFF;                   // Clear existing funnel input enables, keep hold time
+          value |= APSS_FUNNEL_INPUT_MASK;  // Keep hold time as is for now, could be made configurable if needed
+
+      - execute: |
+          Write32(APSS_FUNNEL_ADDRESS + 0x000, value); // Configure CoreSight Trace Funnel to enable selected trace sources
+
+          __apid = savedAPID;
+          Message(0, "End Configure_Funnel_APSS @0x%08X, APID 0x%08X", APSS_FUNNEL_ADDRESS, APSS_FUNNEL_AP);
+
+    # APSS REPLICATOR
+    - name: Configure_Replicator_APSS
+      blocks:
+      - execute: |
+          // Helper variables
+          __var savedAPID    = __apid;
+          __var value      = 0x00000000;
+
+          Message(0, "Begin Configure_Replicator @0x%08X, APID 0x%08X", APSS_REPLICATOR_ADDRESS, APSS_REPLICATOR_APID);
+
+          __apid = APSS_REPLICATOR_APID; // Set APID
+
+          Write32(APSS_REPLICATOR_ADDRESS + 0x000, APSS_REPLICATOR_ID_FILTER0);
+          Write32(APSS_REPLICATOR_ADDRESS + 0x004, APSS_REPLICATOR_ID_FILTER1);
+
+          __apid = savedAPID;
+          Message(0, "End Configure_Replicator @0x%08X, APID 0x%08X", APSS_REPLICATOR_ADDRESS, APSS_REPLICATOR_APID);
+
+    # APSS ETR
+    - name: Flush_ETR_APSS
+      blocks:
+        - execute: |
+            // Helper variables
+            __var savedAPID   = __apid;
+            __var ffcrValue   = 0x00000000;
+            __var etrStatus   = 0x00000000;
+
+            Message(0, "Begin Flush_ETR_APSS @0x%08X, APID 0x%08X", APSS_ETR_ADDRESS, APSS_ETR_APID);
+
+            __apid = APSS_ETR_APID; // Set APID
+
+        - execute: |
+            // Flush ETR first so the HW FIFO drains towards the TPIU.
+            ffcrValue = Read32(APSS_ETR_ADDRESS + 0x304);
+            ffcrValue &= ~(0x00001040); // Clear StopOnFlush and FlushOnManual
+            ffcrValue |= 0x00001000;    // Stop after the manual flush completes
+            Write32(APSS_ETR_ADDRESS + 0x304, ffcrValue);
+            ffcrValue |= 0x00000040;    // Trigger manual flush
+            Write32(APSS_ETR_ADDRESS + 0x304, ffcrValue);
+
+        - execute: |
+            ffcrValue = Read32(APSS_ETR_ADDRESS + 0x304);
+        - while: (ffcrValue & 0x40) != 0
+          info: "Wait for ETR manual flush to complete"
+          timeout: 100
+          blocks:
+            - execute: |
+                ffcrValue = Read32(APSS_ETR_ADDRESS + 0x304);
+
+        - execute: |
+            etrStatus = Read32(APSS_ETR_ADDRESS + 0x00C);
+        - while: (etrStatus & 0x4) == 0
+          info: "Wait for ETR to become ready"
+          timeout: 100
+          blocks:
+            - execute: |
+                etrStatus = Read32(APSS_ETR_ADDRESS + 0x00C);
+
+        - execute: |
+            // Disable ETR after flush until next run/step
+            Write32(APSS_ETR_ADDRESS + 0x020, 0x00000000);
+            etrStatus = Read32(APSS_ETR_ADDRESS + 0x00C);
+        - while: (etrStatus & 0x4) == 0
+          info: "Wait for TMCReady"
+          timeout: 100
+          blocks:
+            - execute: |
+                etrStatus = Read32(APSS_ETR_ADDRESS + 0x00C);
+
+        - execute: |
+            __apid = savedAPID;
+            Message(0, "End Flush_ETR_APSS @0x%08X, APID 0x%08X", APSS_ETR_ADDRESS, APSS_ETR_APID);
+
+    - name: Configure_ETR_CircularBuffer_APSS
+      blocks:
+      - execute: |
+            // Helper variables
+            __var savedAPID = __apid;
+            __var ffcrValue = 0x00000000;
+            __var etrStatus = 0x00000000;
+
+            Message(0, "Begin Configure_ETR_CircularBuffer_APSS @0x%08X, APID 0x%08X", APSS_ETR_ADDRESS, APSS_ETR_APID);
+            __apid = APSS_ETR_APID; // Set APID
+
+            // Configure ETR to HW FIFO for Sync Trace
+            Write32(APSS_ETR_ADDRESS + 0x020, 0x00000000);  // Disable ETR before configuring
+            etrStatus = Read32(APSS_ETR_ADDRESS + 0x00C);
+      - while: (etrStatus & 0x4) == 0
+        info: "Wait for TMCReady"
+        timeout: 100
+        blocks:
+          - execute: |
+              etrStatus = Read32(APSS_ETR_ADDRESS + 0x00C);
+
+      - execute: |
+          // Configure
+          Write32(APSS_ETR_ADDRESS + 0x028, 0x00000000);             // Set Circular Buffer mode
+          Write32(APSS_ETR_ADDRESS + 0x034, 0x00000000);             // Watermark: Set threshold vacancy to 0 to use full buffer
+          Write32(APSS_ETR_ADDRESS + 0x304, 0x00000003);             // FFCR: Enable Formatter and Trigger Insertion
+          Write32(APSS_ETR_ADDRESS + 0x01C, ETR_TRIGGER_COUNT);      // TRG: Number of words to capture after trigger
+          Write32(APSS_ETR_ADDRESS + 0x308, ETR_SYNCCNT);            // Set PSCR
+          Write32(APSS_ETR_ADDRESS + 0x018, ETR_BUFFER_ADDRESS);     // Init RwP
+          Write32(APSS_ETR_ADDRESS + 0x014, ETR_BUFFER_ADDRESS);     // Init RRP
+          Write32(APSS_ETR_ADDRESS + 0x11C, ETR_BUFFER_ADDRESS_HI);  // Init DBAHI
+          Write32(APSS_ETR_ADDRESS + 0x118, ETR_BUFFER_ADDRESS);     // Init DBALO
+          Write32(APSS_ETR_ADDRESS + 0x004, ETR_BUFFER_SIZE);        // Init RSZ
+          Write32(APSS_ETR_ADDRESS + 0x110, ETR_AXI_CTL);            // Init AXICTL
+          Write32(APSS_ETR_ADDRESS + 0xED0, ETR_AXI_CTL1);           // Init AXICTL1
+          Write32(APSS_ETR_ADDRESS + 0x03C, ETR_BUFFER_ADDRESS_HI);  // Init RWPHI
+          Write32(APSS_ETR_ADDRESS + 0x038, ETR_BUFFER_ADDRESS_HI);  // Init RRPHI
+          Write32(APSS_ETR_ADDRESS + 0x020, 0x00000001);             // Enable ETR
+
+      - execute: |
+          __apid = savedAPID;
+          Message(0, "End Configure_ETR_CircularBuffer_APSS @0x%08X, APID 0x%08X", APSS_ETR_ADDRESS, APSS_ETR_APID);
+    
+    - name: TraceCapture_ETR_CircularBuffer_APSS
+      blocks:
+      - execute: |
+          // Helper variables
+          __var ffcrValue = 0x00000000;
+          __var savedAPID = __apid;
+
+          Message(0, "Begin TraceCapture_ETR_CircularBuffer_APSS @0x%08X, APID 0x%08X", APSS_ETR_ADDRESS, APSS_ETR_APID);
+
+          // Ensure involved components are in a well-defined state.
+          Sequence("TraceFlush");
+
+          __apid = APSS_ETR_APID; // Set APID
+          ffcrValue  = Read32(APSS_ETR_ADDRESS + 0x304);
+          ffcrValue |= 0x00000002;                              // FFCR: Enable Formatter
+          Write32(APSS_ETR_ADDRESS + 0x304, ffcrValue);
+          Write32(APSS_ETR_ADDRESS + 0x01C, ETR_TRIGGER_COUNT);      // TRG: Number of words to capture after trigger
+          Write32(APSS_ETR_ADDRESS + 0x308, ETR_SYNCCNT);            // Set PSCR
+          Write32(APSS_ETR_ADDRESS + 0x018, ETR_BUFFER_ADDRESS);     // Init RwP
+          Write32(APSS_ETR_ADDRESS + 0x014, ETR_BUFFER_ADDRESS);     // Init RRP
+          Write32(APSS_ETR_ADDRESS + 0x11C, ETR_BUFFER_ADDRESS_HI);  // Init DBAHI
+          Write32(APSS_ETR_ADDRESS + 0x118, ETR_BUFFER_ADDRESS);     // Init DBALO
+          Write32(APSS_ETR_ADDRESS + 0x004, ETR_BUFFER_SIZE);        // Init RSZ
+          Write32(APSS_ETR_ADDRESS + 0x110, ETR_AXI_CTL);            // Init AXICTL
+          Write32(APSS_ETR_ADDRESS + 0xED0, ETR_AXI_CTL1);           // Init AXICTL1
+          Write32(APSS_ETR_ADDRESS + 0x03C, ETR_BUFFER_ADDRESS_HI);  // Init RWPHI
+          Write32(APSS_ETR_ADDRESS + 0x038, ETR_BUFFER_ADDRESS_HI);  // Init RRPHI
+          Write32(APSS_ETR_ADDRESS + 0x020, 0x00000001);             // Enable ETR
+          __apid = savedAPID;
+
+          Message(0, "End TraceCapture_ETR_CircularBuffer_APSS @0x%08X, APID 0x%08X", APSS_ETR_ADDRESS, APSS_ETR_APID);
+
+    # APSS ETR CATU
+    - name: Flush_ETR_CATU_APSS
+      info: "Flush any outstanding memory transactions"
+      blocks:
+      - execute: |
+            // Helper variables
+            __var savedAPID = __apid;
+            __var status = 0x00000000;
+
+            Message(0, "Begin Flush_ETR_CATU_APSS @0x%08X, AP 0x%08X", APSS_CATU_ADDRESS, APSS_CATU_APID);
+            __apid = APSS_CATU_APID; // Set AP
+
+            // Disable CATU before configuration
+            Write32(APSS_CATU_ADDRESS + 0x000, 0x00000000);  
+
+            status = Read32(APSS_CATU_ADDRESS + 0x100);
+      - while: (status & 0x0100) == 0
+        info: "Wait for READY"
+        timeout: 100
+        blocks:
+          - execute: |
+              status = Read32(APSS_CATU_ADDRESS + 0x100);
+
+      - execute: |
+          __apid = savedAPID;
+          Message(0, "End Flush_ETR_CATU_APSS @0x%08X, AP 0x%08X", APSS_CATU_ADDRESS, APSS_CATU_APID);
+
+    - name: Configure_ETR_CATU_APSS
+      info: "Scatterlist expected to be programmed separately, too complex"
+      blocks:
+      - execute: |
+            // Helper variables
+            __var savedAPID = __apid;
+            __var status = 0x00000000;
+
+            Message(0, "Begin Configure_ETR_CATU_APSS @0x%08X, AP 0x%08X", APSS_CATU_ADDRESS, APSS_CATU_APID);
+
+            __apid = APSS_CATU_APID; // Set AP
+
+            // Disable CATU before configuration
+            Write32(APSS_CATU_ADDRESS + 0x000, 0x00000000);  
+
+            status = Read32(APSS_CATU_ADDRESS + 0x100);
+      - while: (status & 0x0100) == 0
+        info: "Wait for READY"
+        timeout: 100
+        blocks:
+          - execute: |
+              status = Read32(APSS_CATU_ADDRESS + 0x100);
+
+      - execute: |
+          // Configure
+          Write32(APSS_CATU_ADDRESS + 0x004, CATU_MODE);                 // Set MODE
+          Write32(APSS_CATU_ADDRESS + 0x008, CATU_AXI_CTRL);             // Set AXICTRL
+          Write32(APSS_CATU_ADDRESS + 0x00C, CATU_IRQEN);                // Set IRQEN
+          Write32(APSS_CATU_ADDRESS + 0x020, CATU_SCATTERLIST_ADDR);     // Set SLADDRLO
+          Write32(APSS_CATU_ADDRESS + 0x024, CATU_SCATTERLIST_ADDR_HI);  // Set SLADDRHI
+          Write32(APSS_CATU_ADDRESS + 0x028, CATU_INPUT_ADDR);           // Set INADDRLO
+          Write32(APSS_CATU_ADDRESS + 0x02C, CATU_INPUT_ADDR_HI);        // Set INADDRHI
+
+          // Enable CATU after configuration
+          Write32(APSS_CATU_ADDRESS + 0x000, 0x00000001);
+            status = Read32(APSS_CATU_ADDRESS + 0x100);
+
+      - while: (status & 0x0100) == 1
+        info: "Wait for READY cleared"
+        timeout: 100
+        blocks:
+          - execute: |
+              status = Read32(APSS_CATU_ADDRESS + 0x100);
+
+      - execute: |
+          __apid = savedAPID;
+          Message(0, "End Configure_ETR_CATU_APSS @0x%08X, AP 0x%08X", APSS_CATU_ADDRESS, APSS_CATU_APID);
+
+    - name: Capture_ETR_CATU_APSS
+      info: "Restart address translation unit"
+      blocks:
+      - execute: |
+            // Helper variables
+            __var savedAPID = __apid;
+            __var status = 0x00000000;
+
+            Message(0, "Begin Capture_ETR_CATU_APSS @0x%08X, AP 0x%08X", APSS_CATU_ADDRESS, APSS_CATU_APID);
+
+            // Ensure involved components are in a well-defined state.
+            Sequence("TraceFlush");
+
+            __apid = APSS_CATU_APID; // Set AP
+
+            // Keep initial values and re-enable CATU before next capture.
+            // Clears any remaning error bits.
+            Write32(APSS_CATU_ADDRESS + 0x000, 0x00000001);
+
+            status = Read32(APSS_CATU_ADDRESS + 0x100);
+      - while: (status & 0x0100) == 1
+        info: "Wait for READY cleared"
+        timeout: 100
+        blocks:
+          - execute: |
+              status = Read32(APSS_CATU_ADDRESS + 0x100);
+
+      - execute: |
+          __apid = savedAPID;
+          Message(0, "End Capture_ETR_CATU_APSS @0x%08X, AP 0x%08X", APSS_CATU_ADDRESS, APSS_CATU_APID);
+
+    # SOC TPIU 
+    # Component mapped to DP memory space, use ReadAccessAP/WriteAccessAP functions
+    - name: Flush_TPIU_SOC_TPIU
+      blocks:
+        - execute: |
+            // Helper variables
+            __var ffcrValue   = 0x00000000;
+            __var ffsrValue   = 0x00000000;
+
+            Message(0, "Begin Flush_TPIU_SOC_TPIU @0x%08X, DP MEMSPACE", SOC_TPIU_ADDRESS);
+            
+        - execute: |
+            // Configure "local" TPIU for Sync Trace
+            ffsrValue = ReadAccessAP(SOC_TPIU_ADDRESS + 0x300);
+        - if: ffsrValue & 0x2 == 0
+          info: "Formatter not stopped, do it now"
+          blocks:
+
+          - execute: |
+              // Flush the TPIU formatter so pending packets leave the trace port.
+              ffcrValue = ReadAccessAP(SOC_TPIU_ADDRESS + 0x304);
+              ffcrValue &= ~(0x00001040); // Clear StopOnFlush and FlushOnManual
+              ffcrValue |= 0x00001000;    // Stop after the manual flush completes
+              WriteAccessAP(SOC_TPIU_ADDRESS + 0x304, ffcrValue);
+              ffcrValue |= 0x00000040;    // Trigger manual flush
+              WriteAccessAP(SOC_TPIU_ADDRESS + 0x304, ffcrValue);
+
+          - execute: |
+              ffcrValue = ReadAccessAP(SOC_TPIU_ADDRESS + 0x304);
+          - while: (ffcrValue & 0x40) != 0
+            info: "Wait for TPIU manual flush to complete"
+            timeout: 100
+            blocks:
+              - execute: |
+                  ffcrValue = ReadAccessAP(SOC_TPIU_ADDRESS + 0x304);
+
+          - execute: |
+              ffsrValue = ReadAccessAP(SOC_TPIU_ADDRESS + 0x300);
+          - while: (ffsrValue & 0x1) != 0
+            info: "Wait for TPIU flush in progress to clear"
+            timeout: 100
+            blocks:
+              - execute: |
+                  ffsrValue = ReadAccessAP(SOC_TPIU_ADDRESS + 0x300);
+
+        - execute: |
+            Message(0, "End Flush_TPIU_SOC_TPIU @0x%08X, DP MEMSPACE", SOC_TPIU_ADDRESS);
+
+    - name: Configure_TPIU_SOC_TPIU
+      blocks:
+          - execute: |
+                // Temporary - Parameters, set from debugger going forward
+
+                // TEMP_TRACEOUT: replace with __traceout when available from debugger,
+                //                or move trace mode decision to new built-in variable.
+                __var swoTrace    = 0; // TEMP_TRACEOUT & 0x1; // SWO not supported
+                __var syncTrace   = TEMP_TRACEOUT & 0x2;
+                __var bufferTrace = TEMP_TRACEOUT & 0x4;
+                __var tracePortWidth = (TEMP_TRACEOUT >> 16) & 0x3F; // Parallel trace port size
+
+                // Helper variables
+                __var LAR_KEY   = 0xC5ACCE55;
+
+                Message(0, "Begin Configure_TPIU_SOC_TPIU @0x%08X, DP MEMSPACE", SOC_TPIU_ADDRESS);
+
+          - if: swoTrace != 0
+            blocks:
+              - execute: |
+                  WriteAccessAP(SOC_TPIU_ADDRESS + 0xFB0, LAR_KEY);       // TODO: Double-check if still necessary
+                  WriteAccessAP(SOC_TPIU_ADDRESS + 0x010, SOC_SWO_PRESCALER); // TPIU Asynchronous Clock Prescaler Register: No prescaling
+                  WriteAccessAP(SOC_TPIU_ADDRESS + 0x0F0, 0x00000002);    // TPIU Selected Pin Protocol Register: Select SWO 
+
+          - if: syncTrace != 0
+            blocks:
+              - execute: |
+                  WriteAccessAP(SOC_TPIU_ADDRESS + 0xFB0, LAR_KEY);        // TODO: Double-check if still necessary
+                  WriteAccessAP(SOC_TPIU_ADDRESS + 0x010, SOC_TPIU_PRESCALER); // TPIU Asynchronous Clock Prescaler Register: No prescaling
+                  WriteAccessAP(SOC_TPIU_ADDRESS + 0x004, 1 << (tracePortWidth - 1));  // TPIU Current Synchronous Port Width
+                  WriteAccessAP(SOC_TPIU_ADDRESS + 0x0F0, 0x00000000);     // TPIU Selected Pin Protocol Register: Select Sync Trace Port
+                  ffcrValue  = ReadAccessAP(SOC_TPIU_ADDRESS + 0x304);
+                  ffcrValue |= 0x00000002;                    // Enable formatter
+                  WriteAccessAP(SOC_TPIU_ADDRESS + 0x304, ffcrValue);      // TPIU FFCR
+
+          - execute: |
+                Message(0, "End Configure_TPIU_SOC_TPIU @0x%08X, DP MEMSPACE", SOC_TPIU_ADDRESS);
+
+    - name: TraceCapture_TPIU_SOC_TPIU
+      blocks:
+      - execute: |
+          // Helper variables
+          __var LAR_KEY   = 0xC5ACCE55;
+
+          Message(0, "Begin TraceCapture_TPIU_SOC_TPIU @0x%08X, DP MEMSPACE", SOC_TPIU_ADDRESS);
+
+          // Ensure involved components are in a well-defined state.
+          Sequence("TraceFlush");
+
+          // Configure TPIU if needed and enable formatter
+          ffcrValue  = ReadAccessAP(SOC_TPIU_ADDRESS + 0x304);
+          ffcrValue |= 0x00000002;                                // Enable formatter
+          WriteAccessAP(SOC_TPIU_ADDRESS + 0x304, ffcrValue);                  // TPIU FFCR
+
+          Message(0, "End TraceCapture_TPIU_SOC_TPIU @0x%08X, DP MEMSPACE", SOC_TPIU_ADDRESS);
+
+
+    - name: DebugCoreStart
+      blocks:
+        - execute: |
+            // ***** TEMPORARY, TRACE START SEQUENCE MUST BE CALLED BY DEBUGGER *****
+
+            // ***** Default Implementation *****
+            // System Control Space (SCS) offset as defined in Armv6-M/Armv7-M.
+            __var SCS_Addr   = 0xE000E000;
+            __var DHCSR_Addr = SCS_Addr + 0xDF0;
+
+            Message(0, "Begin DebugCoreStart sequence");
+
+            // Enable Core Debug via DHCSR
+            Write32(DHCSR_Addr, 0xA05F0001);
+
+            // ***** Custom Extension for Testing, TraceStart should be called from debugger *****
+            // Configure core-local trace blocks only after CPU debug is enabled.
+            Sequence("TraceStart");
+
+            Sequence("TraceCapture");
+
+            Message(0, "End DebugCoreStart sequence"); 
+  programming:
+    - algorithm: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.1.0/Flash/algorithms/Ensemble.FLM
+      start: 0x80000000
+      size: 0x00580000
+      ram-start: 0x00000000
+      ram-size: 0x00020000
+    - algorithm: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.1.0/Flash/algorithms/Ensemble_IS25WX256.FLM
+      start: 0xC0000000
+      size: 0x02000000
+      ram-start: 0x00000000
+      ram-size: 0x00040000
+  debug-topology:
+    debugports:
+      - dpid: 0
+        accessports:
+          # RTSS-HP
+          - apid: 0
+            address: 0x00200000
+          # RTSS-HE
+          - apid: 1
+            address: 0x00300000
+          # MANUALLY ADDED APIDs
+          # Secure Enclave AHB-AP
+          - apid: 2
+            address: 0x00040000
+          # APSS
+          - apid: 3
+            address: 0x00050000
+          # AXI-AP
+          - apid: 4
+            address: 0x00070000
+    processors:
+      - pname: M55_HP
+        apid: 0
+      - pname: M55_HE
+        apid: 1
+    dormant: true
