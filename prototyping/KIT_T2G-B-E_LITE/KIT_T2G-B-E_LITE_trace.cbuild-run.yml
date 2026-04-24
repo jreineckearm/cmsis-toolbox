@@ -41,6 +41,46 @@ cbuild-run:
         pname: Cortex-M4
       - port: 3334
         pname: Cortex-M0p
+
+    dbgconf-set-go-away:
+      # TEMPORARY HACK, use __traceout instead
+      # TEMP_TRACEOUT: 0x00000000  # OFF
+      # TEMP_TRACEOUT: 0x00040002  # TPIU
+      # TEMP_TRACEOUT: 0x00000004  # TRACE BUFFER
+      TEMP_TRACEOUT: 0x00000000    # OFF
+
+    debug-vars-set:
+      __TPIU_pinlocation: 1  # Select one of the possible TPIU pin locations
+      __TPIU_clocksetup: 1   # Enable(1) or Disable(0) setup of trace source clock
+      __TPIU_clockdivval: 0  # Clock divider value for trace clock
+      # TraceClock configuration data
+      TRACE_CLOCK_CTL_ADDR: 0x40000C00  # Clock control register for cpuss.clock_trace_in
+      TRACE_CLOCK_DIV_CTL_ADDR: 0x40001000  # Divider control (for 8.0 divider)
+      TRACE_CLOCK_DIV_CMD_ADDR: 0x40000400  # Divider command
+      PERI_CLOCK_CTL_DIV_SEL: 0x1F  # CYT2BL devices have 32 of 8-bit dividers - use the lastest available for tracing
+      PERI_DIV_PA_SEL_MASK: 0x000003FF  # PA_TYPE_SEL + PA_DIV_SEL fields mask (size)
+      PERI_DIV_CMD_PA_SEL_ROL: 0x00000010  # PA_TYPE_SEL + PA_DIV_SEL fields offset in PERI_DIV_CMD
+      # TPIU pins configuration data
+      hsiomPrt18PortSel0Addr: 0x40300120  # HSIOM_PRT[port]_PORT_SEL0·register·address. Port 18 selection 0
+      hsiomPrt22PortSel0Addr: 0x40300160  # HSIOM_PRT[port]_PORT_SEL0·register·address. Port 22 selection 0
+      hsiomPrt23PortSel0Addr: 0x40300170  # HSIOM_PRT[port]_PORT_SEL0·register·address. Port 23 selection 0
+      gpioPrt18CfgAddr: 0x40310944  # GPIO_PRT[port]_CFG register address. Port 18 configuration
+      gpioPrt22CfgAddr: 0x40310B44  # GPIO_PRT[port]_CFG register address. Port 22 configuration
+      gpioPrt23CfgAddr: 0x40310BC4  # GPIO_PRT[port]_CFG register address. Port 23 configuration
+      gpioPrt18CfgOutAddr: 0x4031094C  # GPIO_PRT[port]_CFG_OUT register address. Port 18 output buffer configuration
+      gpioPrt22CfgOutAddr: 0x40310B4C  # GPIO_PRT[port]_CFG_OUT register address. Port 22 output buffer configuration
+      gpioPrt23CfgOutAddr: 0x40310BCC  # GPIO_PRT[port]_CFG_OUT register address. Port 23 output buffer configuration
+      # SFLASH base address
+      SFLASH_BASE_ADDR: 0x17000000
+
+      # TRACE SETTINGS
+      # Funnel
+      FUNNEL_INPUT_MASK: 0x00000000  # Mask of trace inputs connected to funnel, enable all valid inputs by default.
+      # TPIU
+      TPIU_PRESCALER: 0x00000000  # TPIU Asynchronous Clock Prescaler Register
+      # ETB
+      ETB_TRIGGER_COUNT: 0x0
+
   debug-vars:
     vars: |
       __var __TPIU_pinlocation = 1;                      // Select one of the possible TPIU pin locations
