@@ -1,0 +1,739 @@
+cbuild-run:
+  generated-by: csolution version 2.13.0+p36-gd2240ffd
+  solution: ../icu_ek_ra8p1_ep.csolution.yml
+  target-type: Target_1
+  target-set: <default>
+  compiler: AC6
+  device: Renesas::R7KA8P1KF
+  device-pack: Renesas::RA_DFP@6.4.0
+  output:
+    - file: ../icu_ek_ra8p1_ep.hex
+      type: hex
+      load: image
+      pname: CPU0
+  system-resources:
+    memory:
+      - name: ITCM
+        access: rwx
+        start: 0x00000000
+        size: 0x00020000
+        pname: CPU0
+        from-pack: Renesas::RA_DFP@6.4.0
+      - name: DTCM
+        access: rw
+        start: 0x20000000
+        size: 0x00020000
+        pname: CPU0
+        from-pack: Renesas::RA_DFP@6.4.0
+      - name: CTCM
+        access: rwx
+        start: 0x00000000
+        size: 0x00010000
+        pname: CPU1
+        from-pack: Renesas::RA_DFP@6.4.0
+      - name: STCM
+        access: rw
+        start: 0x20000000
+        size: 0x00010000
+        pname: CPU1
+        from-pack: Renesas::RA_DFP@6.4.0
+      - name: Flash
+        access: rx
+        start: 0x02000000
+        size: 0x00100000
+        from-pack: Renesas::RA_DFP@6.4.0
+      - name: SRAM
+        access: rwx
+        start: 0x22000000
+        size: 0x001A0000
+        from-pack: Renesas::RA_DFP@6.4.0
+      - name: Config
+        access: r
+        start: 0x02C9F040
+        size: 0x000007C0
+        from-pack: Renesas::RA_DFP@6.4.0
+      - name: OTP_Config
+        access: r
+        start: 0x02E07600
+        size: 0x00010334
+        from-pack: Renesas::RA_DFP@6.4.0
+    processors:
+      - core: Cortex-M85
+        revision: r0p0
+        pname: CPU0
+        endian: little
+        fpu: dp
+        mpu: present
+        dsp: present
+        trustzone: present
+        mve: fp
+        pacbti: present
+        max-clock: 480000000
+      - core: Cortex-M33
+        revision: r0p4-00rel1
+        pname: CPU1
+        endian: little
+        fpu: sp
+        mpu: present
+        dsp: present
+        trustzone: present
+        max-clock: 100000000
+  #system-descriptions:
+    #- file: ${CMSIS_PACK_ROOT}/Renesas/RA_DFP/6.4.0/SVD/R7KA8P1AD.svd
+    #  type: svd
+  debugger:
+    name: CMSIS-DAP@pyOCD
+    protocol: swd
+    clock: 4000000
+    #connect: under-reset
+    gdbserver:
+      - port: 3333
+      - port: 3334
+        pname: CPU0
+      - port: 3335
+        pname: CPU1
+  programming:
+    - algorithm: ${CMSIS_PACK_ROOT}/Renesas/RA_DFP/6.4.0/Flash/RA8P1_1M.FLM
+      start: 0x02000000
+      size: 0x00100000
+      ram-start: 0x22000000
+      ram-size: 0x00007800
+    - algorithm: ${CMSIS_PACK_ROOT}/Renesas/RA_DFP/6.4.0/Flash/RA8P1_CONF.FLM
+      start: 0x02C9F040
+      size: 0x000007C0
+      ram-start: 0x22000000
+      ram-size: 0x00007800
+    - algorithm: ${CMSIS_PACK_ROOT}/Renesas/RA_DFP/6.4.0/Flash/RA8P1_OTP.FLM
+      start: 0x02E07600
+      size: 0x00010334
+      ram-start: 0x22000000
+      ram-size: 0x00007800
+  debug-topology:
+    debugports:
+      - dpid: 0
+        accessports:
+          - apid: 0
+            index: 0
+          - apid: 2
+            index: 1
+    processors:
+      - pname: CPU0
+        apid: 0
+      - pname: CPU1
+        apid: 1
+
+  debug-vars:
+    vars: |
+      // Provide from debugger
+      // Temporary variable until __traceout is available from debugger, used for trace mode decision in TraceStart sequence.
+      // https://open-cmsis-pack.github.io/Open-CMSIS-Pack-Spec/main/html/debug_description.html#__traceout
+      __var TEMP_TRACEOUT = 0x00000000;  // Trace Off        // Bit 0: SWO, Bit 1: Sync Trace Port, Bit 2: Trace Buffer, Bit 16..21: parallel trace port size
+      // __var TEMP_TRACEOUT = 0x00000001;  // SWO Trace        // Bit 0: SWO, Bit 1: Sync Trace Port, Bit 2: Trace Buffer, Bit 16..21: parallel trace port size
+      // __var TEMP_TRACEOUT = 0x00040002;  // 4-Bit Sync Trace // Bit 0: SWO, Bit 1: Sync Trace Port, Bit 2: Trace Buffer, Bit 16..21: parallel trace port size
+      // __var TEMP_TRACEOUT = 0x00000004;  // Trace Buffer     // Bit 0: SWO, Bit 1: Sync Trace Port, Bit 2: Trace Buffer, Bit 16..21: parallel trace port size
+
+      __var SWO_PRESCALER = 1;  // SWO specific
+      __var TPIU_PRESCALER = 0; // Same register as SWO prescaler, TODO: decide if to merge into single variable
+      __var TRACE_BUFFER_SYNCCNT = 0xA; // TODO: Good default!!
+
+      // Custom variables for RA8P1 debug & trace configuration
+      __var ENABLE_TRACE_CPU0 = 1;
+      __var ENABLE_TRACE_CPU1 = 0;
+      __var TRCK_PRESCALER = 2; // Device specific
+      __var TRC_PIN_DRIVER_SPEED = 0 // Device specific: 0=Low, 1=Middle, 2=High-Speed high-drive, 3=High
+
+      // TODO: TPIU PIN CONFIGURATION (ALTERNATE FUNCTION + PULL-UP/DRIVE SETTINGS, ETC)
+      //       SEE PmnPFS/PmnPFS_HA/PmnPFS_BY , chapter 21.2.5 in RA8P1 manual.
+      //       SEE 
+
+  debug-sequences:
+    - name: TraceConfigureClock
+      blocks:
+      - execute: |
+          __var TRCKCR   = 0x4001E03F;
+          __var TRPORTCR = 0x4001B030;
+          __var trportcr_value = 0x00000000;
+
+          Message(0, "Begin TraceConfigureClock sequence");
+
+          trportcr_value = (TRC_PIN_DRIVER_SPEED & 0x3) << 2; // Set up trace pin driver speed
+
+      - if: ENABLE_TRACE_CPU0 != 0
+        blocks:
+          - execute: |
+              trportcr_value |= 0x00000001;  // Enable trace for CPU0
+      - if: ENABLE_TRACE_CPU1 != 0
+        blocks:
+          - execute: |
+              trportcr_value |= 0x00010001;  // Enable trace for CPU1
+
+      - execute: |
+          Write32(TRPORTCR, trportcr_value);              // Configure custom trace port config
+          Write8(TRCKCR, 0x00 | (TRCK_PRESCALER & 0xF));  // Configure TRCK prescaler (NOT SWO PRESCALER) before enabling TRCK.
+                                                          // (0..3: prescaler, 4: HOCO or SystemClock: 7: TRCKEN)
+          Write8(TRCKCR, 0x80 | (TRCK_PRESCALER & 0xF));  // Enable TRCK before accessing TPIU registers to avoid lockup.
+
+          Message(0, "End TraceConfigureClock sequence");
+
+    - name: DebugDeviceUnlock
+      blocks:
+        - execute: |
+            Message(0, "Begin DebugDeviceUnlock sequence"); 
+
+            // Sequence("IGNORE_Experiments");
+
+            // ***** Early TPIU clock configuration required, otherwise TPIU access can cause lockup *****
+            Sequence("TraceConfigureClock");
+
+            Message(0, "End DebugDeviceUnlock sequence");
+
+    - name: EnableCPUTrace
+      blocks:
+        - execute: |
+           __var DEMCR = 0xE000EDFC;
+           __var savedAP = __ap;
+
+           Message(0, "EnableCPUTrace sequence");
+
+        - if: ENABLE_TRACE_CPU0 != 0
+          blocks:
+            - execute: |
+                __ap = 0;
+                Write32(DEMCR, Read32(DEMCR) | 0x01000000);
+        - if: ENABLE_TRACE_CPU1 != 0
+          blocks:
+            - execute: |
+                __ap = 2;
+                Write32(DEMCR, Read32(DEMCR) | 0x01000000);
+
+        - execute: |
+            __ap = savedAP;
+
+    - name: ConfigureSWO
+      blocks:
+      - execute: |
+          __var TPIU_BASE = 0xE0040000;
+          __var LAR_KEY = 0xC5ACCE55;
+          __var savedAP = __ap;
+          __var selectAP = 0xFFFFFFFF;
+
+          Message(0, "ConfigureSWO sequence");
+
+      - if: ENABLE_TRACE_CPU0 != 0
+        blocks:
+          - execute: |
+              selectAP = 0;
+      - if: ENABLE_TRACE_CPU1 != 0
+        blocks:
+          - execute: |
+              selectAP = 2;
+
+      - if: selectAP != 0xFFFFFFFF
+        blocks:
+        - execute: |
+            __ap = selectAP;
+            // Configure "local" TPIU for SWO (RA8P1-specific)
+            Write32(TPIU_BASE + 0xFB0, LAR_KEY);       // TODO: Double-check if still necessary
+            Write32(TPIU_BASE + 0x010, SWO_PRESCALER); // TPIU Asynchronous Clock Prescaler Register: No prescaling
+            Write32(TPIU_BASE + 0x0F0, 0x00000002);    // TPIU Selected Pin Protocol Register: Select SWO 
+
+      - execute: |
+          __ap = savedAP;
+          Message(0, "End ConfigureSWO sequence");
+  
+    - name: ConfigureFunnel
+      blocks:
+      - execute: |
+          __var CSTF_BASE = 0x80013000;
+          __var savedAP = __ap;
+          __var funnelValue = 0x00000000;
+
+          Message(0, "ConfigureFunnel sequence");
+          __ap = 1; // Access "global" trace resources via AP1
+
+          funnelValue = Read32(CSTF_BASE + 0x000);
+          funnelValue &= ~0xFF; // Clear existing funnel input enables, keep hold time
+      - if: ENABLE_TRACE_CPU0 != 0
+        blocks:
+          - execute: |
+              funnelValue |= 0x1 | 0x2; // Enable CPU0 ITM and ETM funnel input
+      - if: ENABLE_TRACE_CPU1 != 0
+        blocks:
+          - execute: |
+              funnelValue |= 0x4 | 0x8; // Enable CPU1 ITM and ETM funnel input
+      - execute: |
+          Write32(CSTF_BASE + 0x000, funnelValue); // Configure CoreSight Trace Funnel to enable selected trace sources
+          // TODO: Something opens all inputs again, understand what it is. Normally recommended to only open what
+          //       really should be traced.
+
+          __ap = savedAP;
+          Message(0, "End ConfigureFunnel sequence");
+
+    - name: ConfigureSyncTrace
+      blocks:
+      - execute: |
+          __var ETF_BASE  = 0x80014000;
+          __var TPIU_BASE = 0x80016000;
+          __var savedAP = __ap;
+          __var tracePortWidth = (TEMP_TRACEOUT >> 16) & 0x3F; // Extract parallel trace port size from TEMP_TRACEOUT, TODO: replace with __traceout when available from debugger
+          __var ffcrValue = 0x00000000;
+          __var etfStatus = 0x00000000;
+
+          Message(0, "ConfigureSyncTrace sequence");
+
+          // TPIU setup for Sync Trace
+          __ap = 1; // Access "global" trace resources via AP1
+      - execute: |
+          Sequence("FlushTPIU");
+
+      - execute: |
+          Write32(TPIU_BASE + 0x010, TPIU_PRESCALER);             // TPIU Asynchronous Clock Prescaler Register: No prescaling
+          Write32(TPIU_BASE + 0x004, 1 << (tracePortWidth - 1));  // TPIU Current Synchronous Port Width
+          Write32(TPIU_BASE + 0x0F0, 0x00000000);                 // TPIU Selected Pin Protocol Register: Select Sync Trace Port 
+          ffcrValue  = Read32(TPIU_BASE + 0x304);
+          ffcrValue |= 0x00000002;                                // Enable formatter
+          Write32(TPIU_BASE + 0x304, ffcrValue);                  // TPIU FFCR
+
+          // CSTF Funnel setup
+          Sequence("ConfigureFunnel");
+
+          // ETF setup for Sync Trace
+      - execute: |
+          // Configure ETF to HW FIFO for Sync Trace
+          Write32(ETF_BASE + 0x020, 0x00000000);  // Disable ETF before configuring
+          etfStatus = Read32(ETF_BASE + 0x00C);
+      - while: (etfStatus & 0x4) == 0
+        info: "Wait for TMCReady"
+        timeout: 100
+        blocks:
+          - execute: |
+              etfStatus = Read32(ETF_BASE + 0x00C);
+
+      - execute: |
+          // Configure
+          Write32(ETF_BASE + 0x028, 0x00000002); // Set HW FIFO Mode
+          Write32(ETF_BASE + 0x034, 0x00000000); // Watermark: Set threshold vacancy to 0 to use full buffer
+          Write32(ETF_BASE + 0x304, 0x00000003); // FFCR: Enable Formatter and Trigger Insertion
+          Write32(ETF_BASE + 0x308, 0x00000000); // Clear PSCR, use other components for periodic sync requests
+
+          Write32(ETF_BASE + 0x020, 0x00000001); // Enable ETF
+
+      - execute: |
+          __ap = savedAP;
+          Message(0, "End ConfigureSyncTrace sequence");
+  
+    - name: ConfigureTraceBuffer
+      blocks:
+      - execute: |
+          __var ETF_BASE = 0x80014000;
+          __var savedAP = __ap;
+          __var etfStatus = 0x00000000;
+
+          Message(0, "ConfigureTraceBuffer sequence");
+
+          // CSTF Funnel setup
+          Sequence("ConfigureFunnel");
+
+          // ETF setup for Trace Buffer
+          __ap = 1; // Access "global" trace resources via AP1
+      - execute: |
+          // Configure ETF to Circular Buffer Mode for Trace Buffer
+          Write32(ETF_BASE + 0x020, 0x00000000);  // Disable ETF before configuring
+          etfStatus = Read32(ETF_BASE + 0x00C);
+      - while: (etfStatus & 0x4) == 0
+        info: "Wait for TMCReady"
+        timeout: 100
+        blocks:
+          - execute: |
+              etfStatus = Read32(ETF_BASE + 0x00C);
+
+      - execute: |
+          // Configure
+          Write32(ETF_BASE + 0x028, 0x00000000); // Set Circular Buffer mode
+          Write32(ETF_BASE + 0x034, 0x00000000); // Watermark: Set threshold vacancy to 0 to use full buffer
+          Write32(ETF_BASE + 0x304, 0x00000003); // FFCR: Enable Formatter and Trigger Insertion
+          Write32(ETF_BASE + 0x308, TRACE_BUFFER_SYNCCNT); // Set PSCR
+          Write32(ETF_BASE + 0x014, 0x00000000); // Init RRP
+          Write32(ETF_BASE + 0x018, 0x00000000); // Init RwP
+
+          Write32(ETF_BASE + 0x020, 0x00000001); // Enable ETF
+
+      - execute: |
+          __ap = savedAP;
+          Message(0, "End ConfigureTraceBuffer sequence");
+  
+    - name: TraceStart
+      blocks:
+      - execute: |
+          // TEMP_TRACEOUT: replace with __traceout when available from debugger,
+          //                or move trace mode decision to new built-in variable.
+          __var swoTrace    = TEMP_TRACEOUT & 0x1;
+          __var syncTrace   = TEMP_TRACEOUT & 0x2;
+          __var bufferTrace = TEMP_TRACEOUT & 0x4;
+      - execute: |
+          // TODO: Make trace mode decision based on __traceout
+          Message(0, "Begin TraceStart sequence");
+
+          Sequence("EnableCPUTrace");
+
+      - if: swoTrace != 0
+        blocks:
+          - execute: |
+              Sequence("ConfigureSWO");
+
+      - if: syncTrace != 0
+        blocks:
+          - execute: |
+              Sequence("ConfigureSyncTrace");
+
+      - if: bufferTrace != 0
+        blocks:
+          - execute: |
+              Sequence("ConfigureTraceBuffer");
+
+      - execute: |
+          // Sequence("IGNORE_TraceConfigureITM_DWT");
+
+          Message(0, "End TraceStart sequence");
+
+    - name: TraceStop
+      blocks:
+      - execute: |
+          // TEMP_TRACEOUT: replace with __traceout when available from debugger,
+          //                or move trace mode decision to new built-in variable.
+          __var TPIU_BASE   = 0xE0040000;
+          __var swoTrace    = TEMP_TRACEOUT & 0x1;
+          __var syncTrace   = TEMP_TRACEOUT & 0x2;
+          __var bufferTrace = TEMP_TRACEOUT & 0x4;
+          __var TRCKCR      = 0x4001E03F;
+          __var TRPORTCR    = 0x4001B030;
+          __var value       = 0x00000000;
+          __var savedAP     = __ap;
+          __var selectAP    = 0xFFFFFFFF;
+      - execute: |
+          // TODO: Make trace mode decision based on __traceout
+          Message(0, "Begin TraceStop sequence");
+
+      - if: swoTrace != 0
+        blocks:
+          - execute: |
+              // Set local TPIU mode back to default (sync port) to
+              // turn off trace output.
+
+          - if: ENABLE_TRACE_CPU0 != 0
+            blocks:
+              - execute: |
+                  selectAP = 0;
+          - if: ENABLE_TRACE_CPU1 != 0
+            blocks:
+              - execute: |
+                  selectAP = 2;
+
+          - if: selectAP != 0xFFFFFFFF
+            blocks:
+              - execute: |
+                  __ap = selectAP;
+                  Write32(TPIU_BASE + 0x0F0, 0x00000000);    // TPIU Selected Pin Protocol Register: Select SWO
+                  __ap = savedAP;
+
+
+      - if: syncTrace != 0 || bufferTrace != 0
+        blocks:
+          - execute: |
+              // Final flush which also leaves TPIU and/or ETF turned off.
+              Sequence("TraceFlush");
+
+      - execute: |
+          // Turn off trace clock
+          Write32(TRPORTCR, 0x00000000);  // Disable trace port config
+          value = Read8(TRCKCR);
+          value &= ~0x80; // Clear TRCKEN to disable trace clock
+          Write8(TRCKCR, value);
+
+          Message(0, "End TraceStop sequence");
+
+
+    - name: TraceCapture
+      blocks:
+      - execute: |
+          // TEMP_TRACEOUT: replace with __traceout when available from debugger,
+          //                or move trace mode decision to new built-in variable.
+          __var swoTrace    = TEMP_TRACEOUT & 0x1;
+          __var syncTrace   = TEMP_TRACEOUT & 0x2;
+          __var bufferTrace = TEMP_TRACEOUT & 0x4;
+          __var TPIU_BASE   = 0x80016000;
+          __var ETF_BASE    = 0x80014000;
+          __var savedAP     = __ap;
+          __var ffcrValue   = 0x00000000;
+      - execute: |
+          // TODO: Make trace mode decision based on __traceout
+          Message(0, "Begin TraceCapture sequence");
+
+      - if: swoTrace != 0
+        blocks:
+          - execute: |
+              // Nothing to do, SWO output always on when enabled.
+
+      - if: syncTrace != 0
+        blocks:
+          - execute: |
+              // Ensure involved components are in a well-defined state.
+              Sequence("TraceFlush");
+              // Configure TPIU if needed and enable formatter
+              __ap = 1; // Access "global" trace resources via AP1
+              ffcrValue  = Read32(TPIU_BASE + 0x304);
+              ffcrValue |= 0x00000002;                                // Enable formatter
+              Write32(TPIU_BASE + 0x304, ffcrValue);                  // TPIU FFCR
+              // Configure ETF if needed and enable formatter
+              // TODO: Double-check if good to keep ETF enabled during capture and handle
+              //       flushes through TPIU.
+
+      - if: bufferTrace != 0
+        blocks:
+          - execute: |
+              // Ensure involved components are in a well-defined state.
+              Sequence("TraceFlush");
+              __ap = 1; // Access "global" trace resources via AP1
+              ffcrValue  = Read32(ETF_BASE + 0x304);
+              ffcrValue |= 0x00000002;               // FFCR: Enable Formatter
+              Write32(ETF_BASE + 0x304, ffcrValue);
+              Write32(ETF_BASE + 0x308, TRACE_BUFFER_SYNCCNT); // Set PSCR
+              Write32(ETF_BASE + 0x014, 0x00000000); // Init RRP
+              Write32(ETF_BASE + 0x018, 0x00000000); // Init RwP
+              Write32(ETF_BASE + 0x020, 0x00000001); // Enable ETF
+
+      - execute: |
+          __ap = savedAP;
+          Message(0, "End TraceCapture sequence");
+
+    - name: FlushETF
+      blocks:
+        - execute: |
+            __var ETF_BASE    = 0x80014000;
+            __var savedAP     = __ap;
+            __var ffcrValue   = 0x00000000;
+            __var etfStatus   = 0x00000000;
+
+            Message(0, "Begin FlushETF sequence");
+
+            __ap = 1; // Access "global" trace resources via AP1
+
+        - execute: |
+            // Flush ETF first so the HW FIFO drains towards the TPIU.
+            ffcrValue = Read32(ETF_BASE + 0x304);
+            ffcrValue &= ~(0x00001040); // Clear StopOnFlush and FlushOnManual
+            ffcrValue |= 0x00001000;    // Stop after the manual flush completes
+            Write32(ETF_BASE + 0x304, ffcrValue);
+            ffcrValue |= 0x00000040;    // Trigger manual flush
+            Write32(ETF_BASE + 0x304, ffcrValue);
+
+        - execute: |
+            ffcrValue = Read32(ETF_BASE + 0x304);
+        - while: (ffcrValue & 0x40) != 0
+          info: "Wait for ETF manual flush to complete"
+          timeout: 100
+          blocks:
+            - execute: |
+                ffcrValue = Read32(ETF_BASE + 0x304);
+
+        - execute: |
+            etfStatus = Read32(ETF_BASE + 0x00C);
+        - while: (etfStatus & 0x4) == 0
+          info: "Wait for ETF to become ready"
+          timeout: 100
+          blocks:
+            - execute: |
+                etfStatus = Read32(ETF_BASE + 0x00C);
+
+        - execute: |
+            // Disable ETF after flush until next run/step
+            Write32(ETF_BASE + 0x020, 0x00000000);
+            etfStatus = Read32(ETF_BASE + 0x00C);
+        - while: (etfStatus & 0x4) == 0
+          info: "Wait for TMCReady"
+          timeout: 100
+          blocks:
+            - execute: |
+                etfStatus = Read32(ETF_BASE + 0x00C);
+
+        - execute: |
+            __ap = savedAP;
+            Message(0, "End FlushETF sequence");
+
+    - name: FlushTPIU
+      blocks:
+        - execute: |
+            __var TPIU_BASE   = 0x80016000;
+            __var savedAP     = __ap;
+            __var ffcrValue   = 0x00000000;
+            __var ffsrValue   = 0x00000000;
+
+            Message(0, "Begin FlushTPIU sequence");
+            __ap = 1; // Access "global" trace resources via AP1
+
+        - execute: |
+            // Configure "local" TPIU for Sync Trace
+            ffsrValue = Read32(TPIU_BASE + 0x300);
+        - if: ffsrValue & 0x2 == 0
+          info: "Formatter not stopped, do it now"
+          blocks:
+
+          - execute: |
+              // Flush the TPIU formatter so pending packets leave the trace port.
+              ffcrValue = Read32(TPIU_BASE + 0x304);
+              ffcrValue &= ~(0x00001040); // Clear StopOnFlush and FlushOnManual
+              ffcrValue |= 0x00001000;    // Stop after the manual flush completes
+              Write32(TPIU_BASE + 0x304, ffcrValue);
+              ffcrValue |= 0x00000040;    // Trigger manual flush
+              Write32(TPIU_BASE + 0x304, ffcrValue);
+
+          - execute: |
+              ffcrValue = Read32(TPIU_BASE + 0x304);
+          - while: (ffcrValue & 0x40) != 0
+            info: "Wait for TPIU manual flush to complete"
+            timeout: 100
+            blocks:
+              - execute: |
+                  ffcrValue = Read32(TPIU_BASE + 0x304);
+
+          - execute: |
+              ffsrValue = Read32(TPIU_BASE + 0x300);
+          - while: (ffsrValue & 0x1) != 0
+            info: "Wait for TPIU flush in progress to clear"
+            timeout: 100
+            blocks:
+              - execute: |
+                  ffsrValue = Read32(TPIU_BASE + 0x300);
+
+        - execute: |
+            __ap = savedAP;
+            Message(0, "End FlushTPIU sequence");
+
+    - name: TraceFlush
+      blocks:
+      - execute: |
+          // TEMP_TRACEOUT: replace with __traceout when available from debugger,
+          //                or move trace mode decision to new built-in variable.
+          __var syncTrace   = TEMP_TRACEOUT & 0x2;
+          __var bufferTrace = TEMP_TRACEOUT & 0x4;
+          __var savedAP     = __ap;
+
+          Message(0, "Begin TraceFlush sequence");
+
+      - if: syncTrace != 0
+        blocks:
+          - execute: |
+              // Flush ETF first so the HW FIFO drains towards the TPIU.
+              // TODO: Double check if really both of ETF and TPIU flush are needed to flush ATB.
+              // Sequence("FlushETF");
+              Sequence("FlushTPIU");
+
+      - if: bufferTrace != 0
+        blocks:
+          - execute: |
+              // In trace buffer mode the ETF is the final sink, so finalize its contents.
+              Sequence("FlushETF");
+
+      - execute: |
+          __ap = savedAP;
+          Message(0, "End TraceFlush sequence");
+
+    - name: DebugCoreStart
+      blocks:
+        - execute: |
+            // ***** TEMPORARY, TRACE START SEQUENCE MUST BE CALLED BY DEBUGGER *****
+
+            // ***** Default Implementation *****
+            // System Control Space (SCS) offset as defined in Armv6-M/Armv7-M.
+            __var SCS_Addr   = 0xE000E000;
+            __var DHCSR_Addr = SCS_Addr + 0xDF0;
+
+            Message(0, "Begin DebugCoreStart sequence");
+
+            // Enable Core Debug via DHCSR
+            Write32(DHCSR_Addr, 0xA05F0001);
+
+            // ***** Custom Extension for Testing, TraceStart should be called from debugger *****
+            // Configure core-local trace blocks only after CPU debug is enabled.
+            Sequence("TraceStart");
+
+            Sequence("TraceCapture");
+
+            Message(0, "End DebugCoreStart sequence"); 
+
+    - name: DebugCoreStop
+      blocks:
+        - execute: |
+            // ***** TEMPORARY, TRACE STOP SEQUENCE MUST BE CALLED BY DEBUGGER *****
+
+            // ***** Default Implementation *****
+            // System Control Space (SCS) offset as defined in Armv6-M/Armv7-M.
+            __var SCS_Addr   = 0xE000E000;
+            __var DHCSR_Addr = SCS_Addr + 0xDF0;
+            __var DEMCR_Addr = SCS_Addr + 0xDFC;
+
+            Message(0, "Begin DebugCoreStop sequence");
+
+            // Disable Core Debug via DHCSR
+            Write32(DHCSR_Addr, 0xA05F0000);
+
+            // Disable DWT and ITM blocks, DebugMonitor handler,
+            // halting debug traps, and Reset Vector Catch.
+            Write32(DEMCR_Addr, 0x00000000);
+
+            // ***** Custom Extension for Testing, TraceStop should be called from debugger *****
+            Sequence("TraceFlush");
+            // Configure core-local trace blocks only after CPU debug is enabled.
+            Sequence("TraceStop");
+
+            Message(0, "End DebugCoreStop sequence"); 
+
+    - name: IGNORE_TraceConfigureITM_DWT
+      blocks:
+      - execute: |
+          __var ITM_BASE = 0xE0000000;
+          __var DWT_BASE = 0xE0001000;
+          __var LAR_KEY = 0xC5ACCE55;
+          __var savedAP = __ap;
+          __var selectAP = 0xFFFFFFFF;
+          __var itm_tcr = 0x00000000;
+          __var dwt_ctrl = 0x00000000;
+          __var ITM_TRACE_BUS_ID = 1;
+          __var DWT_PC_SAMPLE_POSTPRESET = 3;
+          __var DWT_PC_SAMPLE_POSTINIT = 3;
+          Message(0, "Begin TraceConfigureITM_DWT sequence");
+      - if: ENABLE_TRACE_CPU0 != 0
+        blocks:
+          - execute: |
+              selectAP = 0;
+      - if: ENABLE_TRACE_CPU1 != 0
+        blocks:
+          - execute: |
+              selectAP = 2;
+      - if: selectAP != 0xFFFFFFFF
+        blocks:
+        - execute: |
+            __ap = selectAP;
+
+            // Unlock ITM and DWT if the implementation provides lock access registers.
+            Write32(ITM_BASE + 0xFB0, LAR_KEY);
+            Write32(DWT_BASE + 0xFB0, LAR_KEY);
+
+            // Enable ITM forwarding of DWT packets over SWO with a non-zero ATB ID.
+            itm_tcr = 0x0000001D | (ITM_TRACE_BUS_ID << 16);
+            Write32(ITM_BASE + 0xE40, 0x0000000F);
+            Write32(ITM_BASE + 0xE00, 0x00000001);
+            Write32(ITM_BASE + 0xE80, itm_tcr);
+
+            // Enable the cycle counter and PC sampling every 4096 cycles:
+            // CYCTAP=1 selects CYCCNT bit 10 (1024-cycle tap), POSTPRESET/POSTINIT=3 gives x4.
+            Write32(DWT_BASE + 0x004, 0x00000000);
+            dwt_ctrl = 0x00000001 |
+                       (DWT_PC_SAMPLE_POSTPRESET << 1) |
+                       (DWT_PC_SAMPLE_POSTINIT << 5) |
+                       0x00000200 |
+                       0x00001000;
+            Write32(DWT_BASE + 0x000, dwt_ctrl);
+      - execute: |
+          __ap = savedAP;
+          Message(0, "End TraceConfigureITM_DWT sequence");
