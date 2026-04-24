@@ -7,6 +7,127 @@
 #  - Clean up flush sequences (like ETR + CATU)
 
 
+# ETB Component Snippets
+
+    - debug-vars:
+      vars: |
+        // ETB
+        __var ETB_ADDRESS       = 0x00000000;
+        __var ETB_AP            = 0x00000000;
+        __var ETB_TRIGGER_COUNT = 0x0;
+
+    - name: Flush_ETB
+      blocks:
+        - execute: |
+            // Helper variables
+            __var savedAP     = __ap;
+            __var ffcrValue   = 0x00000000;
+            __var etbStatus   = 0x00000000;
+
+            Message(0, "Begin Flush_ETB @0x%08X, AP 0x%08X", ETB_ADDRESS, ETB_AP);
+
+            __ap = ETB_AP; // Set AP
+
+        - execute: |
+            // Flush ETB first
+            ffcrValue = Read32(ETB_ADDRESS + 0x304);
+            ffcrValue &= ~(0x00001040); // Clear StopOnFlush and FlushOnManual
+            ffcrValue |= 0x00001000;    // Stop after the manual flush completes
+            Write32(ETB_ADDRESS + 0x304, ffcrValue);
+            ffcrValue |= 0x00000040;    // Trigger manual flush
+            Write32(ETB_ADDRESS + 0x304, ffcrValue);
+
+        - execute: |
+            ffcrValue = Read32(ETB_ADDRESS + 0x304);
+        - while: (ffcrValue & 0x40) != 0
+          info: "Wait for ETB manual flush to complete"
+          timeout: 100
+          blocks:
+            - execute: |
+                ffcrValue = Read32(ETB_ADDRESS + 0x304);
+
+        - execute: |
+            etbStatus = Read32(ETB_ADDRESS + 0x00C);
+        - while: (etbStatus & 0x4) == 0
+          info: "Wait for ETB to become ready"
+          timeout: 100
+          blocks:
+            - execute: |
+                etbStatus = Read32(ETB_ADDRESS + 0x00C);
+
+        - execute: |
+            // Disable ETB after flush until next run/step
+            Write32(ETB_ADDRESS + 0x020, 0x00000000);
+            etbStatus = Read32(ETB_ADDRESS + 0x00C);
+        - while: (etbStatus & 0x4) == 0
+          info: "Wait for AcqComp"
+          timeout: 100
+          blocks:
+            - execute: |
+                etbStatus = Read32(ETB_ADDRESS + 0x00C);
+
+        - execute: |
+            __ap = savedAP;
+            Message(0, "End Flush_ETB @0x%08X, AP 0x%08X", ETB_ADDRESS, ETB_AP);
+
+    - name: Configure_ETB
+      blocks:
+      - execute: |
+            // Helper variables
+            __var savedAP = __ap;
+            __var ffcrValue = 0x00000000;
+            __var etbStatus = 0x00000000;
+
+            Message(0, "Begin Configure_ETB @0x%08X, AP 0x%08X", ETB_ADDRESS, ETB_AP);
+            __ap = ETB_AP; // Set AP
+
+            // Configure ETB
+            Write32(ETB_ADDRESS + 0x020, 0x00000000);  // Disable ETB before configuring
+            etbStatus = Read32(ETB_ADDRESS + 0x00C);
+      - while: (etbStatus & 0x4) == 0
+        info: "Wait for AcqComp"
+        timeout: 100
+        blocks:
+          - execute: |
+              etbStatus = Read32(ETB_ADDRESS + 0x00C);
+
+      - execute: |
+          // Configure
+          Write32(ETB_ADDRESS + 0x304, 0x00000003);  // FFCR: Enable Formatter and Trigger Insertion
+          Write32(ETB_ADDRESS + 0x01C, ETB_TRIGGER_COUNT); // TRG: Number of words to capture after trigger
+          Write32(ETB_ADDRESS + 0x018, 0x00000000);  // Init RwP
+          Write32(ETB_ADDRESS + 0x014, 0x00000000);  // Init RRP
+
+          Write32(ETB_ADDRESS + 0x020, 0x00000001);  // Enable ETB
+
+      - execute: |
+          __ap = savedAP;
+          Message(0, "End Configure_ETB @0x%08X, AP 0x%08X", ETB_ADDRESS, ETB_AP);
+    
+    - name: TraceCapture_ETB
+      blocks:
+      - execute: |
+          // Helper variables
+          __var ffcrValue = 0x00000000;
+          __var savedAP = __ap;
+
+          Message(0, "Begin TraceCapture_ETB @0x%08X, AP 0x%08X", ETB_ADDRESS, ETB_AP);
+
+          // Ensure involved components are in a well-defined state.
+          Sequence("TraceFlush");
+
+          __ap = ETB_AP; // Set AP
+          ffcrValue  = Read32(ETB_ADDRESS + 0x304);
+          ffcrValue |= 0x00000002;               // FFCR: Enable Formatter
+          Write32(ETB_ADDRESS + 0x304, ffcrValue);
+          Write32(ETB_ADDRESS + 0x01C, ETB_TRIGGER_COUNT); // TRG: Number of words to capture after trigger
+          Write32(ETB_ADDRESS + 0x018, 0x00000000);  // Init RwP
+          Write32(ETB_ADDRESS + 0x014, 0x00000000);  // Init RRP
+          Write32(ETB_ADDRESS + 0x020, 0x00000001);  // Enable ETB
+          __ap = savedAP;
+
+          Message(0, "End TraceCapture_ETB @0x%08X, AP 0x%08X", ETB_ADDRESS, ETB_AP);
+
 # ETF Component Snippets
 
     - debug-vars:
@@ -438,6 +559,9 @@
 
 
 # TPIU Component Snippets
+# - M-TPIU (v7-M): Remove flushes, only present in non-M TPIUs and in M-TPIUs v8-M and later
+# - M-TPIU (v8-M): Keep as is
+# = SoC-400/SoC-600/legacy TPIU: Remove unsupported SWO modes
 
     - debug-vars:
       vars: |
