@@ -123,6 +123,49 @@ cbuild-run:
         pname: CM7
       - port: 3334
         pname: CM4
+
+    debug-vars-go-away:
+      # TEMPORARY HACK, use __traceout instead
+      # TEMP_TRACEOUT: 0x00000000  # OFF
+      # TEMP_TRACEOUT: 0x00000001  # SWO
+      # TEMP_TRACEOUT: 0x00040002  # TPIU
+      # TEMP_TRACEOUT: 0x00000004  # TRACE BUFFER
+      # TEMP_TRACEOUT: 0x00040003  # SWO + TPIU
+      TEMP_TRACEOUT: 0x00000000  # OFF
+
+    debug-vars-set:
+      # Default values for variables in debug sequences are configured with a *.dbgconf file in the user project
+      DbgMCU_CR: 0x00000007  # DBGMCU_CR:       DBGMCU configuration register
+      #                  [ 8] DBGSTBY_D3, [ 7] DBGSTOP_D3
+      #                  [ 5] DBGSTBY_D2, [ 4] DBGSTOP_D2,  [ 3] DBGSLEEP_D2
+      #                  [ 2] DBGSTBY_D1, [ 1] DBGSTOP_D1,  [ 0] DBGSLEEP_D1
+      DbgMCU_APB3_Fz1: 0x00000040  # DBGMCU_APB3FZ1:  DBGMCU CPU1 APB3 peripheral freeze register
+      DbgMCU_APB3_Fz2: 0x00000040  # DBGMCU_APB3FZ2:  DBGMCU CPU2 APB3 peripheral freeze register
+      DbgMCU_APB1L_Fz1: 0x00E00BFF  # DBGMCU_APB1LFZ1: DBGMCU CPU1 APB1L peripheral freeze register
+      DbgMCU_APB1L_Fz2: 0x00E00BFF  # DBGMCU_APB1LFZ2: DBGMCU CPU2 APB1L peripheral freeze register
+      DbgMCU_APB2_Fz1: 0x20070003  # DBGMCU_APB2FZ1:  DBGMCU CPU1 APB2 peripheral freeze register
+      DbgMCU_APB2_Fz2: 0x20070003  # DBGMCU_APB2FZ2:  DBGMCU CPU2 APB2 peripheral freeze register
+      DbgMCU_APB4_Fz1: 0x000C1E80  # DBGMCU_APB4FZ1:  DBGMCU CPU1 APB4 peripheral freeze register
+      DbgMCU_APB4_Fz2: 0x000C1E80  # DBGMCU_APB4FZ2:  DBGMCU CPU2 APB4 peripheral freeze register
+      TraceClk_Pin: 0x00040002  # PE2
+      TraceD0_Pin: 0x00040003  # PE3
+      TraceD1_Pin: 0x00040004  # PE4
+      TraceD2_Pin: 0x00040005  # PE5
+      TraceD3_Pin: 0x00040006  # PE6
+
+
+      # TRACE SETTINGS
+      # Funnel CSTF
+      FUNNEL_INPUT_MASK_0: 0x0000000F  # Trace funnel input mask CSTF funnel instance
+      # Funnel SWTF
+      FUNNEL_INPUT_MASK_1: 0x00000003  # Trace funnel input mask SWTF funnel instance
+      # TPIU
+
+      SWO_PRESCALER: 1  # SWO specific
+      TPIU_PRESCALER: 0  # Same register as SWO prescaler, TODO: decide if to merge into single variable
+      TRACE_BUFFER_SYNCCNT: 0xA  # TODO: Good default!!
+
+
   debug-vars:
     vars: |
       // Default values for variables in debug sequences are configured with a *.dbgconf file in the user project
@@ -154,24 +197,24 @@ cbuild-run:
       // __var TEMP_TRACEOUT = 0x00040003;  // SWO + TPIU
 
 
-      // ******************************************************
-      // GENERATED FROM SDF DURING *.cbuild-run.yml GENERATION
-      // ******************************************************
-
       // Funnel CSTF
-      __var FUNNEL_ADDRESS_0    = 0xE00F3000; // Trace funnel address CSTF funnel instance
-      __var FUNNEL_AP_0         = 0x00000002; // Trace funnel address CSTF funnel instance
-      __var FUNNEL_INPUT_MASK_0 = 0x0000000F; // Trace funnel input mask CSTF funnel instance
+      __var FUNNEL_ADDRESS_CSTF    = 0xE00F3000; // Trace funnel address CSTF funnel instance
+      __var FUNNEL_AP_CSTF         = 0x00000002; // Trace funnel address CSTF funnel instance
+      __var FUNNEL_INPUT_MASK_CSTF = 0x0000000F; // Trace funnel input mask CSTF funnel instance
       // Funnel SWTF
-      __var FUNNEL_ADDRESS_1    = 0xE00F3000; // Trace funnel address SWTF funnel instance
-      __var FUNNEL_AP_1         = 0x00000002; // Trace funnel address SWTF funnel instance
-      __var FUNNEL_INPUT_MASK_1 = 0x00000003; // Trace funnel input mask SWTF funnel instance
+      __var FUNNEL_ADDRESS_SWTF    = 0xE00F3000; // Trace funnel address SWTF funnel instance
+      __var FUNNEL_AP_SWTF         = 0x00000002; // Trace funnel address SWTF funnel instance
+      __var FUNNEL_INPUT_MASK_SWTF = 0x00000003; // Trace funnel input mask SWTF funnel instance
       // ETF
-      __var ETF_ADDRESS_0       = 0xE00F4000;
-      __var ETF_AP_0            = 0x00000002;
+      __var ETF_ADDRESS       = 0xE00F4000;
+      __var ETF_AP            = 0x00000002;
+      __var ETF_SYNCCNT       = 0xA; // TODO: DEFAULT
+      __var ETF_TRIGGER_COUNT = 0x0;
       // TPIU
-      __var TPIU_ADDRESS_0      = 0xE00F5000;
-      __var TPIU_AP_0           = 0x00000002;
+      __var TPIU_ADDRESS      = 0xE00F5000;
+      __var TPIU_AP           = 0x00000002;
+      __var SWO_PRESCALER     = 0x00000000; // TPIU Asynchronous Clock Prescaler Register
+      __var TPIU_PRESCALER    = 0x00000000; // TPIU Asynchronous Clock Prescaler Register
 
 
       // ******************************************************
@@ -457,7 +500,49 @@ cbuild-run:
 
     # EXPERIMENTING WITH NEW TRACE SEQUENCES
     # NOTE: Addresses taken from SDF file in pack!
-    - name: Flush_ETF_0
+    - name: Configure_Funnel_CSTF
+      blocks:
+      - execute: |
+          // Helper variables
+          __var savedAP    = __ap;
+          __var value      = 0x00000000;
+
+          Message(0, "Begin ConfigureFunnel_CSTF @0x%08X, AP 0x%08X", FUNNEL_ADDRESS_CSTF, FUNNEL_AP_CSTF);
+
+          __ap = FUNNEL_AP_CSTF; // Set AP
+
+          value = Read32(FUNNEL_ADDRESS_CSTF + 0x000);
+          value &= ~0xFF;              // Clear existing funnel input enables, keep hold time
+          value |= FUNNEL_INPUT_MASK;  // Keep hold time as is for now, could be made configurable if needed
+
+      - execute: |
+          Write32(FUNNEL_ADDRESS_CSTF + 0x000, value); // Configure CoreSight Trace Funnel to enable selected trace sources
+
+          __ap = savedAP;
+          Message(0, "End Configure_Funnel_CSTF @0x%08X, AP 0x%08X", FUNNEL_ADDRESS_CSTF, FUNNEL_AP_CSTF);
+
+    - name: Configure_Funnel_SWTF
+      blocks:
+      - execute: |
+          // Helper variables
+          __var savedAP    = __ap;
+          __var value      = 0x00000000;
+
+          Message(0, "Begin ConfigureFunnel_SWTF @0x%08X, AP 0x%08X", FUNNEL_ADDRESS_SWTF, FUNNEL_AP_SWTF);
+
+          __ap = FUNNEL_AP_SWTF; // Set AP
+
+          value = Read32(FUNNEL_ADDRESS_SWTF + 0x000);
+          value &= ~0xFF;              // Clear existing funnel input enables, keep hold time
+          value |= FUNNEL_INPUT_MASK;  // Keep hold time as is for now, could be made configurable if needed
+
+      - execute: |
+          Write32(FUNNEL_ADDRESS_SWTF + 0x000, value); // Configure CoreSight Trace Funnel to enable selected trace sources
+
+          __ap = savedAP;
+          Message(0, "End Configure_Funnel_SWTF @0x%08X, AP 0x%08X", FUNNEL_ADDRESS_SWTF, FUNNEL_AP_SWTF);
+
+    - name: Flush_ETF
       blocks:
         - execute: |
             // Helper variables
@@ -465,53 +550,149 @@ cbuild-run:
             __var ffcrValue   = 0x00000000;
             __var etfStatus   = 0x00000000;
 
-            Message(0, "Begin Flush_ETF_0 @0x%08X, AP 0x%08X", ETF_ADDRESS_0, ETF_AP_0);
+            Message(0, "Begin Flush_ETF @0x%08X, AP 0x%08X", ETF_ADDRESS, ETF_AP);
 
-            __ap = ETF_AP_0; // Set AP
+            __ap = ETF_AP; // Set AP
 
         - execute: |
             // Flush ETF first so the HW FIFO drains towards the TPIU.
-            ffcrValue = Read32(ETF_ADDRESS_0 + 0x304);
+            ffcrValue = Read32(ETF_ADDRESS + 0x304);
             ffcrValue &= ~(0x00001040); // Clear StopOnFlush and FlushOnManual
             ffcrValue |= 0x00001000;    // Stop after the manual flush completes
-            Write32(ETF_ADDRESS_0 + 0x304, ffcrValue);
+            Write32(ETF_ADDRESS + 0x304, ffcrValue);
             ffcrValue |= 0x00000040;    // Trigger manual flush
-            Write32(ETF_ADDRESS_0 + 0x304, ffcrValue);
+            Write32(ETF_ADDRESS + 0x304, ffcrValue);
 
         - execute: |
-            ffcrValue = Read32(ETF_ADDRESS_0 + 0x304);
+            ffcrValue = Read32(ETF_ADDRESS + 0x304);
         - while: (ffcrValue & 0x40) != 0
           info: "Wait for ETF manual flush to complete"
           timeout: 100
           blocks:
             - execute: |
-                ffcrValue = Read32(ETF_ADDRESS_0 + 0x304);
+                ffcrValue = Read32(ETF_ADDRESS + 0x304);
 
         - execute: |
-            etfStatus = Read32(ETF_ADDRESS_0 + 0x00C);
+            etfStatus = Read32(ETF_ADDRESS + 0x00C);
         - while: (etfStatus & 0x4) == 0
           info: "Wait for ETF to become ready"
           timeout: 100
           blocks:
             - execute: |
-                etfStatus = Read32(ETF_ADDRESS_0 + 0x00C);
+                etfStatus = Read32(ETF_ADDRESS + 0x00C);
 
         - execute: |
             // Disable ETF after flush until next run/step
-            Write32(ETF_ADDRESS_0 + 0x020, 0x00000000);
-            etfStatus = Read32(ETF_ADDRESS_0 + 0x00C);
+            Write32(ETF_ADDRESS + 0x020, 0x00000000);
+            etfStatus = Read32(ETF_ADDRESS + 0x00C);
         - while: (etfStatus & 0x4) == 0
           info: "Wait for TMCReady"
           timeout: 100
           blocks:
             - execute: |
-                etfStatus = Read32(ETF_ADDRESS_0 + 0x00C);
+                etfStatus = Read32(ETF_ADDRESS + 0x00C);
 
         - execute: |
             __ap = savedAP;
-            Message(0, "End Flush_ETF_0 @0x%08X, AP 0x%08X", ETF_ADDRESS_0, ETF_AP_0);
+            Message(0, "End Flush_ETF @0x%08X, AP 0x%08X", ETF_ADDRESS, ETF_AP);
 
-    - name: Flush_TPIU_0
+    - name: Configure_ETF_HWFIFO
+      blocks:
+      - execute: |
+            // Helper variables
+            __var savedAP = __ap;
+            __var ffcrValue = 0x00000000;
+            __var etfStatus = 0x00000000;
+
+            Message(0, "Begin Configure_ETF_HWFIFO @0x%08X, AP 0x%08X", ETF_BASE, ETF_AP);
+            __ap = ETF_AP; // Set AP
+
+            // Configure ETF to HW FIFO for Sync Trace
+            Write32(ETF_ADDRESS + 0x020, 0x00000000);  // Disable ETF before configuring
+            etfStatus = Read32(ETF_ADDRESS + 0x00C);
+      - while: (etfStatus & 0x4) == 0
+        info: "Wait for TMCReady"
+        timeout: 100
+        blocks:
+          - execute: |
+              etfStatus = Read32(ETF_ADDRESS + 0x00C);
+
+      - execute: |
+          // Configure
+          Write32(ETF_ADDRESS + 0x028, 0x00000002); // Set HW FIFO Mode
+          Write32(ETF_ADDRESS + 0x034, 0x00000000); // Watermark: Set threshold vacancy to 0 to use full buffer
+          Write32(ETF_ADDRESS + 0x304, 0x00000003); // FFCR: Enable Formatter and Trigger Insertion
+          Write32(ETF_ADDRESS + 0x308, 0x00000000); // Clear PSCR, use other components for periodic sync requests
+
+          Write32(ETF_ADDRESS + 0x020, 0x00000001); // Enable ETF
+
+      - execute: |
+          __ap = savedAP;
+          Message(0, "End Configure_ETF_HWFIFO @0x%08X, AP 0x%08X", ETF_ADDRESS, ETF_AP);
+
+    - name: Configure_ETF_CircularBuffer
+      blocks:
+      - execute: |
+            // Helper variables
+            __var savedAP = __ap;
+            __var ffcrValue = 0x00000000;
+            __var etfStatus = 0x00000000;
+
+            Message(0, "Begin Configure_ETF_CircularBuffer @0x%08X, AP 0x%08X", ETF_ADDRESS, ETF_AP);
+            __ap = ETF_AP; // Set AP
+
+            // Configure ETF to HW FIFO for Sync Trace
+            Write32(ETF_ADDRESS + 0x020, 0x00000000);  // Disable ETF before configuring
+            etfStatus = Read32(ETF_ADDRESS + 0x00C);
+      - while: (etfStatus & 0x4) == 0
+        info: "Wait for TMCReady"
+        timeout: 100
+        blocks:
+          - execute: |
+              etfStatus = Read32(ETF_ADDRESS + 0x00C);
+
+      - execute: |
+          // Configure
+          Write32(ETF_ADDRESS + 0x028, 0x00000000);  // Set Circular Buffer mode
+          Write32(ETF_ADDRESS + 0x034, 0x00000000);  // Watermark: Set threshold vacancy to 0 to use full buffer
+          Write32(ETF_ADDRESS + 0x304, 0x00000003);  // FFCR: Enable Formatter and Trigger Insertion
+          Write32(ETF_ADDRESS + 0x01C, ETF_TRIGGER_COUNT); // TRG: Number of words to capture after trigger
+          Write32(ETF_ADDRESS + 0x308, ETF_SYNCCNT); // Set PSCR
+          Write32(ETF_ADDRESS + 0x018, 0x00000000);  // Init RwP
+          Write32(ETF_ADDRESS + 0x014, 0x00000000);  // Init RRP
+
+          Write32(ETF_ADDRESS + 0x020, 0x00000001);  // Enable ETF
+
+      - execute: |
+          __ap = savedAP;
+          Message(0, "End Configure_ETF_CircularBuffer @0x%08X, AP 0x%08X", ETF_ADDRESS, ETF_AP);
+    
+    - name: TraceCapture_ETF_CircularBuffer
+      blocks:
+      - execute: |
+          // Helper variables
+          __var ffcrValue = 0x00000000;
+          __var savedAP = __ap;
+
+          Message(0, "Begin TraceCapture_ETF_CircularBuffer @0x%08X, AP 0x%08X", ETF_ADDRESS, ETF_AP);
+
+          // Ensure involved components are in a well-defined state.
+          Sequence("TraceFlush");
+
+          __ap = ETF_AP; // Set AP
+          ffcrValue  = Read32(ETF_ADDRESS + 0x304);
+          ffcrValue |= 0x00000002;               // FFCR: Enable Formatter
+          Write32(ETF_ADDRESS + 0x304, ffcrValue);
+          Write32(ETF_ADDRESS + 0x01C, ETF_TRIGGER_COUNT); // TRG: Number of words to capture after trigger
+          Write32(ETF_ADDRESS + 0x308, ETF_SYNCCNT); // Set PSCR
+          Write32(ETF_ADDRESS + 0x018, 0x00000000);  // Init RwP
+          Write32(ETF_ADDRESS + 0x014, 0x00000000);  // Init RRP
+          Write32(ETF_ADDRESS + 0x020, 0x00000001);  // Enable ETF
+          __ap = savedAP;
+
+          Message(0, "End TraceCapture_ETF_CircularBuffer @0x%08X, AP 0x%08X", ETF_ADDRESS, ETF_AP);
+
+    - name: Flush_TPIU
       blocks:
         - execute: |
             // Helper variables
@@ -519,47 +700,100 @@ cbuild-run:
             __var ffcrValue   = 0x00000000;
             __var ffsrValue   = 0x00000000;
 
-            Message(0, "Begin Flush_TPIU_0 @0x%08X, AP 0x%08X", TPIU_ADDRESS_0, TPIU_AP_0);
+            Message(0, "Begin Flush_TPIU @0x%08X, AP 0x%08X", TPIU_ADDRESS, TPIU_AP);
             
-            __ap = TPIU_AP_0;  // Set AP
+            __ap = TPIU_AP;  // Set AP
 
         - execute: |
             // Configure "local" TPIU for Sync Trace
-            ffsrValue = Read32(TPIU_ADDRESS_0 + 0x300);
+            ffsrValue = Read32(TPIU_ADDRESS + 0x300);
         - if: ffsrValue & 0x2 == 0
           info: "Formatter not stopped, do it now"
           blocks:
 
           - execute: |
               // Flush the TPIU formatter so pending packets leave the trace port.
-              ffcrValue = Read32(TPIU_ADDRESS_0 + 0x304);
+              ffcrValue = Read32(TPIU_ADDRESS + 0x304);
               ffcrValue &= ~(0x00001040); // Clear StopOnFlush and FlushOnManual
               ffcrValue |= 0x00001000;    // Stop after the manual flush completes
-              Write32(TPIU_ADDRESS_0 + 0x304, ffcrValue);
+              Write32(TPIU_ADDRESS + 0x304, ffcrValue);
               ffcrValue |= 0x00000040;    // Trigger manual flush
-              Write32(TPIU_ADDRESS_0 + 0x304, ffcrValue);
+              Write32(TPIU_ADDRESS + 0x304, ffcrValue);
 
           - execute: |
-              ffcrValue = Read32(TPIU_ADDRESS_0 + 0x304);
+              ffcrValue = Read32(TPIU_ADDRESS + 0x304);
           - while: (ffcrValue & 0x40) != 0
             info: "Wait for TPIU manual flush to complete"
             timeout: 100
             blocks:
               - execute: |
-                  ffcrValue = Read32(TPIU_ADDRESS_0 + 0x304);
+                  ffcrValue = Read32(TPIU_ADDRESS + 0x304);
 
           - execute: |
-              ffsrValue = Read32(TPIU_ADDRESS_0 + 0x300);
+              ffsrValue = Read32(TPIU_ADDRESS + 0x300);
           - while: (ffsrValue & 0x1) != 0
             info: "Wait for TPIU flush in progress to clear"
             timeout: 100
             blocks:
               - execute: |
-                  ffsrValue = Read32(TPIU_ADDRESS_0 + 0x300);
+                  ffsrValue = Read32(TPIU_ADDRESS + 0x300);
 
         - execute: |
             __ap = savedAP;
-            Message(0, "End Flush_TPIU_0 @0x%08X, AP 0x%08X", TPIU_ADDRESS_0, TPIU_AP_0);
+            Message(0, "End Flush_TPIU @0x%08X, AP 0x%08X", TPIU_ADDRESS, TPIU_AP);
+
+    - name: Configure_TPIU
+      blocks:
+          - execute: |
+                // Temporary - Parameters, set from debugger going forward
+
+                // TEMP_TRACEOUT: replace with __traceout when available from debugger,
+                //                or move trace mode decision to new built-in variable.
+                __var syncTrace   = TEMP_TRACEOUT & 0x2;
+                __var tracePortWidth = (TEMP_TRACEOUT >> 16) & 0x3F; // Parallel trace port size
+
+                // Helper variables
+                __var LAR_KEY   = 0xC5ACCE55;
+                __var savedAP = __ap;
+
+                Message(0, "Begin Configure_TPIU @0x%08X, AP 0x%08X", TPIU_ADDRESS, TPIU_AP);
+
+                __ap = TPIU_AP; // Set AP
+
+          - if: syncTrace != 0
+            blocks:
+              - execute: |
+                  Write32(TPIU_ADDRESS + 0xFB0, LAR_KEY);        // TODO: Double-check if still necessary
+                  Write32(TPIU_ADDRESS + 0x010, TPIU_PRESCALER); // TPIU Asynchronous Clock Prescaler Register: No prescaling
+                  Write32(TPIU_ADDRESS + 0x004, 1 << (tracePortWidth - 1));  // TPIU Current Synchronous Port Width
+                  Write32(TPIU_ADDRESS + 0x0F0, 0x00000000);     // TPIU Selected Pin Protocol Register: Select Sync Trace Port
+                  ffcrValue  = Read32(TPIU_ADDRESS + 0x304);
+                  ffcrValue |= 0x00000002;                    // Enable formatter
+                  Write32(TPIU_ADDRESS + 0x304, ffcrValue);      // TPIU FFCR
+
+          - execute: |
+                __ap = savedAP;
+                Message(0, "End Configure_TPIU @0x%08X, AP 0x%08X", TPIU_ADDRESS, TPIU_AP);
+
+    - name: TraceCapture_TPIU
+      blocks:
+      - execute: |
+          // Helper variables
+          __var LAR_KEY   = 0xC5ACCE55;
+          __var savedAP = __ap;
+
+          Message(0, "Begin TraceCapture_TPIU @0x%08X, AP 0x%08X", TPIU_ADDRESS, TPIU_AP);
+
+          // Ensure involved components are in a well-defined state.
+          Sequence("TraceFlush");
+
+          // Configure TPIU if needed and enable formatter
+          __ap = TPIU_AP; // Set AP
+          ffcrValue  = Read32(TPIU_ADDRESS + 0x304);
+          ffcrValue |= 0x00000002;                                // Enable formatter
+          Write32(TPIU_ADDRESS + 0x304, ffcrValue);                  // TPIU FFCR
+          __ap = savedAP;
+          Message(0, "End TraceCapture_TPIU @0x%08X, AP 0x%08X", TPIU_ADDRESS, TPIU_AP);
 
     - name: Configure_CPUTrace
       blocks:
@@ -569,212 +803,29 @@ cbuild-run:
             Write32(DEMCR_Address, Read32(DEMCR_Address) | 0x01000000);
             Message(0, "End Configure_CPUTrace @0x%08X", DEMCR_Address);
 
-    - name: Configure_Funnel_0
-      blocks:
-      - execute: |
-          // TEMP_TRACEOUT: replace with __traceout when available from debugger,
-          //                or move trace mode decision to new built-in variable.
-          __var swoTrace    = TEMP_TRACEOUT & 0x1;
-          __var syncTrace   = TEMP_TRACEOUT & 0x2;
-          __var bufferTrace = TEMP_TRACEOUT & 0x4;
-
-          // Helper variables
-          __var savedAP    = __ap;
-          __var funnelMask = 0x00000000;
-          __var value      = 0x00000000;
-
-          Message(0, "Begin Configure_Funnel_0 @0x%08X, AP 0x%08X", FUNNEL_ADDRESS_0, FUNNEL_AP_0);
-
-      - if: syncTrace != 0 || bufferTrace != 0
-        blocks:
-          - execute: |
-              funnelMask = FUNNEL_INPUT_MASK_0;
-
-      - execute: |
-          __ap = FUNNEL_AP_0; // Set AP
-
-          value = Read32(FUNNEL_ADDRESS_0 + 0x000);
-          value &= ~0xFF;       // Clear existing funnel input enables, keep hold time
-          value |= funnelMask;  // Keep hold time as is for now, could be made configurable if needed
-
-      - execute: |
-          Write32(FUNNEL_ADDRESS_0 + 0x000, value); // Configure CoreSight Trace Funnel to enable selected trace sources
-
-          __ap = savedAP;
-          Message(0, "End Configure_Funnel_0 @0x%08X, AP 0x%08X", FUNNEL_ADDRESS_0, FUNNEL_AP_0);
-
-    - name: Configure_Funnel_1
-      blocks:
-      - execute: |
-          // TEMP_TRACEOUT: replace with __traceout when available from debugger,
-          //                or move trace mode decision to new built-in variable.
-          __var swoTrace    = TEMP_TRACEOUT & 0x1;
-          __var syncTrace   = TEMP_TRACEOUT & 0x2;
-          __var bufferTrace = TEMP_TRACEOUT & 0x4;
-
-          // Helper variables
-          __var savedAP    = __ap;
-          __var funnelMask = 0x00000000;
-          __var value      = 0x00000000;
-
-          Message(0, "Begin Configure_Funnel_1 @0x%08X, AP 0x%08X", FUNNEL_ADDRESS_1, FUNNEL_AP_1);
-
-          // BASED ON SDF FILE
-          // Determine funnel inputs
-      - if: swoTrace != 0
-        blocks:
-        - execute: |
-            funnelMask |= FUNNEL_INPUT_MASK_1; // Enable SWO trace input to funnel
-
-        - execute: |
-            __ap = FUNNEL_AP_1; // Set AP
-            value = Read32(FUNNEL_ADDRESS_1 + 0x000);
-            value &= ~0xFF;       // Clear existing funnel input enables, keep hold time
-            value |= funnelMask;  // Keep hold time as is for now, could be made configurable if needed
-
-      - execute: |
-          Write32(FUNNEL_ADDRESS_1 + 0x000, value); // Configure CoreSight Trace Funnel to enable selected trace sources
-
-          __ap = savedAP;
-          Message(0, "End Configure_Funnel_1 @0x%08X, AP 0x%08X", FUNNEL_ADDRESS_1, FUNNEL_AP_1);
-
-    - name: Configure_ETF_0_HWFIFO
-      blocks:
-      - execute: |
-            // Helper variables
-            __var savedAP = __ap;
-            __var ffcrValue = 0x00000000;
-            __var etfStatus = 0x00000000;
-
-            Message(0, "Begin Configure_TMC_ETF_HWFIFO @0x%08X, AP 0x%08X", ETF_ADDRESS_0, ETF_AP_0);
-            __ap = ETF_AP_0; // Set AP
-
-            // Configure ETF to HW FIFO for Sync Trace
-            Write32(ETF_ADDRESS_0 + 0x020, 0x00000000);  // Disable ETF before configuring
-            etfStatus = Read32(ETF_ADDRESS_0 + 0x00C);
-      - while: (etfStatus & 0x4) == 0
-        info: "Wait for TMCReady"
-        timeout: 100
-        blocks:
-          - execute: |
-              etfStatus = Read32(ETF_ADDRESS_0 + 0x00C);
-
-      - execute: |
-          // Configure
-          Write32(ETF_ADDRESS_0 + 0x028, 0x00000002); // Set HW FIFO Mode
-          Write32(ETF_ADDRESS_0 + 0x034, 0x00000000); // Watermark: Set threshold vacancy to 0 to use full buffer
-          Write32(ETF_ADDRESS_0 + 0x304, 0x00000003); // FFCR: Enable Formatter and Trigger Insertion
-          Write32(ETF_ADDRESS_0 + 0x308, 0x00000000); // Clear PSCR, use other components for periodic sync requests
-
-          Write32(ETF_ADDRESS_0 + 0x020, 0x00000001); // Enable ETF
-
-      - execute: |
-          __ap = savedAP;
-          Message(0, "End Configure_TMC_ETF_HWFIFO @0x%08X, AP 0x%08X", ETF_ADDRESS_0, ETF_AP_0);
-
-    - name: Configure_ETF_0_CircularBuffer
-      blocks:
-      - execute: |
-            // Helper variables
-            __var savedAP = __ap;
-            __var ffcrValue = 0x00000000;
-            __var etfStatus = 0x00000000;
-
-            Message(0, "Begin Configure_TMC_ETF_CircularBuffer @0x%08X, AP 0x%08X", ETF_ADDRESS_0, ETF_AP_0);
-            __ap = ETF_AP_0; // Set AP
-
-            // Configure ETF to HW FIFO for Sync Trace
-            Write32(ETF_ADDRESS_0 + 0x020, 0x00000000);  // Disable ETF before configuring
-            etfStatus = Read32(ETF_ADDRESS_0 + 0x00C);
-      - while: (etfStatus & 0x4) == 0
-        info: "Wait for TMCReady"
-        timeout: 100
-        blocks:
-          - execute: |
-              etfStatus = Read32(ETF_ADDRESS_0 + 0x00C);
-
-      - execute: |
-          // Configure
-          Write32(ETF_ADDRESS_0 + 0x028, 0x00000000); // Set Circular Buffer mode
-          Write32(ETF_ADDRESS_0 + 0x034, 0x00000000); // Watermark: Set threshold vacancy to 0 to use full buffer
-          Write32(ETF_ADDRESS_0 + 0x304, 0x00000003); // FFCR: Enable Formatter and Trigger Insertion
-          Write32(ETF_ADDRESS_0 + 0x308, TRACE_BUFFER_SYNCCNT); // Set PSCR
-          Write32(ETF_ADDRESS_0 + 0x014, 0x00000000); // Init RRP
-          Write32(ETF_ADDRESS_0 + 0x018, 0x00000000); // Init RwP
-
-          Write32(ETF_ADDRESS_0 + 0x020, 0x00000001); // Enable ETF
-
-      - execute: |
-          __ap = savedAP;
-          Message(0, "End Configure_TMC_ETF_CircularBuffer @0x%08X, AP 0x%08X", ETF_ADDRESS_0, ETF_AP_0);
-    
     - name: Configure_SWO
       blocks:
       - execute: |
           Message(0, "Begin Configure_SWO");
-          Sequence("Configure_Funnel_1");
+          Sequence("Configure_Funnel_SWTF");
           Message(0, "End Configure_SWO");
 
     - name: Configure_SyncTrace
       blocks:
       - execute: |
           Message(0, "Begin Configure_SyncTrace");
-          Sequence("Flush_TPIU_0");
-          Sequence("Configure_Funnel_0");
-          Sequence("Configure_ETF_0_HWFIFO");
+          Sequence("Flush_TPIU");
+          Sequence("Configure_Funnel_CSTF");
+          Sequence("Configure_ETF_HWFIFO");
           Message(0, "End Configure_SyncTrace");
   
     - name: Configure_TraceBuffer
       blocks:
       - execute: |
           Message(0, "Begin Configure_TraceBuffer");
-          Sequence("Configure_Funnel_0");
-          Sequence("Configure_ETF_0_CircularBuffer");
+          Sequence("Configure_Funnel_CSTF");
+          Sequence("Configure_ETF_CircularBuffer");
           Message(0, "End Configure_TraceBuffer");
-
-    - name: TraceCapture_TPIU_0
-      blocks:
-      - execute: |
-          // Helper variables
-          __var LAR_KEY   = 0xC5ACCE55;
-          __var savedAP = __ap;
-
-          Message(0, "Begin TraceCapture_TPIU_0 @0x%08X, AP 0x%08X", TPIU_ADDRESS_0, TPIU_AP_0);
-
-          // Ensure involved components are in a well-defined state.
-          Sequence("TraceFlush");
-
-          // Configure TPIU if needed and enable formatter
-          __ap = TPIU_AP_0; // Set AP
-          ffcrValue  = Read32(TPIU_ADDRESS_0 + 0x304);
-          ffcrValue |= 0x00000002;                                // Enable formatter
-          Write32(TPIU_ADDRESS_0 + 0x304, ffcrValue);                  // TPIU FFCR
-          __ap = savedAP;
-          Message(0, "End TraceCapture_TPIU_0 @0x%08X, AP 0x%08X", TPIU_ADDRESS_0, TPIU_AP_0);
-
-    - name: TraceCapture_ETF_0_CircularBuffer
-      blocks:
-      - execute: |
-          // Helper variables
-          __var ffcrValue = 0x00000000;
-          __var savedAP = __ap;
-
-          Message(0, "Begin TraceCapture_ETF_0_CircularBuffer @0x%08X, AP 0x%08X", ETF_ADDRESS_0, ETF_AP_0);
-
-          // Ensure involved components are in a well-defined state.
-          Sequence("TraceFlush");
-
-          __ap = ETF_AP_0; // Set AP
-          ffcrValue  = Read32(ETF_ADDRESS_0 + 0x304);
-          ffcrValue |= 0x00000002;               // FFCR: Enable Formatter
-          Write32(ETF_ADDRESS_0 + 0x304, ffcrValue);
-          Write32(ETF_ADDRESS_0 + 0x308, TRACE_BUFFER_SYNCCNT); // Set PSCR
-          Write32(ETF_ADDRESS_0 + 0x014, 0x00000000); // Init RRP
-          Write32(ETF_ADDRESS_0 + 0x018, 0x00000000); // Init RwP
-          Write32(ETF_ADDRESS_0 + 0x020, 0x00000001); // Enable ETF
-          __ap = savedAP;
-
-          Message(0, "End TraceCapture_ETF_0_CircularBuffer @0x%08X, AP 0x%08X", ETF_ADDRESS_0, ETF_AP_0);
 
     - name: TraceStartExt
       blocks:
@@ -852,12 +903,12 @@ cbuild-run:
       - if: syncTrace != 0
         blocks:
           - execute: |
-              Sequence("TraceCapture_TPIU_0");
+              Sequence("TraceCapture_TPIU");
 
       - if: bufferTrace != 0
         blocks:
           - execute: |
-              Sequence("TraceCapture_ETF_0_CircularBuffer");
+              Sequence("TraceCapture_ETF_CircularBuffer");
 
       - execute: |
           Message(0, "End TraceCapture");
@@ -875,12 +926,12 @@ cbuild-run:
       - if: syncTrace != 0
         blocks:
           - execute: |
-              Sequence("Flush_TPIU_0");
+              Sequence("Flush_TPIU");
 
       - if: bufferTrace != 0
         blocks:
           - execute: |
-              Sequence("Flush_ETF_0");
+              Sequence("Flush_ETF");
 
       - execute: |
           Message(0, "End TraceFlush");
@@ -934,8 +985,6 @@ cbuild-run:
             Sequence("TraceStop");
 
             Message(0, "End DebugCoreStop sequence"); 
-
-
 
   programming:
     - algorithm: ${CMSIS_PACK_ROOT}/Keil/STM32H7xx_DFP/4.1.3/CMSIS/Flash/STM32H7x_2048.FLM
