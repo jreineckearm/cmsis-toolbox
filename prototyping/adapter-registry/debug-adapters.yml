@@ -92,8 +92,7 @@ debug-adapters:
             description: Configure clock that is output from the trace port component (SWO, Trace Port). If left to 0, the value is computed based on other available information.
             yml-node: clock-out
             type: number
-            range: [10, 200000]
-            default: 10000
+            default: 0
           - name: Width
             description: Configure trace interface port width (only applicable for Trace Port mode, ignored otherwise)
             yml-node: width
@@ -161,6 +160,44 @@ debug-adapters:
               - name: Disabled
                 value: off
                 description:  Serial I/O disabled
+      - section: Trace Port
+        description: Trace port setup
+        yml-node: trace-port
+        select: on
+        options:
+          - name: Mode
+            description: Configure trace port mode
+            yml-node: mode
+            type: enum
+            default: swo-uart
+            values:
+              - name: SWO UART
+                value: swo-uart
+                description:  Trace output via SWO UART
+              - name: SWO Manchester
+                value: swo-manchester
+                description:  Trace output via SWO Manchester
+              - name: On-Chip Trace Buffer
+                value: buffer
+                description:  Trace output via On-Chip Trace Buffer
+              - name: Synchronous Trace Port
+                value: trace-port
+                description:  Trace output via Synchronous Trace Port
+          - name: Input Clock (kHz)
+            description: Configure clock that is input to the trace port component (SWO, Trace Port). Same as CPU clock in majority of systems with trace from one CPU.
+            yml-node: clock-in
+            type: number
+            default: 10000
+          - name: Output Clock (kHz)
+            description: Configure clock that is output from the trace port component (SWO, Trace Port). If left to 0, the value is computed based on other available information.
+            yml-node: clock-out
+            type: number
+            default: 0
+          - name: Width
+            description: Configure trace interface port width (only applicable for Trace Port mode, ignored otherwise)
+            yml-node: width
+            type: number
+            default: 4
 
 
   - name: "MCU-Link@pyOCD"
@@ -224,6 +261,44 @@ debug-adapters:
               - name: Disabled
                 value: off
                 description:  Serial I/O disabled
+      - section: Trace Port
+        description: Trace port setup
+        yml-node: trace-port
+        select: on
+        options:
+          - name: Mode
+            description: Configure trace port mode
+            yml-node: mode
+            type: enum
+            default: swo-uart
+            values:
+              - name: SWO UART
+                value: swo-uart
+                description:  Trace output via SWO UART
+              - name: SWO Manchester
+                value: swo-manchester
+                description:  Trace output via SWO Manchester
+              - name: On-Chip Trace Buffer
+                value: buffer
+                description:  Trace output via On-Chip Trace Buffer
+              - name: Synchronous Trace Port
+                value: trace-port
+                description:  Trace output via Synchronous Trace Port
+          - name: Input Clock (kHz)
+            description: Configure clock that is input to the trace port component (SWO, Trace Port). Same as CPU clock in majority of systems with trace from one CPU.
+            yml-node: clock-in
+            type: number
+            default: 10000
+          - name: Output Clock (kHz)
+            description: Configure clock that is output from the trace port component (SWO, Trace Port). If left to 0, the value is computed based on other available information.
+            yml-node: clock-out
+            type: number
+            default: 0
+          - name: Width
+            description: Configure trace interface port width (only applicable for Trace Port mode, ignored otherwise)
+            yml-node: width
+            type: number
+            default: 4
 
 
   - name: "Nu-Link@pyOCD"
@@ -287,6 +362,44 @@ debug-adapters:
               - name: Disabled
                 value: off
                 description:  Serial I/O disabled
+      - section: Trace Port
+        description: Trace port setup
+        yml-node: trace-port
+        select: on
+        options:
+          - name: Mode
+            description: Configure trace port mode
+            yml-node: mode
+            type: enum
+            default: swo-uart
+            values:
+              - name: SWO UART
+                value: swo-uart
+                description:  Trace output via SWO UART
+              - name: SWO Manchester
+                value: swo-manchester
+                description:  Trace output via SWO Manchester
+              - name: On-Chip Trace Buffer
+                value: buffer
+                description:  Trace output via On-Chip Trace Buffer
+              - name: Synchronous Trace Port
+                value: trace-port
+                description:  Trace output via Synchronous Trace Port
+          - name: Input Clock (kHz)
+            description: Configure clock that is input to the trace port component (SWO, Trace Port). Same as CPU clock in majority of systems with trace from one CPU.
+            yml-node: clock-in
+            type: number
+            default: 10000
+          - name: Output Clock (kHz)
+            description: Configure clock that is output from the trace port component (SWO, Trace Port). If left to 0, the value is computed based on other available information.
+            yml-node: clock-out
+            type: number
+            default: 0
+          - name: Width
+            description: Configure trace interface port width (only applicable for Trace Port mode, ignored otherwise)
+            yml-node: width
+            type: number
+            default: 4
 
   - name: "PICkit@pyOCD"
     alias-name: ["PICkit Basic"]                           # alternative names that map to this debug adapter
@@ -349,6 +462,44 @@ debug-adapters:
               - name: Disabled
                 value: off
                 description:  Serial I/O disabled
+      - section: Trace Port
+        description: Trace port setup
+        yml-node: trace-port
+        select: on
+        options:
+          - name: Mode
+            description: Configure trace port mode
+            yml-node: mode
+            type: enum
+            default: swo-uart
+            values:
+              - name: SWO UART
+                value: swo-uart
+                description:  Trace output via SWO UART
+              - name: SWO Manchester
+                value: swo-manchester
+                description:  Trace output via SWO Manchester
+              - name: On-Chip Trace Buffer
+                value: buffer
+                description:  Trace output via On-Chip Trace Buffer
+              - name: Synchronous Trace Port
+                value: trace-port
+                description:  Trace output via Synchronous Trace Port
+          - name: Input Clock (kHz)
+            description: Configure clock that is input to the trace port component (SWO, Trace Port). Same as CPU clock in majority of systems with trace from one CPU.
+            yml-node: clock-in
+            type: number
+            default: 10000
+          - name: Output Clock (kHz)
+            description: Configure clock that is output from the trace port component (SWO, Trace Port). If left to 0, the value is computed based on other available information.
+            yml-node: clock-out
+            type: number
+            default: 0
+          - name: Width
+            description: Configure trace interface port width (only applicable for Trace Port mode, ignored otherwise)
+            yml-node: width
+            type: number
+            default: 4
 
   - name: "KitProg3@pyOCD"
     alias-name: ["KitProg3"]                               # alternative names that map to this debug adapter
@@ -411,6 +562,44 @@ debug-adapters:
               - name: Disabled
                 value: off
                 description:  Serial I/O disabled
+      - section: Trace Port
+        description: Trace port setup
+        yml-node: trace-port
+        select: on
+        options:
+          - name: Mode
+            description: Configure trace port mode
+            yml-node: mode
+            type: enum
+            default: swo-uart
+            values:
+              - name: SWO UART
+                value: swo-uart
+                description:  Trace output via SWO UART
+              - name: SWO Manchester
+                value: swo-manchester
+                description:  Trace output via SWO Manchester
+              - name: On-Chip Trace Buffer
+                value: buffer
+                description:  Trace output via On-Chip Trace Buffer
+              - name: Synchronous Trace Port
+                value: trace-port
+                description:  Trace output via Synchronous Trace Port
+          - name: Input Clock (kHz)
+            description: Configure clock that is input to the trace port component (SWO, Trace Port). Same as CPU clock in majority of systems with trace from one CPU.
+            yml-node: clock-in
+            type: number
+            default: 10000
+          - name: Output Clock (kHz)
+            description: Configure clock that is output from the trace port component (SWO, Trace Port). If left to 0, the value is computed based on other available information.
+            yml-node: clock-out
+            type: number
+            default: 0
+          - name: Width
+            description: Configure trace interface port width (only applicable for Trace Port mode, ignored otherwise)
+            yml-node: width
+            type: number
+            default: 4
 
   - name: "RPiDebugProbe@pyOCD"
     alias-name: ["RaspberryPiDebugProbe", "RPiDebugProbe"] # alternative names that map to this debug adapter
@@ -532,6 +721,44 @@ debug-adapters:
               - name: Disabled
                 value: off
                 description:  Serial I/O disabled
+      - section: Trace Port
+        description: Trace port setup
+        yml-node: trace-port
+        select: on
+        options:
+          - name: Mode
+            description: Configure trace port mode
+            yml-node: mode
+            type: enum
+            default: swo-uart
+            values:
+              - name: SWO UART
+                value: swo-uart
+                description:  Trace output via SWO UART
+              - name: SWO Manchester
+                value: swo-manchester
+                description:  Trace output via SWO Manchester
+              - name: On-Chip Trace Buffer
+                value: buffer
+                description:  Trace output via On-Chip Trace Buffer
+              - name: Synchronous Trace Port
+                value: trace-port
+                description:  Trace output via Synchronous Trace Port
+          - name: Input Clock (kHz)
+            description: Configure clock that is input to the trace port component (SWO, Trace Port). Same as CPU clock in majority of systems with trace from one CPU.
+            yml-node: clock-in
+            type: number
+            default: 10000
+          - name: Output Clock (kHz)
+            description: Configure clock that is output from the trace port component (SWO, Trace Port). If left to 0, the value is computed based on other available information.
+            yml-node: clock-out
+            type: number
+            default: 0
+          - name: Width
+            description: Configure trace interface port width (only applicable for Trace Port mode, ignored otherwise)
+            yml-node: width
+            type: number
+            default: 4
 
   - name: "J-Link Server"
     alias-name: ["J-Link", "JLink Server"]                 # alternative names that map to this debug adapter
@@ -593,6 +820,44 @@ debug-adapters:
               - name: Disabled
                 value: off
                 description:  Serial I/O disabled
+      - section: Trace Port
+        description: Trace port setup
+        yml-node: trace-port
+        select: on
+        options:
+          - name: Mode
+            description: Configure trace port mode
+            yml-node: mode
+            type: enum
+            default: swo-uart
+            values:
+              - name: SWO UART
+                value: swo-uart
+                description:  Trace output via SWO UART
+              - name: SWO Manchester
+                value: swo-manchester
+                description:  Trace output via SWO Manchester
+              - name: On-Chip Trace Buffer
+                value: buffer
+                description:  Trace output via On-Chip Trace Buffer
+              - name: Synchronous Trace Port
+                value: trace-port
+                description:  Trace output via Synchronous Trace Port
+          - name: Input Clock (kHz)
+            description: Configure clock that is input to the trace port component (SWO, Trace Port). Same as CPU clock in majority of systems with trace from one CPU.
+            yml-node: clock-in
+            type: number
+            default: 10000
+          - name: Output Clock (kHz)
+            description: Configure clock that is output from the trace port component (SWO, Trace Port). If left to 0, the value is computed based on other available information.
+            yml-node: clock-out
+            type: number
+            default: 0
+          - name: Width
+            description: Configure trace interface port width (only applicable for Trace Port mode, ignored otherwise)
+            yml-node: width
+            type: number
+            default: 4
 
   - name: "CMSIS-DAP@Arm-Debugger"
     alias-name: ["CMSIS-DAP@armdbg"]

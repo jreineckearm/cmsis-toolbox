@@ -1,0 +1,383 @@
+{
+    "data": {
+        "cwd": "${workspaceFolder}/<%= solution_folder %>",
+        "shell": {
+            "win32": {
+                "executable": "cmd.exe",
+                "args": [ "/d", "/c" ]
+            },
+            "linux": {
+                "executable": "/bin/bash",
+                "args": [ "-c" ]
+            },
+            "darwin": {
+                "executable": "/bin/bash",
+                "args": [ "-c" ]
+            }
+        },
+        "program": "<%= symbol_files[0]?.file ?? '' %>",
+        "programs": "<%= symbol_files.flatMap(e => (e.pname || !processors?.length) ? e : processors.map(p => ({ ...e, pname: p }))).groupedBy(v => v.pname ?? '') %>",
+        "JLinkGDBServerCL": "JLinkGDBServerCL<%= platform === 'win32' ? '.exe' : '' %>",
+        "JLink": "JLink<%= platform === 'win32' ? '.exe' : 'Exe' %>",
+        "jlinkDevice": "<%= device_name %><%= start_pname ? `_${start_pname}` : '' %>",
+        "jlinkDevices": "<%= Object.fromEntries(processors.map(pname => [pname ?? '', `${device_name}_${pname ?? start_pname ?? ''}`])) %>",
+        "resetOption": {
+            "system": "0",
+            "core": "1",
+            "hardware": "2"
+        },
+        "resetTypesInput": "<%= config.reset && Array.isArray(config.reset) ? Object.fromEntries(config.reset.map(r => ( [ r.pname ?? '', r.type ]))) : undefined %>",
+        "resetTypeDefault": "<%= config.reset?.type ?? 'system' %>",
+        "telnetOptionsInput": "<%= config.telnet && Array.isArray(config.telnet) ? Object.fromEntries(config.telnet.map(t => ( [ t.pname ?? '', { mode: t.mode, port: t.port }]))) : undefined %>",
+        "telnetOptionsDefault": "<%= { mode: config.telnet?.mode ?? 'off', port: config.telnet?.port ?? '4444' } %>",
+        "telnetMode": {
+            "server": "1",
+            "monitor": "1",
+            "console": "2",
+            "off": "1"
+        },
+        "connectOptions": {
+            "attach": [ "-nohalt", "-noreset" ],
+            "halt": [ "-halt" ]
+        },
+        "defaultClock": 4000,
+        "scaleClock": 1000,
+        "traceEnabled": "<%= !!config['trace-port'] %>",
+        "traceClockIn": "<%= (config['trace-port']?.['clock-in'] ?? 0) * 1000 %>",
+        "traceClockOut": "<%= (config['trace-port']?.['clock-out'] ?? 0) * 1000 %>"
+    },
+    "launch": {
+        "singlecore-launch": {
+            "name": "JLink (launch)",
+            "type": "gdbtarget",
+            "request": "launch",
+            "cwd": "<%= data.cwd %>",
+            "program": "<%= data.program %>",
+            "gdb": "arm-none-eabi-gdb",
+            "auxiliaryGdb": true,
+            "preLaunchTask": "CMSIS Load",
+            "initCommands": [
+                "<%= data.programs[pname]?.slice(1)?.map(p => p.file ? `symbol-file \"${p.file}\"\\n` : '')?.join('') %>",
+                "<% const telnetMode = data.telnetOptionsInput[pname ?? '']?.mode ?? data.telnetOptionsDefault.mode %>",
+                "<% if (telnetMode && telnetMode !== 'off') { %>",
+                "monitor semihosting ioclient <%= data.telnetMode[telnetMode] %>\n",
+                "monitor semihosting enable",
+                "<% } %>",
+                "<% if (data.traceEnabled) { %>",
+                "<% const cpuFreq = data.traceClockIn %>",
+                "<% const swoFreq = data.traceClockOut %>",
+                "monitor SWO EnableTarget <%= cpuFreq %> <%= swoFreq %> 1 0",
+                "<% } %>",
+                "<% if (config.connect?.mode !== 'attach') { %>",
+                "monitor reset <%= data.resetOption[data.resetTypesInput[pname ?? ''] ?? data.resetTypeDefault] %>\n",
+                "tbreak main",
+                "<% } %>"
+            ],
+            "customResetCommands": [
+                "monitor reset <%= data.resetOption[data.resetTypesInput[pname ?? ''] ?? data.resetTypeDefault] %>\n",
+                "maintenance flush register-cache",
+                "maintenance flush dcache",
+                "tbreak main",
+                "continue"
+            ],
+            "target": {
+                "server": "<%= data.JLinkGDBServerCL %>",
+                "serverParameters": [
+                    "<% if (config['probe-id']) { %>",
+                    "-USB", "<%= config['probe-id'] %>\n",
+                    "<% } %>",
+                    "-device", "<%= device_name %>\n",
+                    "-endian", "little",
+                    "-if", "<%= config.protocol ?? 'swd' %>\n",
+                    "-speed", "<%= parseInt((config.clock ?? data.defaultClock) / data.scaleClock) %>\n",
+                    "<% const connectOptions = data.connectOptions[config.connect?.mode ?? 'halt'] ?? data.connectOptions.halt %>",
+                    "<% connectOptions.forEach(connectOption => { %>",
+                    "<%= connectOption %>\n",
+                    "<% }) %>",
+                    "-noir",
+                    "-vd",
+                    "-nogui",
+                    "-localhostonly",
+                    "-silent",
+                    "-port", "<%= ports.get(pname) %>\n",
+                    "-TelnetPort", "<%= data.telnetOptionsInput[pname ?? '']?.port ?? data.telnetOptionsDefault.port %>\n",
+                    "<% if (data.traceEnabled) { %>",
+                    "-SWOPort", "5555",
+                    "<% } %>"
+                ],
+                "port": "<%= ports.get(pname) %>"
+            },
+            "cmsis": {
+                "cbuildRunFile": "${command:cmsis-csolution.getCbuildRunFile}",
+                "updateConfiguration": "auto"
+            }
+        },
+        "singlecore-attach": {
+            "name": "JLink (attach)",
+            "type": "gdbtarget",
+            "request": "attach",
+            "cwd": "<%= data.cwd %>",
+            "program": "<%= data.program %>",
+            "gdb": "arm-none-eabi-gdb",
+            "auxiliaryGdb": true,
+            "initCommands": [
+                "<%= data.programs[pname]?.slice(1)?.map(p => p.file ? `symbol-file \"${p.file}\"\\n` : '')?.join('') %>",
+                "<% const telnetMode = data.telnetOptionsInput[pname ?? '']?.mode ?? data.telnetOptionsDefault.mode %>",
+                "<% if (telnetMode && telnetMode !== 'off') { %>",
+                "monitor semihosting ioclient <%= data.telnetMode[telnetMode] %>\n",
+                "monitor semihosting enable",
+                "<% } %>",
+                "<% if (data.traceEnabled) { %>",
+                "<% const cpuFreq = data.traceClockIn %>",
+                "<% const swoFreq = data.traceClockOut %>",
+                "monitor SWO EnableTarget <%= cpuFreq %> <%= swoFreq %> 1 0",
+                "<% } %>"
+            ],
+            "customResetCommands": [
+                "monitor reset <%= data.resetOption[data.resetTypesInput[pname ?? ''] ?? data.resetTypeDefault] %>\n",
+                "maintenance flush register-cache",
+                "maintenance flush dcache",
+                "tbreak main",
+                "continue"
+            ],
+            "target": {
+                "port": "<%= ports.get(pname) %>"
+            },
+            "cmsis": {
+                "cbuildRunFile": "${command:cmsis-csolution.getCbuildRunFile}",
+                "updateConfiguration": "auto"
+            }
+        },
+        "multicore-start-launch": {
+            "name": "<%= pname %> JLink (launch)",
+            "type": "gdbtarget",
+            "request": "launch",
+            "cwd": "<%= data.cwd %>",
+            "program": "<%= data.programs[pname]?.[0].file ?? '' %>",
+            "gdb": "arm-none-eabi-gdb",
+            "auxiliaryGdb": true,
+            "preLaunchTask": "CMSIS Load",
+            "initCommands": [
+                "<%= data.programs[pname]?.slice(1)?.map(p => p.file ? `symbol-file \"${p.file}\"\\n` : '')?.join('') %>",
+                "<% const telnetMode = data.telnetOptionsInput[pname ?? '']?.mode ?? data.telnetOptionsDefault.mode %>",
+                "<% if (telnetMode && telnetMode !== 'off') { %>",
+                "monitor semihosting ioclient <%= data.telnetMode[telnetMode] %>\n",
+                "monitor semihosting enable",
+                "<% } %>",
+                "<% if (data.traceEnabled) { %>",
+                "<% const cpuFreq = data.traceClockIn %>",
+                "<% const swoFreq = data.traceClockOut %>",
+                "monitor SWO EnableTarget <%= cpuFreq %> <%= swoFreq %> 1 0",
+                "<% } %>",
+                "<% if (config.connect?.mode !== 'attach') { %>",
+                "monitor reset <%= data.resetOption[data.resetTypesInput[pname ?? ''] ?? data.resetTypeDefault] %>\n",
+                "tbreak main",
+                "<% } %>"
+            ],
+            "customResetCommands": [
+                "monitor reset <%= data.resetOption[data.resetTypesInput[pname ?? ''] ?? data.resetTypeDefault] %>\n",
+                "maintenance flush register-cache",
+                "maintenance flush dcache",
+                "tbreak main",
+                "continue"
+            ],
+            "target": {
+                "server": "<%= data.JLinkGDBServerCL %>",
+                "serverParameters": [
+                    "<% if (config['probe-id']) { %>",
+                    "-USB", "<%= config['probe-id'] %>\n",
+                    "<% } %>",
+                    "-device", "<%= data.jlinkDevices[pname] %>\n",
+                    "-endian", "little",
+                    "-if", "<%= config.protocol ?? 'swd' %>\n",
+                    "-speed", "<%= parseInt((config.clock ?? data.defaultClock) / data.scaleClock) %>\n",
+                    "<% const connectOptions = data.connectOptions[config.connect?.mode ?? 'halt'] ?? data.connectOptions.halt %>",
+                    "<% connectOptions.forEach(connectOption => { %>",
+                    "<%= connectOption %>\n",
+                    "<% }) %>",
+                    "-noir",
+                    "-vd",
+                    "-nogui",
+                    "-localhostonly",
+                    "-silent",
+                    "-port", "<%= ports.get(pname) %>\n",
+                    "-TelnetPort", "<%= data.telnetOptionsInput[pname ?? '']?.port ?? data.telnetOptionsDefault.port %>\n",
+                    "<% if (data.traceEnabled) { %>",
+                    "-SWOPort", "5555",
+                    "<% } %>"
+                ],
+                "port": "<%= ports.get(pname) %>"
+            },
+            "cmsis": {
+                "cbuildRunFile": "${command:cmsis-csolution.getCbuildRunFile}",
+                "updateConfiguration": "auto"
+            }
+        },
+        "multicore-start-attach": {
+            "name": "<%= pname %> JLink (attach)",
+            "type": "gdbtarget",
+            "request": "attach",
+            "cwd": "<%= data.cwd %>",
+            "program": "<%= data.programs[pname]?.[0]?.file ?? '' %>",
+            "gdb": "arm-none-eabi-gdb",
+            "auxiliaryGdb": true,
+            "initCommands": [
+                "<%= data.programs[pname]?.slice(1)?.map(p => p.file ? `symbol-file \"${p.file}\"\\n` : '')?.join('') %>",
+                "<% const telnetMode = data.telnetOptionsInput[pname ?? '']?.mode ?? data.telnetOptionsDefault.mode %>",
+                "<% if (telnetMode && telnetMode !== 'off') { %>",
+                "monitor semihosting ioclient <%= data.telnetMode[telnetMode] %>\n",
+                "monitor semihosting enable",
+                "<% } %>",
+                "<% if (data.traceEnabled) { %>",
+                "<% const cpuFreq = data.traceClockIn %>",
+                "<% const swoFreq = data.traceClockOut %>",
+                "monitor SWO EnableTarget <%= cpuFreq %> <%= swoFreq %> 1 0",
+                "<% } %>"
+            ],
+            "customResetCommands": [
+                "monitor reset <%= data.resetOption[data.resetTypesInput[pname ?? ''] ?? data.resetTypeDefault] %>\n",
+                "maintenance flush register-cache",
+                "maintenance flush dcache",
+                "tbreak main",
+                "continue"
+            ],
+            "target": {
+                "port": "<%= ports.get(pname) %>"
+            },
+            "cmsis": {
+                "cbuildRunFile": "${command:cmsis-csolution.getCbuildRunFile}",
+                "updateConfiguration": "auto"
+            }
+        },
+        "multicore-other": {
+            "name": "<%= pname %> JLink (launch)",
+            "type": "gdbtarget",
+            "request": "launch",
+            "cwd": "<%= data.cwd %>",
+            "program": "<%= data.programs[pname]?.[0]?.file ?? '' %>",
+            "gdb": "arm-none-eabi-gdb",
+            "auxiliaryGdb": true,
+            "initCommands": [
+                "<%= data.programs[pname]?.slice(1)?.map(p => p.file ? `symbol-file \"${p.file}\"\\n` : '')?.join('') %>",
+                "<% const telnetMode = data.telnetOptionsInput[pname ?? '']?.mode ?? data.telnetOptionsDefault.mode %>",
+                "<% if (telnetMode && telnetMode !== 'off') { %>",
+                "monitor semihosting ioclient <%= data.telnetMode[telnetMode] %>\n",
+                "monitor semihosting enable",
+                "<% } %>",
+                "<% if (data.traceEnabled) { %>",
+                "monitor SWO EnableTarget <%= data.traceClockIn %> <%= data.traceClockOut %> 1 0",
+                "<% } %>"
+            ],
+            "customResetCommands": [
+                "monitor reset <%= data.resetOption[data.resetTypesInput[pname ?? ''] ?? data.resetTypeDefault] %>\n",
+                "maintenance flush register-cache",
+                "maintenance flush dcache",
+                "tbreak main",
+                "continue"
+            ],
+            "target": {
+                "server": "<%= data.JLinkGDBServerCL %>",
+                "serverParameters": [
+                    "<% if (config['probe-id']) { %>",
+                    "-USB", "<%= config['probe-id'] %>\n",
+                    "<% } %>",
+                    "-device", "<%= data.jlinkDevices[pname] %>\n",
+                    "-endian", "little",
+                    "-if", "<%= config.protocol ?? 'swd' %>\n",
+                    "-speed", "<%= parseInt((config.clock ?? data.defaultClock) / data.scaleClock) %>\n",
+                    "<% const connectOptions = data.connectOptions[config.connect?.mode ?? 'halt'] ?? data.connectOptions.halt %>",
+                    "<% connectOptions.forEach(connectOption => { %>",
+                    "<%= connectOption %>\n",
+                    "<% }) %>",
+                    "-noir",
+                    "-vd",
+                    "-nogui",
+                    "-localhostonly",
+                    "-silent",
+                    "-port", "<%= ports.get(pname) %>\n",
+                    "-TelnetPort", "<%= data.telnetOptionsInput[pname ?? '']?.port ?? data.telnetOptionsDefault.port %>\n",
+                    "<% if (data.traceEnabled) { %>",
+                    "-SWOPort", "5555",
+                    "<% } %>"
+                ],
+                "port": "<%= ports.get(pname) %>"
+            },
+            "cmsis": {
+                "cbuildRunFile": "${command:cmsis-csolution.getCbuildRunFile}",
+                "updateConfiguration": "auto"
+            }
+        }
+    },
+    "tasks": [
+        {
+            "label": "CMSIS Erase",
+            "type": "shell",
+            "command": [
+                "<% const usbArg = config['probe-id'] ? ` -USB ${config['probe-id']}` : '' %>",
+                "echo Connect > .cmd.jlink &&",
+                "echo Erase >> .cmd.jlink &&",
+                "echo Exit >> .cmd.jlink &&",
+                "<%= data.JLink %><%= usbArg %> -device <%= data.jlinkDevice %> -if <%= config.protocol ?? 'swd' %> -speed <%= parseInt((config.clock ?? data.defaultClock) / data.scaleClock) %> -commandfile .cmd.jlink"
+            ],
+            "options": {
+                "cwd": "<%= data.cwd %>",
+                "shell": "<%= data.shell[process.platform] %>"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "CMSIS Load",
+            "type": "shell",
+            "command": [
+                "<% const usbArg = config['probe-id'] ? ` -USB ${config['probe-id']}` : '' %>",
+                "echo Connect > .cmd.jlink &&",
+                "<%= image_files.map(image => `echo LoadFile \"${image.file}\" >> .cmd.jlink &&\\n`).join('') %>",
+                "echo Exit >> .cmd.jlink &&",
+                "<%= data.JLink %><%= usbArg %> -device <%= data.jlinkDevice %> -if <%= config.protocol ?? 'swd' %> -speed <%= parseInt((config.clock ?? data.defaultClock) / data.scaleClock) %> -commandfile .cmd.jlink"
+            ],
+            "options": {
+                "cwd": "<%= data.cwd %>",
+                "shell": "<%= data.shell[process.platform] %>"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "CMSIS Run",
+            "type": "shell",
+            "command": "<%= data.JLinkGDBServerCL %>",
+            "options": {
+                "cwd": "<%= data.cwd %>",
+                "shell": "<%= data.shell[process.platform] %>"
+            },
+            "args": [
+                "<% if (config['probe-id']) { %>",
+                "-USB", "<%= config['probe-id'] %>\n",
+                "<% } %>",
+                "-device", "<%= data.jlinkDevice %>\n",
+                "-endian", "little",
+                "-if", "<%= config.protocol ?? 'swd' %>",
+                "-speed", "<%= parseInt((config.clock ?? data.defaultClock) / data.scaleClock) %>\n",
+                "-nohalt",
+                "-noir",
+                "-nogui",
+                "-localhostonly",
+                "-silent",
+                "-port", "<%= ports.get(start_pname) %>\n",
+                "-TelnetPort", "<%= data.telnetOptionsInput[start_pname ?? '']?.port ?? data.telnetOptionsDefault.port %>\n",
+                "<% if (data.traceEnabled) { %>",
+                "-SWOPort", "5555",
+                "<% } %>"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "CMSIS Load+Run",
+            "dependsOn": [
+                "CMSIS Load",
+                "CMSIS Run"
+            ],
+            "dependsOrder": "sequence",
+            "problemMatcher": []
+        }
+    ]
+}

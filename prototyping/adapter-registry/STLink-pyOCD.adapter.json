@@ -1,0 +1,308 @@
+{
+    "data": {
+        "cwd": "${workspaceFolder}/<%= solution_folder %>",
+        "shell": {
+            "win32": {
+                "executable": "cmd.exe",
+                "args": [ "/d", "/c" ]
+            },
+            "linux": {
+                "executable": "/bin/bash",
+                "args": [ "-c" ]
+            },
+            "darwin": {
+                "executable": "/bin/bash",
+                "args": [ "-c" ]
+            }
+        },
+        "program": "<%= symbol_files[0]?.file ?? '' %>",
+        "programs": "<%= symbol_files.flatMap(e => (e.pname || !processors?.length) ? e : processors.map(p => ({ ...e, pname: p }))).groupedBy(v => v.pname ?? '') %>",
+        "traceEnabled": "<%= !!config['trace-port'] %>",
+        "traceClockIn": "<%= (config['trace-port']?.['clock-in'] ?? 0) * 1000 %>",
+        "traceClockOut": "<%= (config['trace-port']?.['clock-out'] ?? 0) * 1000 %>"
+    },
+    "launch": {
+        "singlecore-launch": {
+            "name": "STLink@pyOCD (launch)",
+            "type": "gdbtarget",
+            "request": "launch",
+            "cwd": "<%= data.cwd %>",
+            "program": "<%= data.program %>",
+            "gdb": "arm-none-eabi-gdb",
+            "auxiliaryGdb": true,
+            "preLaunchTask": "CMSIS Load",
+            "initCommands": [
+                "<%= data.programs[pname]?.slice(1)?.map(p => p.file ? `symbol-file \"${p.file}\"\\n` : '')?.join('') %>",
+                "monitor reset halt",
+                "tbreak main"
+            ],
+            "customResetCommands": [
+                "monitor reset halt",
+                "maintenance flush register-cache",
+                "maintenance flush dcache",
+                "tbreak main",
+                "continue"
+            ],
+            "target": {
+                "server": "pyocd",
+                "serverParameters": [
+                    "gdbserver",
+                    "--probe", "stlink:",
+                    "<% if (config['probe-id']) { %>",
+                    "--uid", "<%= config['probe-id'] %>\n",
+                    "<% } %>",
+                    "--connect", "attach",
+                    "<% if (config.telnet) { %>",
+                    "--semihosting",
+                    "<% } %>",
+                    "<% if (data.traceEnabled) { %>",
+                    "-Oenable_swv=1",
+                    "-Oswv_raw_enable=1",
+                    "-Oswv_raw_port=5555",
+                    "-Oswv_system_clock=<%= data.traceClockIn %>\n",
+                    "<% if (data.traceClockOut) { %>",
+                    "-Oswv_clock=<%= data.traceClockOut %>\n",
+                    "<% } %>",
+                    "<% } %>",
+                    "--cbuild-run", "${command:cmsis-csolution.getCbuildRunFile}",
+                    "--quiet",
+                    "--log", "*.cbuild_run,*server=info"
+                ],
+                "port": "<%= ports.get(pname) %>"
+            },
+            "cmsis": {
+                "cbuildRunFile": "${command:cmsis-csolution.getCbuildRunFile}",
+                "updateConfiguration": "auto"
+            }
+        },
+        "singlecore-attach": {
+            "name": "STLink@pyOCD (attach)",
+            "type": "gdbtarget",
+            "request": "attach",
+            "cwd": "<%= data.cwd %>",
+            "program": "<%= data.program %>",
+            "gdb": "arm-none-eabi-gdb",
+            "auxiliaryGdb": true,
+            "initCommands": [
+                "<%= data.programs[pname]?.slice(1)?.map(p => p.file ? `symbol-file \"${p.file}\"\\n` : '')?.join('') %>"
+            ],
+            "customResetCommands": [
+                "monitor reset halt",
+                "maintenance flush register-cache",
+                "maintenance flush dcache",
+                "tbreak main",
+                "continue"
+            ],
+            "target": {
+                "port": "<%= ports.get(pname) %>"
+            },
+            "cmsis": {
+                "cbuildRunFile": "${command:cmsis-csolution.getCbuildRunFile}",
+                "updateConfiguration": "auto"
+            }
+        },
+        "multicore-start-launch": {
+            "name": "<%= pname %> STLink@pyOCD (launch)",
+            "type": "gdbtarget",
+            "request": "launch",
+            "cwd": "<%= data.cwd %>",
+            "program": "<%= data.programs[pname]?.[0]?.file ?? '' %>",
+            "gdb": "arm-none-eabi-gdb",
+            "auxiliaryGdb": true,
+            "preLaunchTask": "CMSIS Load",
+            "initCommands": [
+                "<%= data.programs[pname]?.slice(1)?.map(p => p.file ? `symbol-file \"${p.file}\"\\n` : '')?.join('') %>",
+                "monitor reset halt",
+                "tbreak main"
+            ],
+            "customResetCommands": [
+                "monitor reset halt",
+                "maintenance flush register-cache",
+                "maintenance flush dcache",
+                "tbreak main",
+                "continue"
+            ],
+            "target": {
+                "server": "pyocd",
+                "serverParameters": [
+                    "gdbserver",
+                    "--probe", "stlink:",
+                    "<% if (config['probe-id']) { %>",
+                    "--uid", "<%= config['probe-id'] %>\n",
+                    "<% } %>",
+                    "--connect", "attach",
+                    "--persist",
+                    "<% if (config.telnet) { %>",
+                    "--semihosting",
+                    "<% } %>",
+                    "<% if (data.traceEnabled) { %>",
+                    "-Oenable_swv=1",
+                    "-Oswv_raw_enable=1",
+                    "-Oswv_raw_port=5555",
+                    "-Oswv_system_clock=<%= data.traceClockIn %>\n",
+                    "<% if (data.traceClockOut) { %>",
+                    "-Oswv_clock=<%= data.traceClockOut %>\n",
+                    "<% } %>",
+                    "<% } %>",
+                    "--cbuild-run", "${command:cmsis-csolution.getCbuildRunFile}",
+                    "--quiet",
+                    "--log", "*.cbuild_run,*server=info"
+                ],
+                "port": "<%= ports.get(pname) %>"
+            },
+            "cmsis": {
+                "cbuildRunFile": "${command:cmsis-csolution.getCbuildRunFile}",
+                "updateConfiguration": "auto"
+            }
+        },
+        "multicore-start-attach": {
+            "name": "<%= pname %> STLink@pyOCD (attach)",
+            "type": "gdbtarget",
+            "request": "attach",
+            "cwd": "<%= data.cwd %>",
+            "program": "<%= data.programs[pname]?.[0]?.file ?? '' %>",
+            "gdb": "arm-none-eabi-gdb",
+            "auxiliaryGdb": true,
+            "initCommands": [
+                "<%= data.programs[pname]?.slice(1)?.map(p => p.file ? `symbol-file \"${p.file}\"\\n` : '')?.join('') %>"
+            ],
+            "customResetCommands": [
+                "monitor reset halt",
+                "maintenance flush register-cache",
+                "maintenance flush dcache",
+                "tbreak main",
+                "continue"
+            ],
+            "target": {
+                "port": "<%= ports.get(pname) %>"
+            },
+            "cmsis": {
+                "cbuildRunFile": "${command:cmsis-csolution.getCbuildRunFile}",
+                "updateConfiguration": "auto"
+            }
+        },
+        "multicore-other": {
+            "name": "<%= pname %> STLink@pyOCD (attach)",
+            "type": "gdbtarget",
+            "request": "attach",
+            "cwd": "<%= data.cwd %>",
+            "program": "<%= data.programs[pname]?.[0]?.file ?? '' %>",
+            "gdb": "arm-none-eabi-gdb",
+            "auxiliaryGdb": true,
+            "initCommands": [
+                "<%= data.programs[pname]?.slice(1)?.map(p => p.file ? `symbol-file \"${p.file}\"\\n` : '')?.join('') %>"
+            ],
+            "customResetCommands": [
+                "monitor reset halt",
+                "maintenance flush register-cache",
+                "maintenance flush dcache",
+                "tbreak main",
+                "continue"
+            ],
+            "target": {
+                "port": "<%= ports.get(pname) %>"
+            },
+            "cmsis": {
+                "cbuildRunFile": "${command:cmsis-csolution.getCbuildRunFile}",
+                "updateConfiguration": "auto"
+            }
+        }
+    },
+    "tasks": [
+        {
+            "label": "CMSIS Erase",
+            "type": "shell",
+            "command": "pyocd",
+            "options": {
+                "cwd": "<%= data.cwd %>",
+                "shell": "<%= data.shell[process.platform] %>"
+            },
+            "args": [
+                "erase",
+                "--probe", "stlink:",
+                "<% if (config['probe-id']) { %>",
+                "--uid", "<%= config['probe-id'] %>\n",
+                "<% } %>",
+                "--chip",
+                "--cbuild-run", "${command:cmsis-csolution.getCbuildRunFile}"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "CMSIS Load",
+            "type": "shell",
+            "command": "pyocd",
+            "options": {
+                "cwd": "<%= data.cwd %>",
+                "shell": "<%= data.shell[process.platform] %>"
+            },
+            "args": [
+                "load",
+                "--probe", "stlink:",
+                "<% if (config['probe-id']) { %>",
+                "--uid", "<%= config['probe-id'] %>\n",
+                "<% } %>",
+                "--cbuild-run", "${command:cmsis-csolution.getCbuildRunFile}"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "CMSIS Run",
+            "type": "shell",
+            "command": "pyocd",
+            "options": {
+                "cwd": "<%= data.cwd %>",
+                "shell": "<%= data.shell[process.platform] %>"
+            },
+            "args": [
+                "gdbserver",
+                "--probe", "stlink:",
+                "<% if (config['probe-id']) { %>",
+                "--uid", "<%= config['probe-id'] %>\n",
+                "<% } %>",
+                "--connect", "attach",
+                "--persist",
+                "--reset-run",
+                "<% if (config.telnet) { %>",
+                "--semihosting",
+                "<% } %>",
+                "<% if (data.traceEnabled) { %>",
+                "-Oenable_swv=1",
+                "-Oswv_raw_enable=1",
+                "-Oswv_raw_port=5555",
+                "-Oswv_system_clock=<%= data.traceClockIn %>\n",
+                "<% if (data.traceClockOut) { %>",
+                "-Oswv_clock=<%= data.traceClockOut %>\n",
+                "<% } %>",
+                "<% } %>",
+                "--cbuild-run", "${command:cmsis-csolution.getCbuildRunFile}",
+                "--quiet",
+                "--log", "*.cbuild_run,*server=info"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "CMSIS Load+Run",
+            "dependsOn": [
+                "CMSIS Load",
+                "CMSIS Run"
+            ],
+            "dependsOrder": "sequence",
+            "problemMatcher": []
+        },
+        {
+            "label": "CMSIS TargetInfo",
+            "type": "shell",
+            "command": "pyocd",
+            "options": {
+                "cwd": "<%= data.cwd %>",
+                "shell": "<%= data.shell[process.platform] %>"
+            },
+            "args": [
+                "list",
+                "--cbuild-run", "${command:cmsis-csolution.getCbuildRunFile}"
+            ],
+            "problemMatcher": []
+        }
+    ]
+}
