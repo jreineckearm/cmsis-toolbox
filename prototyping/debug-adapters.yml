@@ -89,12 +89,12 @@ debug-adapters:
             type: number
             range: [10, 200000]
             default: 10000
-          - name: Trace Configuration File
-            description: Path to file with trace generation settings
-            yml-node: trace-config-file
-            type: file
-            path-type: relative
-            default: stm32h747_trc_swo.dbgconf
+          #- name: Trace Configuration File
+          #  description: Path to file with trace generation settings
+          #  yml-node: trace-config-file
+          #  type: file
+          #  path-type: relative
+          #  default: stm32h747_trc_swo.dbgconf
           #- name: Trace Output Clock (kHz)
           #  description: Configure clock that is output from the trace interface component
           #  yml-node: trace-clock-out

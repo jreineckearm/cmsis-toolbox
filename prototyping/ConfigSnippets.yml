@@ -6,6 +6,39 @@
 #  - Better understand real world usage of CATU
 #  - Clean up flush sequences (like ETR + CATU)
 
+# Predefined debug access variables used in implementations
+# - __traceout: Trace mode and parameters, see https://open-cmsis-pack.github.io/Open-CMSIS-Pack-Spec/main/html/debug_description.html#DebugVars
+#    - Filled from
+#        - trace-interface.mode
+#        - trace-interface.port-width
+#
+#    Work in Progress
+#
+# - __traceclockin: Trace clock input frequency in Hz. In the majority of systems with a CoreSight trace from a single CPU the same as CPU clock.
+#                   Make sure this matches the actual clock frequency for the parts you want to trace. If not set correctly, trace capture may fail.
+# - __traceclockout: Trace clock output frequency in Hz. If left to 0, then the value is computed based on available information from __traceclockin
+#                    and known capabilities of the debug unit.
+#
+
+####
+## SystemClock
+## CPU Clock = often SystemClock / core-prescaler
+## TraceClockIn
+##    - Simple Systems: TraceClockIn = SystemClock = CPU Clock
+##    - HighSpeed Single Core: TraceClockIn = SystemClock / device-prescaler
+##    = Multi-core: TraceClockIn = (SystemClock or independent clock) / device-prescaler
+## TraceClockOut = TraceClockIn / TPIU-prescaler
+## TSGEN Clock -> Typically derived from free-running, always-on clock, can be low-speed.
+##    - Keep separate.
+
+### pyOCD
+##  swv_clock - Optional baud rate for SWO, which defaults to 1 MHz if not set.
+##  swv_system_clock - Required system clock frequency. Used to compute TPIU baud rate divider.
+
+### J-Link - SWO EnableTarget
+##  CPUFreq - Suspect same as TraceClockIn, can be 0 for auto-detect.
+##  SWOFreq - "Baud rate", can be 0 for auto-detect.
+
 
 # ETB Component Snippets
 
@@ -624,14 +657,10 @@
     - name: Configure_TPIU
       blocks:
           - execute: |
-                // Temporary - Parameters, set from debugger going forward
-
-                // TEMP_TRACEOUT: replace with __traceout when available from debugger,
-                //                or move trace mode decision to new built-in variable.
-                __var swoTrace    = TEMP_TRACEOUT & 0x1;
-                __var syncTrace   = TEMP_TRACEOUT & 0x2;
-                __var bufferTrace = TEMP_TRACEOUT & 0x4;
-                __var tracePortWidth = (TEMP_TRACEOUT >> 16) & 0x3F; // Parallel trace port size
+                __var swoTrace    = __traceout & 0x1;
+                __var syncTrace   = __traceout & 0x2;
+                __var bufferTrace = __traceout & 0x4;
+                __var tracePortWidth = (__traceout >> 16) & 0x3F; // Parallel trace port size
 
                 // Helper variables
                 __var LAR_KEY   = 0xC5ACCE55;
@@ -780,11 +809,9 @@
     - name: TraceStart
       blocks:
       - execute: |
-          // TEMP_TRACEOUT: replace with __traceout when available from debugger,
-          //                or move trace mode decision to new built-in variable.
-          __var swoTrace    = TEMP_TRACEOUT & 0x1;
-          __var syncTrace   = TEMP_TRACEOUT & 0x2;
-          __var bufferTrace = TEMP_TRACEOUT & 0x4;
+          __var swoTrace    = __traceout & 0x1;
+          __var syncTrace   = __traceout & 0x2;
+          __var bufferTrace = __traceout & 0x4;
 
           Message(0, "Begin TraceStart");
 
@@ -818,11 +845,9 @@
     - name: TraceStop
       blocks:
       - execute: |
-          // TEMP_TRACEOUT: replace with __traceout when available from debugger,
-          //                or move trace mode decision to new built-in variable.
-          __var swoTrace    = TEMP_TRACEOUT & 0x1;
-          __var syncTrace   = TEMP_TRACEOUT & 0x2;
-          __var bufferTrace = TEMP_TRACEOUT & 0x4;
+          __var swoTrace    = __traceout & 0x1;
+          __var syncTrace   = __traceout & 0x2;
+          __var bufferTrace = __traceout & 0x4;
 
           Message(0, "Begin TraceStop");
 
@@ -845,11 +870,9 @@
     - name: TraceCapture
       blocks:
       - execute: |
-          // TEMP_TRACEOUT: replace with __traceout when available from debugger,
-          //                or move trace mode decision to new built-in variable.
-          __var swoTrace    = TEMP_TRACEOUT & 0x1;
-          __var syncTrace   = TEMP_TRACEOUT & 0x2;
-          __var bufferTrace = TEMP_TRACEOUT & 0x4;
+          __var swoTrace    = __traceout & 0x1;
+          __var syncTrace   = __traceout & 0x2;
+          __var bufferTrace = __traceout & 0x4;
 
           Message(0, "Begin TraceCapture");
 
@@ -876,10 +899,8 @@
     - name: TraceFlush
       blocks:
       - execute: |
-          // TEMP_TRACEOUT: replace with __traceout when available from debugger,
-          //                or move trace mode decision to new built-in variable.
-          __var syncTrace   = TEMP_TRACEOUT & 0x2;
-          __var bufferTrace = TEMP_TRACEOUT & 0x4;
+          __var syncTrace   = __traceout & 0x2;
+          __var bufferTrace = __traceout & 0x4;
 
           Message(0, "Begin TraceFlush");
 
