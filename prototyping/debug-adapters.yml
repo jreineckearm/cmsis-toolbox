@@ -60,13 +60,13 @@ debug-adapters:
               - name: Disabled
                 value: off
                 description:  Serial I/O disabled
-      - section: Trace Interface
-        description: Trace interface setup
-        yml-node: trace-interface
+      - section: Trace Port
+        description: Trace port setup
+        yml-node: trace-port
         select: on
         options:
           - name: Mode
-            description: Configure trace interface mode
+            description: Configure trace port mode
             yml-node: mode
             type: enum
             default: swo-uart
@@ -83,24 +83,22 @@ debug-adapters:
               - name: Synchronous Trace Port
                 value: trace-port
                 description:  Trace output via Synchronous Trace Port
-          - name: Trace Interface Input Clock (kHz)
-            description: Configure clock that is input to the trace interface component (SWO, Trace Port, or Trace Buffer)
-            yml-node: trace-clock-in
+          - name: Input Clock (kHz)
+            description: Configure clock that is input to the trace port component (SWO, Trace Port). Same as CPU clock in majority of systems with trace from one CPU.
+            yml-node: clock-in
+            type: number
+            default: 10000
+          - name: Output Clock (kHz)
+            description: Configure clock that is output from the trace port component (SWO, Trace Port). If left to 0, the value is computed based on other available information.
+            yml-node: clock-out
             type: number
             range: [10, 200000]
             default: 10000
-          #- name: Trace Configuration File
-          #  description: Path to file with trace generation settings
-          #  yml-node: trace-config-file
-          #  type: file
-          #  path-type: relative
-          #  default: stm32h747_trc_swo.dbgconf
-          #- name: Trace Output Clock (kHz)
-          #  description: Configure clock that is output from the trace interface component
-          #  yml-node: trace-clock-out
-          #  type: number
-          #  range: [10, 20000]
-          #  default: 10000
+          - name: Port Width
+            description: Configure trace interface port width (only applicable for Trace Port mode, ignored otherwise)
+            yml-node: width
+            type: number
+            default: 4
 
   - name: "ULINKplus@pyOCD"
     alias-name: ["ULINKplus"]                              # alternative names that map to this debug adapter

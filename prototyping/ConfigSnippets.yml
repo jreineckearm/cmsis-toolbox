@@ -6,21 +6,7 @@
 #  - Better understand real world usage of CATU
 #  - Clean up flush sequences (like ETR + CATU)
 
-# Predefined debug access variables used in implementations
-# - __traceout: Trace mode and parameters, see https://open-cmsis-pack.github.io/Open-CMSIS-Pack-Spec/main/html/debug_description.html#DebugVars
-#    - Filled from
-#        - trace-interface.mode
-#        - trace-interface.port-width
-#
-#    Work in Progress
-#
-# - __traceclockin: Trace clock input frequency in Hz. In the majority of systems with a CoreSight trace from a single CPU the same as CPU clock.
-#                   Make sure this matches the actual clock frequency for the parts you want to trace. If not set correctly, trace capture may fail.
-# - __traceclockout: Trace clock output frequency in Hz. If left to 0, then the value is computed based on available information from __traceclockin
-#                    and known capabilities of the debug unit.
-#
-
-####
+####n Clocks
 ## SystemClock
 ## CPU Clock = often SystemClock / core-prescaler
 ## TraceClockIn
@@ -38,6 +24,26 @@
 ### J-Link - SWO EnableTarget
 ##  CPUFreq - Suspect same as TraceClockIn, can be 0 for auto-detect.
 ##  SWOFreq - "Baud rate", can be 0 for auto-detect.
+
+
+# Predefined debug access variables used in implementations
+# - __traceout: Trace mode and parameters, see https://open-cmsis-pack.github.io/Open-CMSIS-Pack-Spec/main/html/debug_description.html#DebugVars
+#    - *.cbuild-run.tml counterpart, taken as is
+#        - trace-port.mode
+#        - trace-port.width
+#
+#    New
+#
+# - __traceclockin: Trace clock input frequency in Hz. In the majority of systems with a CoreSight trace from a single CPU the same as CPU clock.
+#                   Make sure this matches the actual clock frequency for the parts you want to trace. If not set correctly, trace capture may fail.
+#    - *.cbuild-run.tml counterpart, used for J-Link command line options, optional use for pyocd command line options
+#        - trace-port.clock-in
+#
+# - __traceclockout: Trace clock output frequency in Hz. If left to 0, then the value is computed based on available information from __traceclockin
+#                    and known capabilities of the debug unit.
+#    - *.cbuild-run.tml counterpart, used for J-Link command line options, optional use for pyocd command line options
+#       - trace-port.clock-out
+#
 
 
 # ETB Component Snippets
@@ -599,10 +605,10 @@
     - debug-vars:
       vars: |
         // TPIU
-        __var TPIU_ADDRESS    = 0xE0040000;  // Default TPIU Location for single-core systems
-        __var TPIU_AP         = 0x00000000;
-        __var SWO_PRESCALER   = 0x00000000; // TPIU Asynchronous Clock Prescaler Register
-        __var TPIU_PRESCALER  = 0x00000000; // TPIU Asynchronous Clock Prescaler Register
+        __var TPIU_ADDRESS     = 0xE0040000;  // Default TPIU Location for single-core systems
+        __var TPIU_AP          = 0x00000000;
+        __var TPIU_PRESCALER   = 0;           // Manual override for TPIU prescaler. !! This is the value to program into TPIU + 1, if 0 then no manual override.
+        // TODO: Could do similar for sync packet frequency.
 
     - name: Flush_TPIU
       blocks:
@@ -661,8 +667,11 @@
                 __var syncTrace   = __traceout & 0x2;
                 __var bufferTrace = __traceout & 0x4;
                 __var tracePortWidth = (__traceout >> 16) & 0x3F; // Parallel trace port size
+                __var clockRatio  = __traceclockout / __traceclockin >= 1 ? (__traceclockout / __traceclockin) : 1;
+                __var prescaler   = TPIU_PRESCALER > 0 ? TPIU_PRESCALER : clockRatio - 1;
 
                 // Helper variables
+                __var ffcrValue = 0x00000000;
                 __var LAR_KEY   = 0xC5ACCE55;
                 __var savedAP = __ap;
 
@@ -673,20 +682,20 @@
           - if: swoTrace != 0
             blocks:
               - execute: |
-                  Write32(TPIU_ADDRESS + 0xFB0, LAR_KEY);       // TODO: Double-check if still necessary
-                  Write32(TPIU_ADDRESS + 0x010, SWO_PRESCALER); // TPIU Asynchronous Clock Prescaler Register: No prescaling
-                  Write32(TPIU_ADDRESS + 0x0F0, 0x00000002);    // TPIU Selected Pin Protocol Register: Select SWO 
+                  Write32(TPIU_ADDRESS + 0xFB0, LAR_KEY);     // TODO: Double-check if still necessary
+                  Write32(TPIU_ADDRESS + 0x010, prescaler);   // TPIU Asynchronous Clock Prescaler Register: No prescaling
+                  Write32(TPIU_ADDRESS + 0x0F0, 0x00000002);  // TPIU Selected Pin Protocol Register: Select SWO 
 
           - if: syncTrace != 0
             blocks:
               - execute: |
-                  Write32(TPIU_ADDRESS + 0xFB0, LAR_KEY);        // TODO: Double-check if still necessary
-                  Write32(TPIU_ADDRESS + 0x010, TPIU_PRESCALER); // TPIU Asynchronous Clock Prescaler Register: No prescaling
+                  Write32(TPIU_ADDRESS + 0xFB0, LAR_KEY);       // TODO: Double-check if still necessary
+                  Write32(TPIU_ADDRESS + 0x010, 2*prescaler);   // TPIU Asynchronous Clock Prescaler Register: No prescaling
                   Write32(TPIU_ADDRESS + 0x004, 1 << (tracePortWidth - 1));  // TPIU Current Synchronous Port Width
-                  Write32(TPIU_ADDRESS + 0x0F0, 0x00000000);     // TPIU Selected Pin Protocol Register: Select Sync Trace Port
+                  Write32(TPIU_ADDRESS + 0x0F0, 0x00000000);    // TPIU Selected Pin Protocol Register: Select Sync Trace Port
                   ffcrValue  = Read32(TPIU_ADDRESS + 0x304);
-                  ffcrValue |= 0x00000002;                    // Enable formatter
-                  Write32(TPIU_ADDRESS + 0x304, ffcrValue);      // TPIU FFCR
+                  ffcrValue |= 0x00000002;                      // Enable formatter
+                  Write32(TPIU_ADDRESS + 0x304, ffcrValue);     // TPIU FFCR
 
           - execute: |
                 __ap = savedAP;

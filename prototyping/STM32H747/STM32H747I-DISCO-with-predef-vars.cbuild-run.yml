@@ -150,11 +150,10 @@ cbuild-run:
       FUNNEL_INPUT_MASK_0: 0x0000000F  # Trace funnel input mask CSTF funnel instance
       # Funnel SWTF
       FUNNEL_INPUT_MASK_1: 0x00000003  # Trace funnel input mask SWTF funnel instance
-      # TPIU
-
-      SWO_PRESCALER: 1  # SWO specific
-      TPIU_PRESCALER: 0  # Same register as SWO prescaler, TODO: decide if to merge into single variable
-      TRACE_BUFFER_SYNCCNT: 0xA  # TODO: Good default!!
+      # TPIU + SWO
+      TRACE_PORT_PRESCALER: 0          # Manual override for TPIU prescaler. !! This is the value to program into TPIU + 1, if 0 then no manual override.
+      # Trace Buffer
+      TRACE_BUFFER_SYNCCNT: 0xA        # TODO: Good default!!
 
 
   debug-vars:
@@ -198,18 +197,13 @@ cbuild-run:
       // TPIU
       __var TPIU_ADDRESS      = 0xE00F5000;
       __var TPIU_AP           = 0x00000002;
-      __var SWO_PRESCALER     = 0x00000000; // TPIU Asynchronous Clock Prescaler Register
-      __var TPIU_PRESCALER    = 0x00000000; // TPIU Asynchronous Clock Prescaler Register
-
-
-      // ******************************************************
-      // UNDECIDED YET, BUT SAME PER COMPONENT APPROACH AS ABOVE
-      // ******************************************************
-
-      __var SWO_PRESCALER = 1;  // SWO specific
-      __var TPIU_PRESCALER = 0; // Same register as SWO prescaler, TODO: decide if to merge into single variable
+      // SWO
+      __var SWO_ADDRESS       = 0xE00E3000;
+      __var SWO_AP            = 0x00000002;
+      // TPIU + SWO
+      __var TRACE_PORT_PRESCALER = 0;  // Manual override for TPIU prescaler. !! This is the value to program into TPIU + 1, if 0 then no manual override.
+      // Trace Buffer      
       __var TRACE_BUFFER_SYNCCNT = 0xA; // TODO: Good default!!
-
 
   debug-sequences:
     - name: DebugDeviceUnlock
@@ -725,9 +719,12 @@ cbuild-run:
           - execute: |
                 __var syncTrace   = __traceout & 0x2;
                 __var tracePortWidth = (__traceout >> 16) & 0x3F; // Parallel trace port size
+                __var clockRatio  = __traceclockout / __traceclockin >= 1 ? (__traceclockout / __traceclockin) : 1;
+                __var prescaler   = TRACE_PORT_PRESCALER > 0 ? TRACE_PORT_PRESCALER : clockRatio - 1;
 
                 // Helper variables
                 __var LAR_KEY   = 0xC5ACCE55;
+                __var ffcrValue = 0;
                 __var savedAP = __ap;
 
                 Message(0, "Begin Configure_TPIU @0x%08X, AP 0x%08X", TPIU_ADDRESS, TPIU_AP);
@@ -738,11 +735,11 @@ cbuild-run:
             blocks:
               - execute: |
                   Write32(TPIU_ADDRESS + 0xFB0, LAR_KEY);        // TODO: Double-check if still necessary
-                  Write32(TPIU_ADDRESS + 0x010, TPIU_PRESCALER); // TPIU Asynchronous Clock Prescaler Register: No prescaling
+                  Write32(TPIU_ADDRESS + 0x010, 2*prescaler);    // TPIU Asynchronous Clock Prescaler Register: No prescaling
                   Write32(TPIU_ADDRESS + 0x004, 1 << (tracePortWidth - 1));  // TPIU Current Synchronous Port Width
                   Write32(TPIU_ADDRESS + 0x0F0, 0x00000000);     // TPIU Selected Pin Protocol Register: Select Sync Trace Port
                   ffcrValue  = Read32(TPIU_ADDRESS + 0x304);
-                  ffcrValue |= 0x00000002;                    // Enable formatter
+                  ffcrValue |= 0x00000002;                       // Enable formatter
                   Write32(TPIU_ADDRESS + 0x304, ffcrValue);      // TPIU FFCR
 
           - execute: |
@@ -780,8 +777,19 @@ cbuild-run:
     - name: Configure_SWO
       blocks:
       - execute: |
+          __var clockRatio  = __traceclockout / __traceclockin >= 1 ? (__traceclockout / __traceclockin) : 1;
+          __var prescaler   = TRACE_PORT_PRESCALER > 0 ? TRACE_PORT_PRESCALER : clockRatio - 1;
+
+          // Helper variables
+          __var LAR_KEY   = 0xC5ACCE55;
+          __var savedAP = __ap;
+
           Message(0, "Begin Configure_SWO");
+          __ap = SWO_AP; // Set AP
           Sequence("Configure_Funnel_SWTF");
+          Write32(SWO_ADDRESS + 0xFB0, LAR_KEY);     // TODO: Double-check if still necessary
+          Write32(SWO_ADDRESS + 0x010, prescaler);   // TPIU Asynchronous Clock Prescaler Register: No prescaling
+          __ap = savedAP;
           Message(0, "End Configure_SWO");
 
     - name: Configure_SyncTrace

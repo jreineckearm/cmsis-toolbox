@@ -122,8 +122,7 @@ cbuild-run:
       SOC_TPIU_REPLICATOR_ID_FILTER0: 0x00000000  # Default: all pass to output 0
       SOC_TPIU_REPLICATOR_ID_FILTER1: 0x00000000  # Default: all pass to output 1
       # SOC TPIU
-      SOC_SWO_PRESCALER: 0x00000000
-      SOC_TPIU_PRESCALER: 0x00000000
+      SOC_TPIU_PRESCALER: 0x00000000 # Default: no manual override
       # SOC ETR
       SOC_ETR_SYNCCNT: 0xA      # TODO: DEFAULT
       SOC_ETR_TRIGGER_COUNT: 0x0
@@ -165,27 +164,22 @@ cbuild-run:
   debug-vars:
     vars: |
         // SOC TPIU Funnel (!! E7 SDF file has broken port assignments??)
-        __var SOC_TPIU_FUNNEL_ADDRESS    = 0x00100000;
-        // __var SOC_TPIU_FUNNEL_APID       = 0x00000000;  // DP MEMSPACE
+        __var SOC_TPIU_FUNNEL_ADDRESS    = 0x00100000;  // DP MEMSPACE, no __apid
         // __var SOC_TPIU_FUNNEL_INPUT_MASK = 0x0000001F; // Mask of trace inputs connected to funnel, enable all valid inputs by default.
         // Turn off input from APPS Replicator (suspect Bit 0)
         __var SOC_TPIU_FUNNEL_INPUT_MASK = 0x0000001E; // Mask of trace inputs connected to funnel, enable all valid inputs by default.
 
         // SOC TPIU Replicator
-        __var SOC_TPIU_REPLICATOR_ADDRESS    = 0x00110000;
-        // __var SOC_TPIU_REPLICATOR_AP         = 0x00000000;  // DP MEMSPACE
+        __var SOC_TPIU_REPLICATOR_ADDRESS    = 0x00110000;  // DP MEMSPACE, no __apid
         __var SOC_TPIU_REPLICATOR_ID_FILTER0 = 0x00000000; // Default: all pass to output 0
         __var SOC_TPIU_REPLICATOR_ID_FILTER1 = 0x00000000; // Default: all pass to output 1
 
         // SOC TPIU
-        __var SOC_TPIU_ADDRESS    = 0x00120000;  // Default TPIU Location for single-core systems
-        // __var SOC_TPIU_AP         = 0x00000000;  // DP MEMSPACE
-        __var SOC_SWO_PRESCALER   = 0x00000000; // TPIU Asynchronous Clock Prescaler Register
-        __var SOC_TPIU_PRESCALER  = 0x00000000; // TPIU Asynchronous Clock Prescaler Register
+        __var SOC_TPIU_ADDRESS    = 0x00120000;  // Default TPIU Location for single-core systems, DP MEMSPACE, no __apid
+        __var SOC_TPIU_PRESCALER  = 0x00000000; // Default: no manual override
 
         // SOC ETR
-        __var SOC_ETR_ADDRESS           = 0x00140000;
-        // __var SOC_ETR_AP                = 0x00000000;  // DP MEMSPACE
+        __var SOC_ETR_ADDRESS           = 0x00140000; // DP MEMSPACE, no __apid
         __var SOC_ETR_SYNCCNT           = 0xA; // TODO: DEFAULT
         __var SOC_ETR_TRIGGER_COUNT     = 0x0;
         __var SOC_ETR_BUFFER_ADDRESS    = 0x02010000;
@@ -202,8 +196,7 @@ cbuild-run:
         // SOC CATU
         // Additional settings if CATU implemented
         // TODO: Seems like better set up by target software
-        __var SOC_CATU_ADDRESS             = 0x00150000;
-        // __var SOC_CATU_AP                  = 0x00000000;  // DP MEMSPACE
+        __var SOC_CATU_ADDRESS             = 0x00150000;  // DP MEMSPACE, no __apid
         __var SOC_CATU_MODE                = 0x00000000;              // [0]: 1- Translate, 0 - Pass-through
         __var SOC_CATU_SCATTERLIST_ADDR    = 0x00000000;              // Lookup table in RAM for translation
         __var SOC_CATU_SCATTERLIST_ADDR_HI = 0x00000000;
@@ -970,35 +963,36 @@ cbuild-run:
     - name: Configure_TPIU_SOC_TPIU
       blocks:
           - execute: |
-                // Temporary - Parameters, set from debugger going forward
-
                 __var swoTrace    = 0; // __traceout & 0x1; // SWO not supported
                 __var syncTrace   = __traceout & 0x2;
                 __var bufferTrace = __traceout & 0x4;
                 __var tracePortWidth = (__traceout >> 16) & 0x3F; // Parallel trace port size
+                __var clockRatio  = __traceclockout / __traceclockin >= 1 ? (__traceclockout / __traceclockin) : 1;
+                __var prescaler   = TPIU_PRESCALER > 0 ? TPIU_PRESCALER : clockRatio - 1;
 
                 // Helper variables
                 __var LAR_KEY   = 0xC5ACCE55;
+                __var ffcrValue = 0;
 
                 Message(0, "Begin Configure_TPIU_SOC_TPIU @0x%08X, DP MEMSPACE", SOC_TPIU_ADDRESS);
 
           - if: swoTrace != 0
             blocks:
               - execute: |
-                  WriteAccessAP(SOC_TPIU_ADDRESS + 0xFB0, LAR_KEY);       // TODO: Double-check if still necessary
-                  WriteAccessAP(SOC_TPIU_ADDRESS + 0x010, SOC_SWO_PRESCALER); // TPIU Asynchronous Clock Prescaler Register: No prescaling
-                  WriteAccessAP(SOC_TPIU_ADDRESS + 0x0F0, 0x00000002);    // TPIU Selected Pin Protocol Register: Select SWO 
+                  WriteAccessAP(SOC_TPIU_ADDRESS + 0xFB0, LAR_KEY);     // TODO: Double-check if still necessary
+                  WriteAccessAP(SOC_TPIU_ADDRESS + 0x010, prescaler);   // TPIU Asynchronous Clock Prescaler Register: No prescaling
+                  WriteAccessAP(SOC_TPIU_ADDRESS + 0x0F0, 0x00000002);  // TPIU Selected Pin Protocol Register: Select SWO 
 
           - if: syncTrace != 0
             blocks:
               - execute: |
-                  WriteAccessAP(SOC_TPIU_ADDRESS + 0xFB0, LAR_KEY);        // TODO: Double-check if still necessary
-                  WriteAccessAP(SOC_TPIU_ADDRESS + 0x010, SOC_TPIU_PRESCALER); // TPIU Asynchronous Clock Prescaler Register: No prescaling
+                  WriteAccessAP(SOC_TPIU_ADDRESS + 0xFB0, LAR_KEY);     // TODO: Double-check if still necessary
+                  WriteAccessAP(SOC_TPIU_ADDRESS + 0x010, 2*prescaler); // TPIU Asynchronous Clock Prescaler Register: No prescaling
                   WriteAccessAP(SOC_TPIU_ADDRESS + 0x004, 1 << (tracePortWidth - 1));  // TPIU Current Synchronous Port Width
-                  WriteAccessAP(SOC_TPIU_ADDRESS + 0x0F0, 0x00000000);     // TPIU Selected Pin Protocol Register: Select Sync Trace Port
+                  WriteAccessAP(SOC_TPIU_ADDRESS + 0x0F0, 0x00000000);  // TPIU Selected Pin Protocol Register: Select Sync Trace Port
                   ffcrValue  = ReadAccessAP(SOC_TPIU_ADDRESS + 0x304);
-                  ffcrValue |= 0x00000002;                    // Enable formatter
-                  WriteAccessAP(SOC_TPIU_ADDRESS + 0x304, ffcrValue);      // TPIU FFCR
+                  ffcrValue |= 0x00000002;                              // Enable formatter
+                  WriteAccessAP(SOC_TPIU_ADDRESS + 0x304, ffcrValue);   // TPIU FFCR
 
           - execute: |
                 Message(0, "End Configure_TPIU_SOC_TPIU @0x%08X, DP MEMSPACE", SOC_TPIU_ADDRESS);

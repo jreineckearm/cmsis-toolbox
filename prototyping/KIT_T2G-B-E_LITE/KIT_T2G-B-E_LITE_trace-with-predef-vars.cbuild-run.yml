@@ -70,7 +70,7 @@ cbuild-run:
       # Funnel
       FUNNEL_INPUT_MASK: 0x00000000  # Mask of trace inputs connected to funnel, enable all valid inputs by default.
       # TPIU
-      TPIU_PRESCALER: 0x00000000  # TPIU Asynchronous Clock Prescaler Register
+      TPIU_PRESCALER: 0x00000000     # Manual override for TPIU prescaler. !! This is the value to program into TPIU + 1, if 0 then no manual override.
       # ETB
       ETB_TRIGGER_COUNT: 0x0
 
@@ -114,7 +114,7 @@ cbuild-run:
       // TPIU
       __var TPIU_ADDRESS    = 0xE0040000;  // Default TPIU Location for single-core systems
       __var TPIU_AP         = 0x00000000;
-      __var TPIU_PRESCALER  = 0x00000000; // TPIU Asynchronous Clock Prescaler Register
+      __var TPIU_PRESCALER  = 0x00000000;  // Manual override for TPIU prescaler. !! This is the value to program into TPIU + 1, if 0 then no manual override.
 
       // ETB
       __var ETB_ADDRESS       = 0x00000000;
@@ -1560,29 +1560,39 @@ cbuild-run:
     - name: Configure_TPIU
       blocks:
           - execute: |
-                // Temporary - Parameters, set from debugger going forward
+                __var swoTrace    = 0; // __traceout & 0x1; // SWO not supported
                 __var syncTrace   = __traceout & 0x2;
                 __var bufferTrace = __traceout & 0x4;
                 __var tracePortWidth = (__traceout >> 16) & 0x3F; // Parallel trace port size
+                __var clockRatio  = __traceclockout / __traceclockin >= 1 ? (__traceclockout / __traceclockin) : 1;
+                __var prescaler   = TPIU_PRESCALER > 0 ? TPIU_PRESCALER : clockRatio - 1;
 
                 // Helper variables
                 __var LAR_KEY   = 0xC5ACCE55;
+                __var ffcrValue = 0;
                 __var savedAP = __ap;
 
                 Message(0, "Begin Configure_TPIU @0x%08X, AP 0x%08X", TPIU_ADDRESS, TPIU_AP);
 
                 __ap = TPIU_AP; // Set AP
 
+          - if: swoTrace != 0
+            blocks:
+              - execute: |
+                  Write32(TPIU_ADDRESS + 0xFB0, LAR_KEY);     // TODO: Double-check if still necessary
+                  Write32(TPIU_ADDRESS + 0x010, prescaler);   // TPIU Asynchronous Clock Prescaler Register: No prescaling
+                  Write32(TPIU_ADDRESS + 0x0F0, 0x00000002);  // TPIU Selected Pin Protocol Register: Select SWO 
+
           - if: syncTrace != 0
             blocks:
               - execute: |
-                  Write32(TPIU_ADDRESS + 0xFB0, LAR_KEY);        // TODO: Double-check if still necessary
-                  Write32(TPIU_ADDRESS + 0x010, TPIU_PRESCALER); // TPIU Asynchronous Clock Prescaler Register: No prescaling
+                  Write32(TPIU_ADDRESS + 0xFB0, LAR_KEY);          // TODO: Double-check if still necessary
+                  Write32(TPIU_ADDRESS + 0x010, 2*TPIU_PRESCALER); // TPIU Asynchronous Clock Prescaler Register: No prescaling
                   Write32(TPIU_ADDRESS + 0x004, 1 << (tracePortWidth - 1));  // TPIU Current Synchronous Port Width
-                  Write32(TPIU_ADDRESS + 0x0F0, 0x00000000);     // TPIU Selected Pin Protocol Register: Select Sync Trace Port
+                  Write32(TPIU_ADDRESS + 0x0F0, 0x00000000);       // TPIU Selected Pin Protocol Register: Select Sync Trace Port
                   ffcrValue  = Read32(TPIU_ADDRESS + 0x304);
-                  ffcrValue |= 0x00000002;                    // Enable formatter
-                  Write32(TPIU_ADDRESS + 0x304, ffcrValue);      // TPIU FFCR
+                  ffcrValue |= 0x00000002;                         // Enable formatter
+                  Write32(TPIU_ADDRESS + 0x304, ffcrValue);        // TPIU FFCR
 
           - execute: |
                 __ap = savedAP;

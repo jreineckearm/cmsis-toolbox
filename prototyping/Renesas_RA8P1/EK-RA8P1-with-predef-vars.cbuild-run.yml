@@ -125,8 +125,7 @@ cbuild-run:
   debug-vars:
     vars: |
       // Provide from debugger
-      __var SWO_PRESCALER = 1;  // SWO specific
-      __var TPIU_PRESCALER = 0; // Same register as SWO prescaler, TODO: decide if to merge into single variable
+      __var TRACE_PORT_PRESCALER = 0;   // Manual override for trace port prescaler. !! This is the value to program into TPIU + 1, if 0 then no manual override.
       __var TRACE_BUFFER_SYNCCNT = 0xA; // TODO: Good default!!
 
       // Custom variables for RA8P1 debug & trace configuration
@@ -209,6 +208,8 @@ cbuild-run:
           __var LAR_KEY = 0xC5ACCE55;
           __var savedAP = __ap;
           __var selectAP = 0xFFFFFFFF;
+          __var clockRatio  = __traceclockout / __traceclockin >= 1 ? (__traceclockout / __traceclockin) : 1;
+          __var prescaler   = TRACE_PORT_PRESCALER > 0 ? TRACE_PORT_PRESCALER : clockRatio - 1;
 
           Message(0, "ConfigureSWO sequence");
 
@@ -227,7 +228,7 @@ cbuild-run:
             __ap = selectAP;
             // Configure "local" TPIU for SWO (RA8P1-specific)
             Write32(TPIU_BASE + 0xFB0, LAR_KEY);       // TODO: Double-check if still necessary
-            Write32(TPIU_BASE + 0x010, SWO_PRESCALER); // TPIU Asynchronous Clock Prescaler Register: No prescaling
+            Write32(TPIU_BASE + 0x010, prescaler);     // TPIU Asynchronous Clock Prescaler Register: No prescaling
             Write32(TPIU_BASE + 0x0F0, 0x00000002);    // TPIU Selected Pin Protocol Register: Select SWO 
 
       - execute: |
@@ -267,10 +268,14 @@ cbuild-run:
       - execute: |
           __var ETF_BASE  = 0x80014000;
           __var TPIU_BASE = 0x80016000;
-          __var savedAP = __ap;
-          __var tracePortWidth = (__traceout >> 16) & 0x3F; // Extract parallel trace port size from __traceout
+          __var tracePortWidth = (__traceout >> 16) & 0x3F; // Parallel trace port size
+          __var clockRatio  = __traceclockout / __traceclockin >= 1 ? (__traceclockout / __traceclockin) : 1;
+          __var prescaler   = TRACE_PORT_PRESCALER > 0 ? TRACE_PORT_PRESCALER : clockRatio - 1;
+
+          // Helper variables
           __var ffcrValue = 0x00000000;
           __var etfStatus = 0x00000000;
+          __var savedAP = __ap;
 
           Message(0, "ConfigureSyncTrace sequence");
 
@@ -280,7 +285,7 @@ cbuild-run:
           Sequence("FlushTPIU");
 
       - execute: |
-          Write32(TPIU_BASE + 0x010, TPIU_PRESCALER);             // TPIU Asynchronous Clock Prescaler Register: No prescaling
+          Write32(TPIU_BASE + 0x010, 2*prescaler);                // TPIU Asynchronous Clock Prescaler Register: No prescaling
           Write32(TPIU_BASE + 0x004, 1 << (tracePortWidth - 1));  // TPIU Current Synchronous Port Width
           Write32(TPIU_BASE + 0x0F0, 0x00000000);                 // TPIU Selected Pin Protocol Register: Select Sync Trace Port 
           ffcrValue  = Read32(TPIU_BASE + 0x304);
