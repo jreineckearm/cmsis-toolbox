@@ -94,7 +94,7 @@ debug-adapters:
             type: number
             range: [10, 200000]
             default: 10000
-          - name: Port Width
+          - name: Width
             description: Configure trace interface port width (only applicable for Trace Port mode, ignored otherwise)
             yml-node: width
             type: number
