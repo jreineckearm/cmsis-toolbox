@@ -321,16 +321,15 @@ and uses the extension `<pname>.txt`, format: `<solution-name>+<target-type>.tra
 &nbsp;&nbsp;&nbsp; `input-clock:`                         | **Required** | Trace input clock frequency in Hz.
 &nbsp;&nbsp;&nbsp; `port-type:`                           |   Optional   | Set trace port transport mode. Currently only `SWO-UART` is accepted.
 &nbsp;&nbsp;&nbsp; `port-width:`                          |   Optional   | Width of the trace port. Currently only the value '1' is accepted for `SWO-UART`.
-&nbsp;&nbsp;&nbsp; `output-clock:`                        |   Optional   | Maximum trace output clock for the selected port type. For `SWO-UART` mode this is the baudrate.
+&nbsp;&nbsp;&nbsp; `output-clock:`                        |   Optional   | Trace output clock for the selected port type. For `SWO-UART` mode this is the baudrate.
 &nbsp;&nbsp;&nbsp; `server-port:`                         |   Optional   | Set TCP/IP port number of Trace server (default: 5555).
 &nbsp;&nbsp;&nbsp; `file:`                                |   Optional   | Explicit path and name of the trace output file. Default: `<solution-name>+<target-type>.trace`.
 
 #### Trace Clocks
 
-1. Trace `input-clock` is the clock frequency that goes into the trace port component. It equals the CPU clock frequency for the majority of systems with trace from a single core.
+1. Trace `input-clock` is the frequency of the clock signal that goes into the trace port component. It equals the CPU clock frequency for the majority of systems with trace from a single core.
 For more complex multi-core systems, the clock can is normally derived from the system clock. Refer to the device manual and setup to find the exact value.
-2. Trace `output-clock` is the maximum allowed clock frequency of the trace output signal. It is used in combination with `input-clock` to determine the effectively used trace output clock,
-and hence the programming of the trace port component. The value defaults to `input-clock` if not explicitly set.
+2. Trace `output-clock` is the clock frequency of the trace output signal. It is used to configure trace capture of the debug unit, and to calculate trace port prescaler values that need to be programmed. If not provided or if the value is `0`, then a best matching output frequency is automatically calculated based on `input-clock`, supported trace capture frequencies/baudrates of the debug unit, and other potentially known device-specific constraints like pin characteristics.
 
 #### Debug Access Variables
 
