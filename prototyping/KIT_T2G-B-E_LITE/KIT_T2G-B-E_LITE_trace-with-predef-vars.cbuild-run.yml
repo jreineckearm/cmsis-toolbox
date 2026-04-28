@@ -35,13 +35,6 @@ cbuild-run:
     protocol: swd
     clock: 2000000
     dbgconf: ../.cmsis/multicore+CM4.dbgconf
-    start-pname: Cortex-M4
-    gdbserver:
-      - port: 3333
-        pname: Cortex-M4
-      - port: 3334
-        pname: Cortex-M0p
-
     debug-vars-set:
       __TPIU_pinlocation: 1  # Select one of the possible TPIU pin locations
       __TPIU_clocksetup: 1   # Enable(1) or Disable(0) setup of trace source clock
@@ -65,7 +58,6 @@ cbuild-run:
       gpioPrt23CfgOutAddr: 0x40310BCC  # GPIO_PRT[port]_CFG_OUT register address. Port 23 output buffer configuration
       # SFLASH base address
       SFLASH_BASE_ADDR: 0x17000000
-
       # TRACE SETTINGS
       # Funnel
       FUNNEL_INPUT_MASK: 0x00000000  # Mask of trace inputs connected to funnel, enable all valid inputs by default.
@@ -73,6 +65,12 @@ cbuild-run:
       TPIU_PRESCALER: 0x00000000     # Manual override for TPIU prescaler. !! This is the value to program into TPIU + 1, if 0 then no manual override.
       # ETB
       ETB_TRIGGER_COUNT: 0x0
+    start-pname: Cortex-M4
+    gdbserver:
+      - port: 3333
+        pname: Cortex-M4
+      - port: 3334
+        pname: Cortex-M0p
 
   debug-vars:
     vars: |

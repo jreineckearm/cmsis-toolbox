@@ -86,6 +86,18 @@ cbuild-run:
     protocol: swd
     clock: 4000000
     #connect: under-reset
+    debug-vars-set:
+      # Provide from debugger
+      TRACE_PORT_PRESCALER: 0  # Manual override for trace port prescaler. !! This is the value to program into TPIU + 1, if 0 then no manual override.
+      TRACE_BUFFER_SYNCCNT: 0xA  # TODO: Good default!!
+      # Custom variables for RA8P1 debug & trace configuration
+      ENABLE_TRACE_CPU0: 1
+      ENABLE_TRACE_CPU1: 0
+      TRCK_PRESCALER: 2  # Device specific
+      TRC_PIN_DRIVER_SPEED: 0  # Device specific: 0=Low, 1=Middle, 2=High-Speed high-drive, 3=High
+      # TODO: TPIU PIN CONFIGURATION (ALTERNATE FUNCTION + PULL-UP/DRIVE SETTINGS, ETC)
+      #       SEE PmnPFS/PmnPFS_HA/PmnPFS_BY , chapter 21.2.5 in RA8P1 manual.
+      #       SEE 
     gdbserver:
       - port: 3333
       - port: 3334

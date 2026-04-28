@@ -117,13 +117,6 @@ cbuild-run:
     protocol: swd
     clock: 10000000
     dbgconf: ../.cmsis/Blinky+STM32H747I-EVAL.dbgconf
-    start-pname: CM7
-    gdbserver:
-      - port: 3333
-        pname: CM7
-      - port: 3334
-        pname: CM4
-
     debug-vars-set:
       # Default values for variables in debug sequences are configured with a *.dbgconf file in the user project
       DbgMCU_CR: 0x00000007  # DBGMCU_CR:       DBGMCU configuration register
@@ -143,8 +136,6 @@ cbuild-run:
       TraceD1_Pin: 0x00040004  # PE4
       TraceD2_Pin: 0x00040005  # PE5
       TraceD3_Pin: 0x00040006  # PE6
-
-
       # TRACE SETTINGS
       # Funnel CSTF
       FUNNEL_INPUT_MASK_0: 0x0000000F  # Trace funnel input mask CSTF funnel instance
@@ -154,7 +145,12 @@ cbuild-run:
       TRACE_PORT_PRESCALER: 0          # Manual override for TPIU prescaler. !! This is the value to program into TPIU + 1, if 0 then no manual override.
       # Trace Buffer
       TRACE_BUFFER_SYNCCNT: 0xA        # TODO: Good default!!
-
+    start-pname: CM7
+    gdbserver:
+      - port: 3333
+        pname: CM7
+      - port: 3334
+        pname: CM4
 
   debug-vars:
     vars: |

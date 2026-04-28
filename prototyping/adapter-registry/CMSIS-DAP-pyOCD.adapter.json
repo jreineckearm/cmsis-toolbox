@@ -19,7 +19,8 @@
         "programs": "<%= symbol_files.flatMap(e => (e.pname || !processors?.length) ? e : processors.map(p => ({ ...e, pname: p }))).groupedBy(v => v.pname ?? '') %>",
         "traceEnabled": "<%= !!config['trace-port'] %>",
         "traceClockIn": "<%= (config['trace-port']?.['clock-in'] ?? 0) * 1000 %>",
-        "traceClockOut": "<%= (config['trace-port']?.['clock-out'] ?? 0) * 1000 %>"
+        "traceClockOut": "<%= (config['trace-port']?.['clock-out'] ?? 0) * 1000 %>",
+        "debugVarsString": "<%= config['debug-vars-set'] ? Object.entries(config['debug-vars-set']).map(entry => `${entry[0]}=${entry[1]};`).join('') : '' %>"
     },
     "launch": {
         "singlecore-launch": {
@@ -65,6 +66,9 @@
                     "<% } %>",
                     "<% } %>",
                     "--cbuild-run", "${command:cmsis-csolution.getCbuildRunFile}",
+                    "<% if (!!data.debugVarsString) { %>",
+                    "-Opack.debug_sequences.debugvars=\"<%= data.debugVarsString %>\"",
+                    "<% } %>",
                     "--quiet",
                     "--log", "*.cbuild_run,*server=info"
                 ],
@@ -145,6 +149,9 @@
                     "<% } %>",
                     "<% } %>",
                     "--cbuild-run", "${command:cmsis-csolution.getCbuildRunFile}",
+                    "<% if (!!data.debugVarsString) { %>",
+                    "-Opack.debug_sequences.debugvars=\"<%= data.debugVarsString %>\"",
+                    "<% } %>",
                     "--quiet",
                     "--log", "*.cbuild_run,*server=info"
                 ],
@@ -224,7 +231,10 @@
                 "--uid", "<%= config['probe-id'] %>\n",
                 "<% } %>",
                 "--chip",
-                "--cbuild-run", "${command:cmsis-csolution.getCbuildRunFile}"
+                "--cbuild-run", "${command:cmsis-csolution.getCbuildRunFile}",
+                "<% if (!!data.debugVarsString) { %>",
+                "-Opack.debug_sequences.debugvars=\"<%= data.debugVarsString %>\"",
+                "<% } %>"
             ],
             "problemMatcher": []
         },
@@ -242,7 +252,10 @@
                 "<% if (config['probe-id']) { %>",
                 "--uid", "<%= config['probe-id'] %>\n",
                 "<% } %>",
-                "--cbuild-run", "${command:cmsis-csolution.getCbuildRunFile}"
+                "--cbuild-run", "${command:cmsis-csolution.getCbuildRunFile}",
+                "<% if (!!data.debugVarsString) { %>",
+                "-Opack.debug_sequences.debugvars=\"<%= data.debugVarsString %>\"",
+                "<% } %>"
             ],
             "problemMatcher": []
         },
@@ -276,6 +289,9 @@
                 "<% } %>",
                 "<% } %>",
                 "--cbuild-run", "${command:cmsis-csolution.getCbuildRunFile}",
+                "<% if (!!data.debugVarsString) { %>",
+                "-Opack.debug_sequences.debugvars=\"<%= data.debugVarsString %>\"",
+                "<% } %>",
                 "--quiet",
                 "--log", "*.cbuild_run,*server=info"
             ],
@@ -300,7 +316,10 @@
             },
             "args": [
                 "list",
-                "--cbuild-run", "${command:cmsis-csolution.getCbuildRunFile}"
+                "--cbuild-run", "${command:cmsis-csolution.getCbuildRunFile}",
+                "<% if (!!data.debugVarsString) { %>",
+                "-Opack.debug_sequences.debugvars=\"<%= data.debugVarsString %>\"",
+                "<% } %>"
             ],
             "problemMatcher": []
         }
