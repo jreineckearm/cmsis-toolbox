@@ -332,6 +332,19 @@ For more complex multi-core systems, the clock can is normally derived from the 
 2. Trace `output-clock` is the maximum allowed clock frequency of the trace output signal. It is used in combination with `input-clock` to determine the effectively used trace output clock,
 and hence the programming of the trace port component. The value defaults to `input-clock` if not explicitly set.
 
+#### Debug Access Variables
+
+The above configurations are passed to debug sequence implementations through [pre-defined debug access variables](https://open-cmsis-pack.github.io/Open-CMSIS-Pack-Spec/main/html/debug_description.html#DebugVars). The following mapping is expected:
+- `input-clock` directly mapps to variable `__traceclockin`.
+- If `output-clock` is provided or has a value other than `0`, then the value directly maps to variable `__traceclockout`.
+- If `output-clock` is not provided or has the value `0`, then the highest achievable output clock frequency supported by the debug unit is written to `__traceclockout`.
+- `port-type` maps to bits `0..2` of variable `__traceout`.
+- `port-width` maps to bits `16..21` of variable `__traceout` if the selected `port-type` is a synchronous trace port.
+
+!!! Note
+    The linked description of pre-defined debug access variables needs to be updated to include the proposed new variables
+    `__traceclockin` and `__traceclockout`.
+
 ### `debug-vars-set:`
 
 !!! Note
