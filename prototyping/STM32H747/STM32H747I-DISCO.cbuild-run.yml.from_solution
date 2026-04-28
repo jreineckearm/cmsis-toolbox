@@ -1,0 +1,982 @@
+cbuild-run:
+  generated-by: csolution version 2.13.0+p50-gc2e5f7d6
+  solution: ../Blinky.csolution.yml
+  target-type: STM32H747I-EVAL
+  target-set: <default>
+  compiler: AC6
+  board: STMicroelectronics::STM32H747I-EVAL:Rev.B
+  board-pack: Keil::STM32H747I-EVAL_BSP@1.1.1
+  board-pack-path: ${CMSIS_PACK_ROOT}/Keil/STM32H747I-EVAL_BSP/1.1.1
+  device: STMicroelectronics::STM32H747XIHx
+  device-pack: Keil::STM32H7xx_DFP@4.1.3
+  device-pack-path: ${CMSIS_PACK_ROOT}/Keil/STM32H7xx_DFP/4.1.3
+  output:
+    - file: Blinky_cm4/STM32H747I-EVAL/Debug/Blinky_cm4.axf
+      info: generate by Blinky_cm4.Debug+STM32H747I-EVAL
+      type: elf
+      load: symbols
+      pname: CM4
+    - file: Blinky_cm4/STM32H747I-EVAL/Debug/Blinky_cm4.hex
+      info: generate by Blinky_cm4.Debug+STM32H747I-EVAL
+      type: hex
+      load: image
+      pname: CM4
+    - file: Blinky_cm4/STM32H747I-EVAL/Debug/Blinky_cm4.bin
+      info: generate by Blinky_cm4.Debug+STM32H747I-EVAL
+      type: bin
+      load: none
+      pname: CM4
+    - file: Blinky_cm7/STM32H747I-EVAL/Debug/Blinky_cm7.axf
+      info: generate by Blinky_cm7.Debug+STM32H747I-EVAL
+      type: elf
+      load: symbols
+      pname: CM7
+    - file: Blinky_cm7/STM32H747I-EVAL/Debug/Blinky_cm7.hex
+      info: generate by Blinky_cm7.Debug+STM32H747I-EVAL
+      type: hex
+      load: image
+      pname: CM7
+    - file: Blinky_cm7/STM32H747I-EVAL/Debug/Blinky_cm7.bin
+      info: generate by Blinky_cm7.Debug+STM32H747I-EVAL
+      type: bin
+      load: none
+      pname: CM7
+  system-resources:
+    memory:
+      - name: FLASH_Bank2
+        access: rx
+        start: 0x08100000
+        size: 0x00100000
+        pname: CM4
+        default: true
+        from-pack: Keil::STM32H7xx_DFP@4.1.3
+      - name: RAM_D2
+        access: rw
+        start: 0x10000000
+        size: 0x00048000
+        pname: CM4
+        default: true
+        from-pack: Keil::STM32H7xx_DFP@4.1.3
+      - name: FLASH_Bank1
+        access: rx
+        start: 0x08000000
+        size: 0x00100000
+        pname: CM7
+        default: true
+        from-pack: Keil::STM32H7xx_DFP@4.1.3
+      - name: DTCMRAM
+        access: rw
+        start: 0x20000000
+        size: 0x00020000
+        pname: CM7
+        default: false
+        from-pack: Keil::STM32H7xx_DFP@4.1.3
+      - name: RAM_D1
+        access: rw
+        start: 0x24000000
+        size: 0x00080000
+        pname: CM7
+        default: true
+        from-pack: Keil::STM32H7xx_DFP@4.1.3
+      - name: RAM_D3
+        access: rw
+        start: 0x38000000
+        size: 0x00010000
+        pname: CM7
+        default: true
+        from-pack: Keil::STM32H7xx_DFP@4.1.3
+    processors:
+      - core: Cortex-M4
+        revision: r0p1
+        pname: CM4
+        endian: little
+        fpu: sp
+        mpu: present
+        dsp: present
+        max-clock: 240000000
+      - core: Cortex-M7
+        revision: r0p1
+        pname: CM7
+        endian: little
+        fpu: dp
+        mpu: present
+        dsp: present
+        max-clock: 480000000
+  system-descriptions:
+    - file: ${CMSIS_PACK_ROOT}/Keil/STM32H7xx_DFP/4.1.3/CMSIS/SVD/STM32H747_CM4.svd
+      type: svd
+      pname: CM4
+    - file: ${CMSIS_PACK_ROOT}/Keil/STM32H7xx_DFP/4.1.3/CMSIS/SVD/STM32H747_CM7.svd
+      type: svd
+      pname: CM7
+    - file: ${CMSIS_PACK_ROOT}/ARM/CMSIS-RTX/5.9.0/RTX5.scvd
+      type: scvd
+      pname: CM7
+  debugger:
+    name: ST-Link@pyOCD
+    protocol: swd
+    clock: 10000000
+    dbgconf: .cmsis/Blinky+STM32H747I-EVAL.dbgconf
+    start-pname: CM7
+    gdbserver:
+      - port: 3333
+        pname: CM7
+      - port: 3334
+        pname: CM4
+    trace-port:
+      mode: trace-port
+      clock-in: 10000
+      clock-out: 0
+      width: 4
+    debug-vars-set:
+      TEMP_TRACEOUT: 0x00040002
+      DbgMCU_CR: 0x00000007
+      DbgMCU_APB3_Fz1: 0x00000040
+      DbgMCU_APB3_Fz2: 0x00000040
+      DbgMCU_APB1L_Fz1: 0x00E00BFF
+      DbgMCU_APB1L_Fz2: 0x00E00BFF
+      DbgMCU_APB2_Fz1: 0x20070003
+      DbgMCU_APB2_Fz2: 0x20070003
+      DbgMCU_APB4_Fz1: 0x000C1E80
+      DbgMCU_APB4_Fz2: 0x000C1E80
+      TraceClk_Pin: 0x00040002
+      TraceD0_Pin: 0x00040003
+      TraceD1_Pin: 0x00040004
+      TraceD2_Pin: 0x00040005
+      TraceD3_Pin: 0x00040006
+      FUNNEL_INPUT_MASK_0: 0x0000000F
+      FUNNEL_INPUT_MASK_1: 0x00000003
+      TRACE_PORT_PRESCALER: 0
+      TRACE_BUFFER_SYNCCNT: 0xA
+  debug-vars:
+    vars: |
+      // Default values for variables in debug sequences are configured with a *.dbgconf file in the user project
+      __var DbgMCU_CR        = 0x00000007;   // DBGMCU_CR:       DBGMCU configuration register
+      //                  [ 8] DBGSTBY_D3, [ 7] DBGSTOP_D3
+      //                  [ 5] DBGSTBY_D2, [ 4] DBGSTOP_D2,  [ 3] DBGSLEEP_D2
+      //                  [ 2] DBGSTBY_D1, [ 1] DBGSTOP_D1,  [ 0] DBGSLEEP_D1
+      __var DbgMCU_APB3_Fz1  = 0x00000040;   // DBGMCU_APB3FZ1:  DBGMCU CPU1 APB3 peripheral freeze register
+      __var DbgMCU_APB3_Fz2  = 0x00000040;   // DBGMCU_APB3FZ2:  DBGMCU CPU2 APB3 peripheral freeze register
+      __var DbgMCU_APB1L_Fz1 = 0x00E00BFF;   // DBGMCU_APB1LFZ1: DBGMCU CPU1 APB1L peripheral freeze register
+      __var DbgMCU_APB1L_Fz2 = 0x00E00BFF;   // DBGMCU_APB1LFZ2: DBGMCU CPU2 APB1L peripheral freeze register
+      __var DbgMCU_APB2_Fz1  = 0x20070003;   // DBGMCU_APB2FZ1:  DBGMCU CPU1 APB2 peripheral freeze register
+      __var DbgMCU_APB2_Fz2  = 0x20070003;   // DBGMCU_APB2FZ2:  DBGMCU CPU2 APB2 peripheral freeze register
+      __var DbgMCU_APB4_Fz1  = 0x000C1E80;   // DBGMCU_APB4FZ1:  DBGMCU CPU1 APB4 peripheral freeze register
+      __var DbgMCU_APB4_Fz2  = 0x000C1E80;   // DBGMCU_APB4FZ2:  DBGMCU CPU2 APB4 peripheral freeze register
+
+      __var TraceClk_Pin     = 0x00040002;   // PE2
+      __var TraceD0_Pin      = 0x00040003;   // PE3
+      __var TraceD1_Pin      = 0x00040004;   // PE4
+      __var TraceD2_Pin      = 0x00040005;   // PE5
+      __var TraceD3_Pin      = 0x00040006;   // PE6
+
+
+      // TEMPORARY HACK, use __traceout instead
+      __var TEMP_TRACEOUT = 0x00000000;  // OFF
+      // __var TEMP_TRACEOUT = 0x00000001;  // SWO
+      // __var TEMP_TRACEOUT = 0x00040002;  // TPIU
+      // __var TEMP_TRACEOUT = 0x00000004;  // TRACE BUFFER
+      // __var TEMP_TRACEOUT = 0x00040003;  // SWO + TPIU
+
+
+      // Funnel CSTF
+      __var FUNNEL_ADDRESS_0    = 0xE00F3000; // Trace funnel address CSTF funnel instance
+      __var FUNNEL_AP_0         = 0x00000002; // Trace funnel address CSTF funnel instance
+      __var FUNNEL_INPUT_MASK_0 = 0x0000000F; // Trace funnel input mask CSTF funnel instance
+      // Funnel SWTF
+      __var FUNNEL_ADDRESS_1    = 0xE00F3000; // Trace funnel address SWTF funnel instance
+      __var FUNNEL_AP_1         = 0x00000002; // Trace funnel address SWTF funnel instance
+      __var FUNNEL_INPUT_MASK_1 = 0x00000003; // Trace funnel input mask SWTF funnel instance
+      // ETF
+      __var ETF_ADDRESS_0       = 0xE00F4000;
+      __var ETF_AP_0            = 0x00000002;
+      // TPIU
+      __var TPIU_ADDRESS_0      = 0xE00F5000;
+      __var TPIU_AP_0           = 0x00000002;
+
+      __var TRACE_PORT_PRESCALER = 0;   // Trace Port Prescaler
+      __var TRACE_BUFFER_SYNCCNT = 0xA; // TODO: Good default!!
+
+
+  debug-sequences:
+    - name: DebugDeviceUnlock
+      blocks:
+        - execute: |
+            __var value = 0;
+
+            Sequence("CheckID");
+
+            __ap   = 2;                                         // Switch to System Debug Access Port
+
+            value  = Read32(0xE00E1004);                        // Read DBGMCU_CR
+            value |= 0x00670000;                                // set preset values (enable all debug clocks by default)
+            // DBGMCU_CR[18] CKDBGD3EN, [17] CKDBGD2EN, [16] CKDBGD1EN
+            // DBGMCU_CR[22] D3DBGCKEN, [21] D1DBGCKEN
+        #- if: __traceout
+        - if: TEMP_TRACEOUT
+          execute: |
+            value |= 0x00100000;                              // DBGMCU_CR[20] TRACECLKEN
+        - execute: |
+            Write32(0xE00E1004, value);                         // Update DBGMCU_CR
+        - info: DbgMCU registers
+          execute: |
+            Write32(0xE00E1004 , DbgMCU_CR        | value);     // DBGMCU_CR:       Configure MCU Debug
+            Write32(0xE00E1034 , DbgMCU_APB3_Fz1         );     // DBGMCU_APB3FZ1:  Configure CPU1 APB3 peripheral freeze behavior
+            Write32(0xE00E1038 , DbgMCU_APB3_Fz2         );     // DBGMCU_APB3FZ2:  Configure CPU2 APB3 peripheral freeze register
+            Write32(0xE00E103C , DbgMCU_APB1L_Fz1        );     // DBGMCU_APB1LFZ1: Configure CPU1 APB1L peripheral freeze behavior
+            Write32(0xE00E1040 , DbgMCU_APB1L_Fz2        );     // DBGMCU_APB1LFZ2: Configure CPU2 APB1L peripheral freeze register
+            Write32(0xE00E104C , DbgMCU_APB2_Fz1         );     // DBGMCU_APB2FZ1:  Configure CPU1 APB2 peripheral freeze behavior
+            Write32(0xE00E1050 , DbgMCU_APB2_Fz2         );     // DBGMCU_APB2FZ2:  Configure CPU2 APB2 peripheral freeze register
+            Write32(0xE00E1054 , DbgMCU_APB4_Fz1         );     // DBGMCU_APB4FZ1:  Configure CPU1 APB4 peripheral freeze behavior
+            Write32(0xE00E1058 , DbgMCU_APB4_Fz2         );     // DBGMCU_APB4FZ2:  Configure CPU2 APB4 peripheral freeze register
+    - name: TraceStart
+      blocks:
+        - execute: |
+            //__var traceSWO    = (__traceout & 0x1) != 0;                               // SWO (asynchronous) Trace Selected?
+            //__var traceTPIU   = (__traceout & 0x2) != 0;                               // TPIU (synchronous) Trace Selected?
+            __var traceSWO    = (TEMP_TRACEOUT & 0x1) != 0;                               // SWO (asynchronous) Trace Selected?
+            __var traceTPIU   = (TEMP_TRACEOUT & 0x2) != 0;                               // TPIU (synchronous) Trace Selected?
+        - if: traceSWO
+          execute: |
+            Sequence("EnableTraceSWO");                                                  // Call SWO Trace Setup
+        - if: traceTPIU
+          execute: |
+            Sequence("EnableTraceTPIU");                                                 // Call TPIU Trace Setup
+
+        # ADD ADDITIONAL TRACE CONFIGURATION
+        - execute: |
+            // Additional Trace configuration can be added here if needed, e.g. configuring the trace funnel or ETF
+            Sequence("TraceStartExt");
+
+    - name: TraceStop
+      blocks:
+        - execute: |
+            // Nothing required for SWO Trace
+            // __var traceSWO    = (__traceout & 0x1) != 0;                               // SWO enabled?
+            // __var traceTPIU   = (__traceout & 0x2) != 0;                               // Synchronous trace port enabled?
+            __var traceSWO    = (TEMP_TRACEOUT & 0x1) != 0;                               // SWO enabled?
+            __var traceTPIU   = (TEMP_TRACEOUT & 0x2) != 0;                               // Synchronous trace port enabled?
+
+            // CALL TEARDOWN OF TRACE FIRST
+            Sequence("TraceStopExt");   // Add additional Trace Stop configuration if needed, e.g. to flush the ETF or TPIU FIFOs before stopping trace
+
+        - if: traceSWO
+          execute: |
+            Sequence("DisableTraceSWO");
+        - if: traceTPIU
+          execute: |
+            Sequence("DisableTraceTPIU");
+
+    - name: CheckID
+      blocks:
+        - execute: |
+            __var pidr1 = 0;
+            __var pidr2 = 0;
+            __var jep106id = 0;
+            __var ROMTableBase = 0;
+
+            __ap = 2;      // System debug access port (APB-AP)
+
+            ROMTableBase = ReadAP(0xF8) & ~0x3;
+
+            pidr1 = Read32(ROMTableBase + 0x0FE4);
+            pidr2 = Read32(ROMTableBase + 0x0FE8);
+            jep106id = ((pidr2 & 0x7) << 4 ) | ((pidr1 >> 4) & 0xF);
+        - if: jep106id != 0x20
+          execute: |
+            Query(0, "Not a genuine ST Device! Abort connection", 1);
+            Message(2, "Not a genuine ST Device! Abort connection.");
+    - name: EnableTraceSWO
+      blocks:
+        - execute: |
+            Sequence("ConfigureTraceSWOPin");
+    - name: DisableTraceSWO
+      blocks:
+        - execute: |
+            __var value = 0;
+
+            __ap   = 2;                                                                    // Switch to System Debug Access Port
+
+            // Disable Trace Clock
+            value      =  Read32(0xE00E1004);                                              // Read DBGMCU_CR
+            value &= ~0x00100000;                                                      // DBGMCU_CR[20] : set TraceClkEn
+            Write32(0xE00E1004, value);                                                    // Update DBGMCU_CR
+
+            // Configure SWO Funnel (SWTF) at 0xE00E4000
+            value      =  Read32(0xE00E4000);                                              // Read Trace Funnel CONTROL Register
+            value &=  0x00000F00;                                                      // Preserve Hold Time Settings, disable active slave ports
+            Write32(0xE00E4000, value);                                                    // Update Trace Funnel CONTROL Register
+    - name: EnableTraceTPIU
+      blocks:
+        - execute: |
+            Sequence("ConfigureTraceTPIUPins");
+    - name: DisableTraceTPIU
+      blocks:
+        - execute: |
+            __var value = 0;
+
+            __ap   = 2;                                                                    // Switch to System Debug Access Port
+
+            // Disable Trace Clock
+            value      =  Read32(0xE00E1004);                                              // Read DBGMCU_CR
+            value &= ~0x00100000;                                                      // DBGMCU_CR[20] : set TraceClkEn
+            Write32(0xE00E1004, value);                                                    // Update DBGMCU_CR
+
+            // Configure CoreSight Trace Funnel (CSTF) at 0xE00F3000
+            value      =  Read32(0xE00F3000);                                              // Read Trace Funnel CONTROL Register
+            value &=  0x00000FFC;                                                      // Preserve Hold Time Settings and other possibly set slave ports
+            Write32(0xE00F3000, value);                                                    // Update Trace Funnel CONTROL Register
+    - name: ConfigureTraceSWOPin
+      blocks:
+        - execute: |
+            __var pin     = 0;
+            __var port    = 0;
+            __var portAdr = 0;
+            __var pos     = 0;
+
+            __var SWO_Pin = 0x00010003;          // PB3
+        - info: configure SWO
+          execute: |
+            pin     =               ((SWO_Pin            ) & 0x0000FFFF);
+            port    =               ((SWO_Pin >> 16) & 0x0000FFFF);
+            portAdr = 0x58020000 + (((SWO_Pin >> 16) & 0x0000FFFF) * 0x400);
+
+            pos = pin * 2;
+            Write32(0x58024540,     ((Read32(0x58024540    )                         ) | (1 << port)) );  // RCC_C1_AHB4ENR:IO port clock enable
+            Write32(portAdr + 0x00, ((Read32(portAdr + 0x00) & ~( 3 << pos)) | (2 << pos )) );  // GPIOx_MODER:   Set Mode (Alternate Function)
+            Write32(portAdr + 0x08, ((Read32(portAdr + 0x08)                         ) | (3 << pos )) );  // GPIOx_OSPEEDR: Set Speed (Very High Speed)
+            Write32(portAdr + 0x0C, ((Read32(portAdr + 0x0C) & ~( 3 << pos))                    ) );  // GPIOx_PUPDR:   Set I/O to no pull-up/pull-down
+        - if: pin <  8
+          execute: |
+            pos = ((pin    ) & 7) * 4;
+            Write32(portAdr + 0x20, ((Read32(portAdr + 0x20) & ~(15 << pos))                    ) );  // GPIOx_AFRL:    Alternate Function to AF0
+        - if: pin >= 8
+          execute: |
+            pos = ((pin - 8) & 7) * 4;
+            Write32(portAdr + 0x24, ((Read32(portAdr + 0x24) & ~(15 << pos))                    ) );  // GPIOx_AFRH:    Alternate Function to AF0
+    - name: ConfigureTraceTPIUPins
+      blocks:
+        - execute: |
+            __var pin     = 8;
+            __var port    = 0;
+            __var portAdr = 0;
+            __var pos     = 0;
+
+            // __var width   = (__traceout & 0x003F0000) >> 16;
+            __var width   = (TEMP_TRACEOUT & 0x003F0000) >> 16;
+        - info: configure TRACECLK
+          execute: |
+            pin     =                (TraceClk_Pin            ) & 0x0000FFFF;
+            port    =                (TraceClk_Pin >> 16) & 0x0000FFFF;
+            portAdr = 0x58020000 + (((TraceClk_Pin >> 16) & 0x0000FFFF) * 0x400);
+
+            pos = pin * 2;
+            Write32(0x58024540,     ((Read32(0x58024540    )                         ) | (1 << port)) );  // RCC_C1_AHB4ENR:IO port clock enable
+            Write32(portAdr + 0x00, ((Read32(portAdr + 0x00) & ~( 3 << pos)) | (2 << pos )) );  // GPIOx_MODER:   Set Mode (Alternate Function)
+            Write32(portAdr + 0x08, ((Read32(portAdr + 0x08)                         ) | (3 << pos )) );  // GPIOx_OSPEEDR: Set Speed (Very High Speed)
+            Write32(portAdr + 0x0C, ((Read32(portAdr + 0x0C) & ~( 3 << pos))                    ) );  // GPIOx_PUPDR:   Set I/O to no pull-up/pull-down
+        - if: pin <  8
+          execute: |
+            pos = ((pin    ) & 7) * 4;
+            Write32(portAdr + 0x20, ((Read32(portAdr + 0x20) & ~(15 << pos))                    ) );  // GPIOx_AFRL:    Alternate Function to AF0
+        - if: pin >= 8
+          execute: |
+            pos = ((pin - 8) & 7) * 4;
+            Write32(portAdr + 0x24, ((Read32(portAdr + 0x24) & ~(15 << pos))                    ) );  // GPIOx_AFRH:    Alternate Function to AF0
+        - info: TPIU port width 1
+          if: width >= 1
+          blocks:
+            - info: configure TRACED0
+              execute: |
+                pin     =                (TraceD0_Pin            ) & 0x0000FFFF;
+                port    =                (TraceD0_Pin >> 16) & 0x0000FFFF;
+                portAdr = 0x58020000 + (((TraceD0_Pin >> 16) & 0x0000FFFF) * 0x400);
+
+                pos = pin * 2;
+                Write32(0x58024540,     ((Read32(0x58024540    )                         ) | (1 << port)) );  // RCC_C1_AHB4ENR:IO port clock enable
+                Write32(portAdr + 0x00, ((Read32(portAdr + 0x00) & ~( 3 << pos)) | (2 << pos )) );  // GPIOx_MODER:   Set Mode (Alternate Function)
+                Write32(portAdr + 0x08, ((Read32(portAdr + 0x08)                         ) | (3 << pos )) );  // GPIOx_OSPEEDR: Set Speed (Very High Speed)
+                Write32(portAdr + 0x0C, ((Read32(portAdr + 0x0C) & ~( 3 << pos))                    ) );  // GPIOx_PUPDR:   Set I/O to no pull-up/pull-down
+            - if: pin <  8
+              execute: |
+                pos = ((pin    ) & 7) * 4;
+                Write32(portAdr + 0x20, ((Read32(portAdr + 0x20) & ~(15 << pos))                    ) );  // GPIOx_AFRL:    Alternate Function to AF0
+            - if: pin >= 8
+              execute: |
+                pos = ((pin - 8) & 7) * 4;
+                Write32(portAdr + 0x24, ((Read32(portAdr + 0x24) & ~(15 << pos))                    ) );  // GPIOx_AFRH:    Alternate Function to AF0
+        - info: TPIU port width 2
+          if: width >= 2
+          blocks:
+            - info: configure TRACED1
+              execute: |
+                pin     =                (TraceD1_Pin            ) & 0x0000FFFF;
+                port    =                (TraceD1_Pin >> 16) & 0x0000FFFF;
+                portAdr = 0x58020000 + (((TraceD1_Pin >> 16) & 0x0000FFFF) * 0x400);
+
+                pos = pin * 2;
+                Write32(0x58024540,     ((Read32(0x58024540    )                         ) | (1 << port)) );  // RCC_C1_AHB4ENR:IO port clock enable
+                Write32(portAdr + 0x00, ((Read32(portAdr + 0x00) & ~( 3 << pos)) | (2 << pos )) );  // GPIOx_MODER:   Set Mode (Alternate Function)
+                Write32(portAdr + 0x08, ((Read32(portAdr + 0x08)                         ) | (3 << pos )) );  // GPIOx_OSPEEDR: Set Speed (Very High Speed)
+                Write32(portAdr + 0x0C, ((Read32(portAdr + 0x0C) & ~( 3 << pos))                    ) );  // GPIOx_PUPDR:   Set I/O to no pull-up/pull-down
+            - if: pin <  8
+              execute: |
+                pos = ((pin    ) & 7) * 4;
+                Write32(portAdr + 0x20, ((Read32(portAdr + 0x20) & ~(15 << pos))                    ) );  // GPIOx_AFRL:    Alternate Function to AF0
+            - if: pin >= 8
+              execute: |
+                pos = ((pin - 8) & 7) * 4;
+                Write32(portAdr + 0x24, ((Read32(portAdr + 0x24) & ~(15 << pos))                    ) );  // GPIOx_AFRH:    Alternate Function to AF0
+        - info: TPIU port width 4
+          if: width >= 4
+          blocks:
+            - info: configure TRACED2
+              execute: |
+                pin     =                (TraceD2_Pin            ) & 0x0000FFFF;
+                port    =                (TraceD2_Pin >> 16) & 0x0000FFFF;
+                portAdr = 0x58020000 + (((TraceD2_Pin >> 16) & 0x0000FFFF) * 0x400);
+
+                pos = pin * 2;
+                Write32(0x58024540,     ((Read32(0x58024540    )                         ) | (1 << port)) );  // RCC_C1_AHB4ENR:IO port clock enable
+                Write32(portAdr + 0x00, ((Read32(portAdr + 0x00) & ~( 3 << pos)) | (2 << pos )) );  // GPIOx_MODER:   Set Mode (Alternate Function)
+                Write32(portAdr + 0x08, ((Read32(portAdr + 0x08)                         ) | (3 << pos )) );  // GPIOx_OSPEEDR: Set Speed (Very High Speed)
+                Write32(portAdr + 0x0C, ((Read32(portAdr + 0x0C) & ~( 3 << pos))                    ) );  // GPIOx_PUPDR:   Set I/O to no pull-up/pull-down
+            - if: pin <  8
+              execute: |
+                pos = ((pin    ) & 7) * 4;
+                Write32(portAdr + 0x20, ((Read32(portAdr + 0x20) & ~(15 << pos))                    ) );  // GPIOx_AFRL:    Alternate Function to AF0
+            - if: pin >= 8
+              execute: |
+                pos = ((pin - 8) & 7) * 4;
+                Write32(portAdr + 0x24, ((Read32(portAdr + 0x24) & ~(15 << pos))                    ) );  // GPIOx_AFRH:    Alternate Function to AF0
+            - info: configure TRACED3
+              execute: |
+                pin     =                (TraceD3_Pin            ) & 0x0000FFFF;
+                port    =                (TraceD3_Pin >> 16) & 0x0000FFFF;
+                portAdr = 0x58020000 + (((TraceD3_Pin >> 16) & 0x0000FFFF) * 0x400);
+
+                pos = pin * 2;
+                Write32(0x58024540,     ((Read32(0x58024540    )                         ) | (1 << port)) );  // RCC_C1_AHB4ENR:IO port clock enable
+                Write32(portAdr + 0x00, ((Read32(portAdr + 0x00) & ~( 3 << pos)) | (2 << pos )) );  // GPIOx_MODER:   Set Mode (Alternate Function)
+                Write32(portAdr + 0x08, ((Read32(portAdr + 0x08)                         ) | (3 << pos )) );  // GPIOx_OSPEEDR: Set Speed (Very High Speed)
+                Write32(portAdr + 0x0C, ((Read32(portAdr + 0x0C) & ~( 3 << pos))                    ) );  // GPIOx_PUPDR:   Set I/O to no pull-up/pull-down
+            - if: pin <  8
+              execute: |
+                pos = ((pin    ) & 7) * 4;
+                Write32(portAdr + 0x20, ((Read32(portAdr + 0x20) & ~(15 << pos))                    ) );  // GPIOx_AFRL:    Alternate Function to AF0
+            - if: pin >= 8
+              execute: |
+                pos = ((pin - 8) & 7) * 4;
+                Write32(portAdr + 0x24, ((Read32(portAdr + 0x24) & ~(15 << pos))                    ) );  // GPIOx_AFRH:    Alternate Function to AF0
+
+
+    # EXPERIMENTING WITH NEW TRACE SEQUENCES
+    # NOTE: Addresses taken from SDF file in pack!
+    - name: Flush_ETF_0
+      blocks:
+        - execute: |
+            // Helper variables
+            __var savedAP     = __ap;
+            __var ffcrValue   = 0x00000000;
+            __var etfStatus   = 0x00000000;
+
+            Message(0, "Begin Flush_ETF_0 @0x%08X, AP 0x%08X", ETF_ADDRESS_0, ETF_AP_0);
+
+            __ap = ETF_AP_0; // Set AP
+
+        - execute: |
+            // Flush ETF first so the HW FIFO drains towards the TPIU.
+            ffcrValue = Read32(ETF_ADDRESS_0 + 0x304);
+            ffcrValue &= ~(0x00001040); // Clear StopOnFlush and FlushOnManual
+            ffcrValue |= 0x00001000;    // Stop after the manual flush completes
+            Write32(ETF_ADDRESS_0 + 0x304, ffcrValue);
+            ffcrValue |= 0x00000040;    // Trigger manual flush
+            Write32(ETF_ADDRESS_0 + 0x304, ffcrValue);
+
+        - execute: |
+            ffcrValue = Read32(ETF_ADDRESS_0 + 0x304);
+        - while: (ffcrValue & 0x40) != 0
+          info: "Wait for ETF manual flush to complete"
+          timeout: 100
+          blocks:
+            - execute: |
+                ffcrValue = Read32(ETF_ADDRESS_0 + 0x304);
+
+        - execute: |
+            etfStatus = Read32(ETF_ADDRESS_0 + 0x00C);
+        - while: (etfStatus & 0x4) == 0
+          info: "Wait for ETF to become ready"
+          timeout: 100
+          blocks:
+            - execute: |
+                etfStatus = Read32(ETF_ADDRESS_0 + 0x00C);
+
+        - execute: |
+            // Disable ETF after flush until next run/step
+            Write32(ETF_ADDRESS_0 + 0x020, 0x00000000);
+            etfStatus = Read32(ETF_ADDRESS_0 + 0x00C);
+        - while: (etfStatus & 0x4) == 0
+          info: "Wait for TMCReady"
+          timeout: 100
+          blocks:
+            - execute: |
+                etfStatus = Read32(ETF_ADDRESS_0 + 0x00C);
+
+        - execute: |
+            __ap = savedAP;
+            Message(0, "End Flush_ETF_0 @0x%08X, AP 0x%08X", ETF_ADDRESS_0, ETF_AP_0);
+
+    - name: Flush_TPIU_0
+      blocks:
+        - execute: |
+            // Helper variables
+            __var savedAP     = __ap;
+            __var ffcrValue   = 0x00000000;
+            __var ffsrValue   = 0x00000000;
+
+            Message(0, "Begin Flush_TPIU_0 @0x%08X, AP 0x%08X", TPIU_ADDRESS_0, TPIU_AP_0);
+            
+            __ap = TPIU_AP_0;  // Set AP
+
+        - execute: |
+            // Configure "local" TPIU for Sync Trace
+            ffsrValue = Read32(TPIU_ADDRESS_0 + 0x300);
+        - if: ffsrValue & 0x2 == 0
+          info: "Formatter not stopped, do it now"
+          blocks:
+
+          - execute: |
+              // Flush the TPIU formatter so pending packets leave the trace port.
+              ffcrValue = Read32(TPIU_ADDRESS_0 + 0x304);
+              ffcrValue &= ~(0x00001040); // Clear StopOnFlush and FlushOnManual
+              ffcrValue |= 0x00001000;    // Stop after the manual flush completes
+              Write32(TPIU_ADDRESS_0 + 0x304, ffcrValue);
+              ffcrValue |= 0x00000040;    // Trigger manual flush
+              Write32(TPIU_ADDRESS_0 + 0x304, ffcrValue);
+
+          - execute: |
+              ffcrValue = Read32(TPIU_ADDRESS_0 + 0x304);
+          - while: (ffcrValue & 0x40) != 0
+            info: "Wait for TPIU manual flush to complete"
+            timeout: 100
+            blocks:
+              - execute: |
+                  ffcrValue = Read32(TPIU_ADDRESS_0 + 0x304);
+
+          - execute: |
+              ffsrValue = Read32(TPIU_ADDRESS_0 + 0x300);
+          - while: (ffsrValue & 0x1) != 0
+            info: "Wait for TPIU flush in progress to clear"
+            timeout: 100
+            blocks:
+              - execute: |
+                  ffsrValue = Read32(TPIU_ADDRESS_0 + 0x300);
+
+        - execute: |
+            __ap = savedAP;
+            Message(0, "End Flush_TPIU_0 @0x%08X, AP 0x%08X", TPIU_ADDRESS_0, TPIU_AP_0);
+
+    - name: Configure_CPUTrace
+      blocks:
+        - execute: |
+            __var DEMCR_Address = 0xE000EDFC;
+            Message(0, "Begin Configure_CPUTrace @0x%08X", DEMCR_Address);
+            Write32(DEMCR_Address, Read32(DEMCR_Address) | 0x01000000);
+            Message(0, "End Configure_CPUTrace @0x%08X", DEMCR_Address);
+
+    - name: Configure_Funnel_0
+      blocks:
+      - execute: |
+          // TEMP_TRACEOUT: replace with __traceout when available from debugger,
+          //                or move trace mode decision to new built-in variable.
+          __var swoTrace    = TEMP_TRACEOUT & 0x1;
+          __var syncTrace   = TEMP_TRACEOUT & 0x2;
+          __var bufferTrace = TEMP_TRACEOUT & 0x4;
+
+          // Helper variables
+          __var savedAP    = __ap;
+          __var funnelMask = 0x00000000;
+          __var value      = 0x00000000;
+
+          Message(0, "Begin Configure_Funnel_0 @0x%08X, AP 0x%08X", FUNNEL_ADDRESS_0, FUNNEL_AP_0);
+
+      - if: syncTrace != 0 || bufferTrace != 0
+        blocks:
+          - execute: |
+              funnelMask = FUNNEL_INPUT_MASK_0;
+
+      - execute: |
+          __ap = FUNNEL_AP_0; // Set AP
+
+          value = Read32(FUNNEL_ADDRESS_0 + 0x000);
+          value &= ~0xFF;       // Clear existing funnel input enables, keep hold time
+          value |= funnelMask;  // Keep hold time as is for now, could be made configurable if needed
+
+      - execute: |
+          Write32(FUNNEL_ADDRESS_0 + 0x000, value); // Configure CoreSight Trace Funnel to enable selected trace sources
+
+          __ap = savedAP;
+          Message(0, "End Configure_Funnel_0 @0x%08X, AP 0x%08X", FUNNEL_ADDRESS_0, FUNNEL_AP_0);
+
+    - name: Configure_Funnel_1
+      blocks:
+      - execute: |
+          // TEMP_TRACEOUT: replace with __traceout when available from debugger,
+          //                or move trace mode decision to new built-in variable.
+          __var swoTrace    = TEMP_TRACEOUT & 0x1;
+          __var syncTrace   = TEMP_TRACEOUT & 0x2;
+          __var bufferTrace = TEMP_TRACEOUT & 0x4;
+
+          // Helper variables
+          __var savedAP    = __ap;
+          __var funnelMask = 0x00000000;
+          __var value      = 0x00000000;
+
+          Message(0, "Begin Configure_Funnel_1 @0x%08X, AP 0x%08X", FUNNEL_ADDRESS_1, FUNNEL_AP_1);
+
+          // BASED ON SDF FILE
+          // Determine funnel inputs
+      - if: swoTrace != 0
+        blocks:
+        - execute: |
+            funnelMask |= FUNNEL_INPUT_MASK_1; // Enable SWO trace input to funnel
+
+        - execute: |
+            __ap = FUNNEL_AP_1; // Set AP
+            value = Read32(FUNNEL_ADDRESS_1 + 0x000);
+            value &= ~0xFF;       // Clear existing funnel input enables, keep hold time
+            value |= funnelMask;  // Keep hold time as is for now, could be made configurable if needed
+
+      - execute: |
+          Write32(FUNNEL_ADDRESS_1 + 0x000, value); // Configure CoreSight Trace Funnel to enable selected trace sources
+
+          __ap = savedAP;
+          Message(0, "End Configure_Funnel_1 @0x%08X, AP 0x%08X", FUNNEL_ADDRESS_1, FUNNEL_AP_1);
+
+    - name: Configure_ETF_0_HWFIFO
+      blocks:
+      - execute: |
+            // Helper variables
+            __var savedAP = __ap;
+            __var ffcrValue = 0x00000000;
+            __var etfStatus = 0x00000000;
+
+            Message(0, "Begin Configure_TMC_ETF_HWFIFO @0x%08X, AP 0x%08X", ETF_ADDRESS_0, ETF_AP_0);
+            __ap = ETF_AP_0; // Set AP
+
+            // Configure ETF to HW FIFO for Sync Trace
+            Write32(ETF_ADDRESS_0 + 0x020, 0x00000000);  // Disable ETF before configuring
+            etfStatus = Read32(ETF_ADDRESS_0 + 0x00C);
+      - while: (etfStatus & 0x4) == 0
+        info: "Wait for TMCReady"
+        timeout: 100
+        blocks:
+          - execute: |
+              etfStatus = Read32(ETF_ADDRESS_0 + 0x00C);
+
+      - execute: |
+          // Configure
+          Write32(ETF_ADDRESS_0 + 0x028, 0x00000002); // Set HW FIFO Mode
+          Write32(ETF_ADDRESS_0 + 0x034, 0x00000000); // Watermark: Set threshold vacancy to 0 to use full buffer
+          Write32(ETF_ADDRESS_0 + 0x304, 0x00000003); // FFCR: Enable Formatter and Trigger Insertion
+          Write32(ETF_ADDRESS_0 + 0x308, 0x00000000); // Clear PSCR, use other components for periodic sync requests
+
+          Write32(ETF_ADDRESS_0 + 0x020, 0x00000001); // Enable ETF
+
+      - execute: |
+          __ap = savedAP;
+          Message(0, "End Configure_TMC_ETF_HWFIFO @0x%08X, AP 0x%08X", ETF_ADDRESS_0, ETF_AP_0);
+
+    - name: Configure_ETF_0_CircularBuffer
+      blocks:
+      - execute: |
+            // Helper variables
+            __var savedAP = __ap;
+            __var ffcrValue = 0x00000000;
+            __var etfStatus = 0x00000000;
+
+            Message(0, "Begin Configure_TMC_ETF_CircularBuffer @0x%08X, AP 0x%08X", ETF_ADDRESS_0, ETF_AP_0);
+            __ap = ETF_AP_0; // Set AP
+
+            // Configure ETF to HW FIFO for Sync Trace
+            Write32(ETF_ADDRESS_0 + 0x020, 0x00000000);  // Disable ETF before configuring
+            etfStatus = Read32(ETF_ADDRESS_0 + 0x00C);
+      - while: (etfStatus & 0x4) == 0
+        info: "Wait for TMCReady"
+        timeout: 100
+        blocks:
+          - execute: |
+              etfStatus = Read32(ETF_ADDRESS_0 + 0x00C);
+
+      - execute: |
+          // Configure
+          Write32(ETF_ADDRESS_0 + 0x028, 0x00000000); // Set Circular Buffer mode
+          Write32(ETF_ADDRESS_0 + 0x034, 0x00000000); // Watermark: Set threshold vacancy to 0 to use full buffer
+          Write32(ETF_ADDRESS_0 + 0x304, 0x00000003); // FFCR: Enable Formatter and Trigger Insertion
+          Write32(ETF_ADDRESS_0 + 0x308, TRACE_BUFFER_SYNCCNT); // Set PSCR
+          Write32(ETF_ADDRESS_0 + 0x014, 0x00000000); // Init RRP
+          Write32(ETF_ADDRESS_0 + 0x018, 0x00000000); // Init RwP
+
+          Write32(ETF_ADDRESS_0 + 0x020, 0x00000001); // Enable ETF
+
+      - execute: |
+          __ap = savedAP;
+          Message(0, "End Configure_TMC_ETF_CircularBuffer @0x%08X, AP 0x%08X", ETF_ADDRESS_0, ETF_AP_0);
+    
+    - name: Configure_SWO
+      blocks:
+      - execute: |
+          Message(0, "Begin Configure_SWO");
+          Sequence("Configure_Funnel_1");
+          Message(0, "End Configure_SWO");
+
+    - name: Configure_SyncTrace
+      blocks:
+      - execute: |
+          Message(0, "Begin Configure_SyncTrace");
+          Sequence("Flush_TPIU_0");
+          Sequence("Configure_Funnel_0");
+          Sequence("Configure_ETF_0_HWFIFO");
+          Message(0, "End Configure_SyncTrace");
+  
+    - name: Configure_TraceBuffer
+      blocks:
+      - execute: |
+          Message(0, "Begin Configure_TraceBuffer");
+          Sequence("Configure_Funnel_0");
+          Sequence("Configure_ETF_0_CircularBuffer");
+          Message(0, "End Configure_TraceBuffer");
+
+    - name: TraceCapture_TPIU_0
+      blocks:
+      - execute: |
+          // Helper variables
+          __var LAR_KEY   = 0xC5ACCE55;
+          __var savedAP = __ap;
+
+          Message(0, "Begin TraceCapture_TPIU_0 @0x%08X, AP 0x%08X", TPIU_ADDRESS_0, TPIU_AP_0);
+
+          // Ensure involved components are in a well-defined state.
+          Sequence("TraceFlush");
+
+          // Configure TPIU if needed and enable formatter
+          __ap = TPIU_AP_0; // Set AP
+          ffcrValue  = Read32(TPIU_ADDRESS_0 + 0x304);
+          ffcrValue |= 0x00000002;                                // Enable formatter
+          Write32(TPIU_ADDRESS_0 + 0x304, ffcrValue);                  // TPIU FFCR
+          __ap = savedAP;
+          Message(0, "End TraceCapture_TPIU_0 @0x%08X, AP 0x%08X", TPIU_ADDRESS_0, TPIU_AP_0);
+
+    - name: TraceCapture_ETF_0_CircularBuffer
+      blocks:
+      - execute: |
+          // Helper variables
+          __var ffcrValue = 0x00000000;
+          __var savedAP = __ap;
+
+          Message(0, "Begin TraceCapture_ETF_0_CircularBuffer @0x%08X, AP 0x%08X", ETF_ADDRESS_0, ETF_AP_0);
+
+          // Ensure involved components are in a well-defined state.
+          Sequence("TraceFlush");
+
+          __ap = ETF_AP_0; // Set AP
+          ffcrValue  = Read32(ETF_ADDRESS_0 + 0x304);
+          ffcrValue |= 0x00000002;               // FFCR: Enable Formatter
+          Write32(ETF_ADDRESS_0 + 0x304, ffcrValue);
+          Write32(ETF_ADDRESS_0 + 0x308, TRACE_BUFFER_SYNCCNT); // Set PSCR
+          Write32(ETF_ADDRESS_0 + 0x014, 0x00000000); // Init RRP
+          Write32(ETF_ADDRESS_0 + 0x018, 0x00000000); // Init RwP
+          Write32(ETF_ADDRESS_0 + 0x020, 0x00000001); // Enable ETF
+          __ap = savedAP;
+
+          Message(0, "End TraceCapture_ETF_0_CircularBuffer @0x%08X, AP 0x%08X", ETF_ADDRESS_0, ETF_AP_0);
+
+    - name: TraceStartExt
+      blocks:
+      - execute: |
+          // TEMP_TRACEOUT: replace with __traceout when available from debugger,
+          //                or move trace mode decision to new built-in variable.
+          __var swoTrace    = TEMP_TRACEOUT & 0x1;
+          __var syncTrace   = TEMP_TRACEOUT & 0x2;
+          __var bufferTrace = TEMP_TRACEOUT & 0x4;
+
+          Message(0, "Begin TraceStart");
+
+          Sequence("Configure_CPUTrace");
+
+      - if: swoTrace != 0
+        blocks:
+          - execute: |
+              Sequence("Configure_SWO");
+
+      - if: syncTrace != 0
+        blocks:
+          - execute: |
+              Sequence("Configure_SyncTrace");
+
+      - if: bufferTrace != 0
+        blocks:
+          - execute: |
+              Sequence("Configure_TraceBuffer");
+
+      - execute: |
+          Message(0, "End TraceStart sequence");
+
+    - name: TraceStopExt
+      blocks:
+      - execute: |
+          // TEMP_TRACEOUT: replace with __traceout when available from debugger,
+          //                or move trace mode decision to new built-in variable.
+          __var swoTrace    = TEMP_TRACEOUT & 0x1;
+          __var syncTrace   = TEMP_TRACEOUT & 0x2;
+          __var bufferTrace = TEMP_TRACEOUT & 0x4;
+
+          Message(0, "Begin TraceStop");
+
+      - if: swoTrace != 0
+        blocks:
+          - execute: |
+              // Add device specific stop for SWO trace if needed.
+              // Turn off funnels?
+
+      - if: syncTrace != 0 || bufferTrace != 0
+        blocks:
+          - execute: |
+              // Final flush which also leaves TPIU and/or ETF turned off.
+              Sequence("TraceFlush");
+
+      - execute: |
+          Message(0, "End TraceStop sequence");
+
+    - name: TraceCapture
+      blocks:
+      - execute: |
+          // TEMP_TRACEOUT: replace with __traceout when available from debugger,
+          //                or move trace mode decision to new built-in variable.
+          __var swoTrace    = TEMP_TRACEOUT & 0x1;
+          __var syncTrace   = TEMP_TRACEOUT & 0x2;
+          __var bufferTrace = TEMP_TRACEOUT & 0x4;
+
+          Message(0, "Begin TraceCapture");
+
+      - if: swoTrace != 0
+        blocks:
+          - execute: |
+              // Normally nothing to do, SWO output always on when enabled.
+
+      - if: syncTrace != 0
+        blocks:
+          - execute: |
+              Sequence("TraceCapture_TPIU_0");
+
+      - if: bufferTrace != 0
+        blocks:
+          - execute: |
+              Sequence("TraceCapture_ETF_0_CircularBuffer");
+
+      - execute: |
+          Message(0, "End TraceCapture");
+
+    - name: TraceFlush
+      blocks:
+      - execute: |
+          // TEMP_TRACEOUT: replace with __traceout when available from debugger,
+          //                or move trace mode decision to new built-in variable.
+          __var syncTrace   = TEMP_TRACEOUT & 0x2;
+          __var bufferTrace = TEMP_TRACEOUT & 0x4;
+
+          Message(0, "Begin TraceFlush");
+
+      - if: syncTrace != 0
+        blocks:
+          - execute: |
+              Sequence("Flush_TPIU_0");
+
+      - if: bufferTrace != 0
+        blocks:
+          - execute: |
+              Sequence("Flush_ETF_0");
+
+      - execute: |
+          Message(0, "End TraceFlush");
+
+    - name: DebugCoreStart
+      blocks:
+        - execute: |
+            // ***** TEMPORARY, TRACE START SEQUENCE MUST BE CALLED BY DEBUGGER *****
+
+            // ***** Default Implementation *****
+            // System Control Space (SCS) offset as defined in Armv6-M/Armv7-M.
+            __var SCS_Addr   = 0xE000E000;
+            __var DHCSR_Addr = SCS_Addr + 0xDF0;
+
+            Message(0, "Begin DebugCoreStart sequence");
+
+            // Enable Core Debug via DHCSR
+            Write32(DHCSR_Addr, 0xA05F0001);
+
+            // ***** Custom Extension for Testing, TraceStart should be called from debugger *****
+            // Configure core-local trace blocks only after CPU debug is enabled.
+            Sequence("TraceStart");
+
+            Sequence("TraceCapture");
+
+            Message(0, "End DebugCoreStart sequence"); 
+
+    - name: DebugCoreStop
+      blocks:
+        - execute: |
+            // ***** TEMPORARY, TRACE STOP SEQUENCE MUST BE CALLED BY DEBUGGER *****
+
+            // ***** Default Implementation *****
+            // System Control Space (SCS) offset as defined in Armv6-M/Armv7-M.
+            __var SCS_Addr   = 0xE000E000;
+            __var DHCSR_Addr = SCS_Addr + 0xDF0;
+            __var DEMCR_Addr = SCS_Addr + 0xDFC;
+
+            Message(0, "Begin DebugCoreStop sequence");
+
+            // Disable Core Debug via DHCSR
+            Write32(DHCSR_Addr, 0xA05F0000);
+
+            // Disable DWT and ITM blocks, DebugMonitor handler,
+            // halting debug traps, and Reset Vector Catch.
+            Write32(DEMCR_Addr, 0x00000000);
+
+            // ***** Custom Extension for Testing, TraceStop should be called from debugger *****
+            Sequence("TraceFlush");
+            // Configure core-local trace blocks only after CPU debug is enabled.
+            Sequence("TraceStop");
+
+            Message(0, "End DebugCoreStop sequence"); 
+
+
+
+  programming:
+    - algorithm: ${CMSIS_PACK_ROOT}/Keil/STM32H7xx_DFP/4.1.3/CMSIS/Flash/STM32H7x_2048.FLM
+      start: 0x08000000
+      size: 0x00200000
+      ram-start: 0x10000000
+      ram-size: 0x00008000
+      pname: CM4
+    - algorithm: ${CMSIS_PACK_ROOT}/Keil/STM32H7xx_DFP/4.1.3/CMSIS/Flash/STM32H7x_2048.FLM
+      start: 0x08000000
+      size: 0x00200000
+      ram-start: 0x20000000
+      ram-size: 0x00008000
+      pname: CM7
+  debug-topology:
+    debugports:
+      - dpid: 0
+        accessports:
+          - apid: 0
+            index: 3
+          - apid: 1
+            index: 0
+    processors:
+      - pname: CM4
+        apid: 0
+      - pname: CM7
+        apid: 1
+    swj: true
+    sdf: ${CMSIS_PACK_ROOT}/Keil/STM32H7xx_DFP/4.1.3/CMSIS/Debug/STM32H745_747_755_757.sdf
