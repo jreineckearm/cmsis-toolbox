@@ -26,7 +26,11 @@ set {unsigned int}0xE0000E80 = 0x0001001F
 #          = 0x00001267
 # set {unsigned int}0xE0001004 = 0x00000000
 # !!!Enable all easy to enable sources and sync packets for first test
-set {unsigned int}0xE0001000 = 0x000FFE67
+# set {unsigned int}0xE0001000 = 0x000FFE67
+# PC Sampling, Exception Trace, highest SYNCTAP, higheset CYCTAP, CYCCNTENA, (random) POSTCNT init/reload
+set {unsigned int}0xE0001000 = 0x00011E67
+# Exception Trace, highest SYNCTAP, higheset CYCTAP, CYCCNTENA, (random) POSTCNT init/reload
+set {unsigned int}0xE0001000 = 0x00010E67
 
 printf "ITM_TCR  = 0x%08x\n", *(unsigned int *)0xE0000E80
 printf "DWT_CTRL = 0x%08x\n", *(unsigned int *)0xE0001000

@@ -116,13 +116,21 @@ cbuild-run:
     name: ST-Link@pyOCD
     protocol: swd
     clock: 10000000
-    dbgconf: ../.cmsis/Blinky+STM32H747I-EVAL.dbgconf
+    dbgconf: .cmsis/Blinky+STM32H747I-EVAL.dbgconf
     start-pname: CM7
     gdbserver:
       - port: 3333
         pname: CM7
       - port: 3334
         pname: CM4
+    trace:
+      mode: server
+      input-clock: 75000000
+      output-clock: 1500000
+      port-type: SWO-UART
+      server-port: 3555
+  debug-sequences-conf:
+      fullTraceSetup: true      
   debug-vars:
     vars: |
       // Default values for variables in debug sequences are configured with a *.dbgconf file in the user project
@@ -147,8 +155,8 @@ cbuild-run:
 
 
       // TEMPORARY HACK, use __traceout instead
-      __var TEMP_TRACEOUT = 0x00000000;  // OFF
-      // __var TEMP_TRACEOUT = 0x00000001;  // SWO
+      //__var TEMP_TRACEOUT = 0x00000000;  // OFF
+      __var TEMP_TRACEOUT = 0x00000001;  // SWO
       // __var TEMP_TRACEOUT = 0x00040002;  // TPIU
       // __var TEMP_TRACEOUT = 0x00000004;  // TRACE BUFFER
       // __var TEMP_TRACEOUT = 0x00040003;  // SWO + TPIU
@@ -163,7 +171,7 @@ cbuild-run:
       __var FUNNEL_AP_0         = 0x00000002; // Trace funnel address CSTF funnel instance
       __var FUNNEL_INPUT_MASK_0 = 0x0000000F; // Trace funnel input mask CSTF funnel instance
       // Funnel SWTF
-      __var FUNNEL_ADDRESS_1    = 0xE00F3000; // Trace funnel address SWTF funnel instance
+      __var FUNNEL_ADDRESS_1    = 0xE00E4000; // Trace funnel address SWTF funnel instance
       __var FUNNEL_AP_1         = 0x00000002; // Trace funnel address SWTF funnel instance
       __var FUNNEL_INPUT_MASK_1 = 0x00000003; // Trace funnel input mask SWTF funnel instance
       // ETF
@@ -172,13 +180,16 @@ cbuild-run:
       // TPIU
       __var TPIU_ADDRESS_0      = 0xE00F5000;
       __var TPIU_AP_0           = 0x00000002;
+      // SWO
+      __var SWO_ADDRESS_0       = 0xE00E3000;
+      __var SWO_AP_0            = 0x00000002;
 
 
       // ******************************************************
       // UNDECIDED YET, BUT SAME PER COMPONENT APPROACH AS ABOVE
       // ******************************************************
 
-      __var SWO_PRESCALER = 1;  // SWO specific
+      __var SWO_PRESCALER = 50;  // SWO specific
       __var TPIU_PRESCALER = 0; // Same register as SWO prescaler, TODO: decide if to merge into single variable
       __var TRACE_BUFFER_SYNCCNT = 0xA; // TODO: Good default!!
 
@@ -711,8 +722,15 @@ cbuild-run:
     - name: Configure_SWO
       blocks:
       - execute: |
+          // Helper variables
+          __var savedAP    = __ap;
+
           Message(0, "Begin Configure_SWO");
           Sequence("Configure_Funnel_1");
+          __ap = SWO_AP_0;
+          Write32(SWO_ADDRESS_0 + 0x010, SWO_PRESCALER); // Prescaler
+          Write32(SWO_ADDRESS_0 + 0x0F0, 0x2);   // Enable SWO-UART
+          __ap = savedAP;
           Message(0, "End Configure_SWO");
 
     - name: Configure_SyncTrace
@@ -848,6 +866,7 @@ cbuild-run:
         blocks:
           - execute: |
               // Normally nothing to do, SWO output always on when enabled.
+              Message(0, "TraceCapture - SWO (nothing to do)");
 
       - if: syncTrace != 0
         blocks:
@@ -867,6 +886,7 @@ cbuild-run:
       - execute: |
           // TEMP_TRACEOUT: replace with __traceout when available from debugger,
           //                or move trace mode decision to new built-in variable.
+          __var swoTrace    = TEMP_TRACEOUT & 0x1;
           __var syncTrace   = TEMP_TRACEOUT & 0x2;
           __var bufferTrace = TEMP_TRACEOUT & 0x4;
 
@@ -875,7 +895,8 @@ cbuild-run:
       - if: syncTrace != 0
         blocks:
           - execute: |
-              Sequence("Flush_TPIU_0");
+              // Normally nothing to do, SWO output always on when enabled.
+              Message(0, "TraceFlush - SWO (nothing to do)");
 
       - if: bufferTrace != 0
         blocks:
@@ -902,9 +923,9 @@ cbuild-run:
 
             // ***** Custom Extension for Testing, TraceStart should be called from debugger *****
             // Configure core-local trace blocks only after CPU debug is enabled.
-            Sequence("TraceStart");
+            // Sequence("TraceStart");
 
-            Sequence("TraceCapture");
+            // Sequence("TraceCapture");
 
             Message(0, "End DebugCoreStart sequence"); 
 
@@ -929,9 +950,9 @@ cbuild-run:
             Write32(DEMCR_Addr, 0x00000000);
 
             // ***** Custom Extension for Testing, TraceStop should be called from debugger *****
-            Sequence("TraceFlush");
+            // Sequence("TraceFlush");
             // Configure core-local trace blocks only after CPU debug is enabled.
-            Sequence("TraceStop");
+            //Sequence("TraceStop");
 
             Message(0, "End DebugCoreStop sequence"); 
 

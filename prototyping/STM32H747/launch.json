@@ -1,0 +1,44 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "TraceTest (launch)",
+            "type": "gdbtarget",
+            "request": "launch",
+            "cwd": "${workspaceFolder}/",
+            "program": "out/Blinky_cm7/STM32H747I-EVAL/Debug/Blinky_cm7.axf",
+            "gdb": "arm-none-eabi-gdb",
+            "auxiliaryGdb": true,
+            "preLaunchTask": "CMSIS Load",
+            "initCommands": [
+                "monitor reset halt",
+                "source ${workspaceFolder}/trace_config_itm_dwt.gdb",
+                "tbreak main"
+            ],
+            "customResetCommands": [
+                "monitor reset halt",
+                "maintenance flush register-cache",
+                "maintenance flush dcache",
+                "source ${workspaceFolder}/trace_config_itm_dwt.gdb",
+                "tbreak main",
+                "continue"
+            ],
+            "target": {
+                "server": "pyocd",
+                "serverParameters": [
+                    "gdbserver",
+                    "--probe",
+                    "stlink:",
+                    "--persist",
+                    "-v",
+                    "--cbuild-run",
+                    "${workspaceFolder}/STM32H747I-DISCO.cbuild-run.yml",
+                    "--quiet",
+                    "--log",
+                    "*.cbuild_run,*server=info"
+                ],
+                "port": "3333"
+            }
+        }
+    ]
+}
