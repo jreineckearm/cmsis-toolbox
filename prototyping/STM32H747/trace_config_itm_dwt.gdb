@@ -30,7 +30,7 @@ set {unsigned int}0xE0000E80 = 0x0001001F
 # PC Sampling, Exception Trace, highest SYNCTAP, higheset CYCTAP, CYCCNTENA, (random) POSTCNT init/reload
 set {unsigned int}0xE0001000 = 0x00011E67
 # Exception Trace, highest SYNCTAP, higheset CYCTAP, CYCCNTENA, (random) POSTCNT init/reload
-set {unsigned int}0xE0001000 = 0x00010E67
+# set {unsigned int}0xE0001000 = 0x00010E67
 
 printf "ITM_TCR  = 0x%08x\n", *(unsigned int *)0xE0000E80
 printf "DWT_CTRL = 0x%08x\n", *(unsigned int *)0xE0001000
