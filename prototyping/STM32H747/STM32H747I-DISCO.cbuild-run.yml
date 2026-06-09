@@ -154,14 +154,6 @@ cbuild-run:
       __var TraceD3_Pin      = 0x00040006;   // PE6
 
 
-      // TEMPORARY HACK, use __traceout instead
-      //__var TEMP_TRACEOUT = 0x00000000;  // OFF
-      __var TEMP_TRACEOUT = 0x00000001;  // SWO
-      // __var TEMP_TRACEOUT = 0x00040002;  // TPIU
-      // __var TEMP_TRACEOUT = 0x00000004;  // TRACE BUFFER
-      // __var TEMP_TRACEOUT = 0x00040003;  // SWO + TPIU
-
-
       // ******************************************************
       // GENERATED FROM SDF DURING *.cbuild-run.yml GENERATION
       // ******************************************************
@@ -189,8 +181,14 @@ cbuild-run:
       // UNDECIDED YET, BUT SAME PER COMPONENT APPROACH AS ABOVE
       // ******************************************************
 
-      __var SWO_PRESCALER = 50;  // SWO specific
-      __var TPIU_PRESCALER = 0; // Same register as SWO prescaler, TODO: decide if to merge into single variable
+      // Provide from debugger
+      // Temporary variable until __traceout is available from debugger, used for trace mode decision in TraceStart sequence.
+      // https://open-cmsis-pack.github.io/Open-CMSIS-Pack-Spec/main/html/debug_description.html#__traceout
+      //    Bit 0: SWO, Bit 1: Sync Trace Port, Bit 2: Trace Buffer, Bit 16..21: parallel trace port size
+      __var TEMP_TRACEOUT = 0x00000001;  // SWO Trace
+      __var TEMP_TRACECLOCKIN = 75000000;
+      __var TEMP_TRACECLOCKOUT = 1500000;
+
       __var TRACE_BUFFER_SYNCCNT = 0xA; // TODO: Good default!!
 
 
@@ -724,9 +722,24 @@ cbuild-run:
       - execute: |
           // Helper variables
           __var savedAP    = __ap;
+          __var SWO_PRESCALER = 0;
 
           Message(0, "Begin Configure_SWO");
           Sequence("Configure_Funnel_1");
+
+      - if: TEMP_TRACECLOCKOUT != 0
+        blocks:
+          - if: TEMP_TRACECLOCKIN < TEMP_TRACECLOCKOUT
+            blocks:
+              - execute: |
+                  Message(2, "Error: TEMP_TRACECLOCKIN (0x%08X) is less than TEMP_TRACECLOCKOUT (0x%08X)", TEMP_TRACECLOCKIN, TEMP_TRACECLOCKOUT);
+
+          - execute: |
+              // Calculate SWO prescaler value based on provided trace clock frequencies. 
+              SWO_PRESCALER = (TEMP_TRACECLOCKIN / TEMP_TRACECLOCKOUT) - 1;
+              Message(0, "Calculated SWO prescaler value: %d", SWO_PRESCALER);
+
+      - execute: |
           __ap = SWO_AP_0;
           Write32(SWO_ADDRESS_0 + 0x010, SWO_PRESCALER); // Prescaler
           Write32(SWO_ADDRESS_0 + 0x0F0, 0x2);   // Enable SWO-UART
@@ -736,10 +749,25 @@ cbuild-run:
     - name: Configure_SyncTrace
       blocks:
       - execute: |
+          __var TPIU_PRESCALER = 0;
+
           Message(0, "Begin Configure_SyncTrace");
           Sequence("Flush_TPIU_0");
           Sequence("Configure_Funnel_0");
           Sequence("Configure_ETF_0_HWFIFO");
+      - if: TEMP_TRACECLOCKOUT != 0
+        blocks:
+          - if: TEMP_TRACECLOCKIN < TEMP_TRACECLOCKOUT
+            blocks:
+              - execute: |
+                  Message(2, "Error: TEMP_TRACECLOCKIN (0x%08X) is less than TEMP_TRACECLOCKOUT (0x%08X)", TEMP_TRACECLOCKIN, TEMP_TRACECLOCKOUT);
+
+          - execute: |
+              // Calculate TPIU prescaler value based on provided trace clock frequencies. 
+              TPIU_PRESCALER = (TEMP_TRACECLOCKIN / TEMP_TRACECLOCKOUT) - 1;
+              Message(0, "Calculated TPIU prescaler value: %d", TPIU_PRESCALER);
+      - execute: |
+          Message(1, "MISSING: TPIU SETUP LIKE PRESCALER");
           Message(0, "End Configure_SyncTrace");
   
     - name: Configure_TraceBuffer
