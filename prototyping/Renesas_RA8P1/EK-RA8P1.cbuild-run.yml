@@ -1,15 +1,19 @@
 cbuild-run:
   generated-by: csolution version 2.13.0+p36-gd2240ffd
-  solution: ../icu_ek_ra8p1_ep.csolution.yml
+  solution: ./icu_ek_ra8p1_ep.csolution.yml
   target-type: Target_1
   target-set: <default>
   compiler: AC6
   device: Renesas::R7KA8P1KF
   device-pack: Renesas::RA_DFP@6.4.0
   output:
-    - file: ../icu_ek_ra8p1_ep.hex
+    - file: ./Objects/icu_ek_ra8p1_ep.hex
       type: hex
       load: image
+      pname: CPU0
+    - file: ./Objects/icu_ek_ra8p1_ep.axf
+      type: elf
+      load: symbols
       pname: CPU0
   system-resources:
     memory:
@@ -85,13 +89,20 @@ cbuild-run:
     name: CMSIS-DAP@pyOCD
     protocol: swd
     clock: 4000000
-    #connect: under-reset
     gdbserver:
       - port: 3333
       - port: 3334
         pname: CPU0
       - port: 3335
         pname: CPU1
+    trace:
+      mode: server
+      input-clock: 250000000 # System Clock at 1 GHz div 4 for TRCK
+      output-clock: 1000000
+      port-type: SWO-UART
+      server-port: 3555
+  debug-sequences-conf:
+      fullTraceSetup: true      
   programming:
     - algorithm: ${CMSIS_PACK_ROOT}/Renesas/RA_DFP/6.4.0/Flash/RA8P1_1M.FLM
       start: 0x02000000
@@ -127,19 +138,19 @@ cbuild-run:
       // Provide from debugger
       // Temporary variable until __traceout is available from debugger, used for trace mode decision in TraceStart sequence.
       // https://open-cmsis-pack.github.io/Open-CMSIS-Pack-Spec/main/html/debug_description.html#__traceout
-      __var TEMP_TRACEOUT = 0x00000000;  // Trace Off        // Bit 0: SWO, Bit 1: Sync Trace Port, Bit 2: Trace Buffer, Bit 16..21: parallel trace port size
-      // __var TEMP_TRACEOUT = 0x00000001;  // SWO Trace        // Bit 0: SWO, Bit 1: Sync Trace Port, Bit 2: Trace Buffer, Bit 16..21: parallel trace port size
+      // __var TEMP_TRACEOUT = 0x00000000;  // Trace Off        // Bit 0: SWO, Bit 1: Sync Trace Port, Bit 2: Trace Buffer, Bit 16..21: parallel trace port size
+      __var TEMP_TRACEOUT = 0x00000001;  // SWO Trace        // Bit 0: SWO, Bit 1: Sync Trace Port, Bit 2: Trace Buffer, Bit 16..21: parallel trace port size
       // __var TEMP_TRACEOUT = 0x00040002;  // 4-Bit Sync Trace // Bit 0: SWO, Bit 1: Sync Trace Port, Bit 2: Trace Buffer, Bit 16..21: parallel trace port size
       // __var TEMP_TRACEOUT = 0x00000004;  // Trace Buffer     // Bit 0: SWO, Bit 1: Sync Trace Port, Bit 2: Trace Buffer, Bit 16..21: parallel trace port size
 
-      __var SWO_PRESCALER = 1;  // SWO specific
+      __var SWO_PRESCALER = 24;  // SWO specific, 250 MHz -> 1 MHz // should be 249 but there is a factor 10 somewhere...
       __var TPIU_PRESCALER = 0; // Same register as SWO prescaler, TODO: decide if to merge into single variable
       __var TRACE_BUFFER_SYNCCNT = 0xA; // TODO: Good default!!
 
       // Custom variables for RA8P1 debug & trace configuration
       __var ENABLE_TRACE_CPU0 = 1;
       __var ENABLE_TRACE_CPU1 = 0;
-      __var TRCK_PRESCALER = 2; // Device specific
+      __var TRCK_PRESCALER = 2; // Device specific, 2 = 1/4 input clock
       __var TRC_PIN_DRIVER_SPEED = 0 // Device specific: 0=Low, 1=Middle, 2=High-Speed high-drive, 3=High
 
       // TODO: TPIU PIN CONFIGURATION (ALTERNATE FUNCTION + PULL-UP/DRIVE SETTINGS, ETC)
@@ -655,9 +666,9 @@ cbuild-run:
 
             // ***** Custom Extension for Testing, TraceStart should be called from debugger *****
             // Configure core-local trace blocks only after CPU debug is enabled.
-            Sequence("TraceStart");
+            // Sequence("TraceStart");
 
-            Sequence("TraceCapture");
+            // Sequence("TraceCapture");
 
             Message(0, "End DebugCoreStart sequence"); 
 
@@ -682,9 +693,9 @@ cbuild-run:
             Write32(DEMCR_Addr, 0x00000000);
 
             // ***** Custom Extension for Testing, TraceStop should be called from debugger *****
-            Sequence("TraceFlush");
+            // Sequence("TraceFlush");
             // Configure core-local trace blocks only after CPU debug is enabled.
-            Sequence("TraceStop");
+            // Sequence("TraceStop");
 
             Message(0, "End DebugCoreStop sequence"); 
 

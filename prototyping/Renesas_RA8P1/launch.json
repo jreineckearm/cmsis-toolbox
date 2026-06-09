@@ -1,0 +1,43 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "TraceTest CPU0 pyOCD (launch)",
+            "type": "gdbtarget",
+            "request": "launch",
+            "cwd": "${workspaceFolder}/",
+            "program": "Objects/icu_ek_ra8p1_ep.axf",
+            "gdb": "arm-none-eabi-gdb",
+            "auxiliaryGdb": true,
+            "preLaunchTask": "CMSIS Load",
+            "initCommands": [
+                "set substitute-path C:/Projects/ek_ra8p1_examples/icu_ek_ra8p1_ep <enter absolute path to workspace folder>/..",
+                "monitor reset halt",
+                "source ${workspaceFolder}/trace_config_itm_dwt.gdb",
+                "tbreak main"
+            ],
+            "customResetCommands": [
+                "monitor reset halt",
+                "maintenance flush register-cache",
+                "maintenance flush dcache",
+                "source ${workspaceFolder}/trace_config_itm_dwt.gdb",
+                "tbreak main",
+                "continue"
+            ],
+            "target": {
+                "server": "pyocd",
+                "serverParameters": [
+                    "gdbserver",
+                    "--probe",
+                    "cmsisdap:",
+                    "--persist",
+                    "--cbuild-run",
+                    "${workspaceFolder}/EK-RA8P1.cbuild-run.yml",
+                    "--log",
+                    "*.cbuild_run,*server=info"
+                ],
+                "port": "3334"
+            }
+        }
+    ]
+}
