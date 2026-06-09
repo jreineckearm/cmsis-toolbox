@@ -136,17 +136,6 @@ cbuild-run:
 
   debug-vars:
     vars: |
-      // Provide from debugger
-      // Temporary variable until __traceout is available from debugger, used for trace mode decision in TraceStart sequence.
-      // https://open-cmsis-pack.github.io/Open-CMSIS-Pack-Spec/main/html/debug_description.html#__traceout
-      // __var TEMP_TRACEOUT = 0x00000000;  // Trace Off        // Bit 0: SWO, Bit 1: Sync Trace Port, Bit 2: Trace Buffer, Bit 16..21: parallel trace port size
-      __var TEMP_TRACEOUT = 0x00000001;  // SWO Trace        // Bit 0: SWO, Bit 1: Sync Trace Port, Bit 2: Trace Buffer, Bit 16..21: parallel trace port size
-      // __var TEMP_TRACEOUT = 0x00040002;  // 4-Bit Sync Trace // Bit 0: SWO, Bit 1: Sync Trace Port, Bit 2: Trace Buffer, Bit 16..21: parallel trace port size
-      // __var TEMP_TRACEOUT = 0x00000004;  // Trace Buffer     // Bit 0: SWO, Bit 1: Sync Trace Port, Bit 2: Trace Buffer, Bit 16..21: parallel trace port size
-
-      // __var SWO_PRESCALER = 24;  // SWO specific, 250 MHz -> 1 MHz // should be 249 but there is a factor 10 somewhere...
-      __var SWO_PRESCALER = 11;  // SWO specific, HOCO: 48MHz -> 4MHz // div 12
-      __var TPIU_PRESCALER = 0; // Same register as SWO prescaler, TODO: decide if to merge into single variable
       __var TRACE_BUFFER_SYNCCNT = 0xA; // TODO: Good default!!
 
       // Custom variables for RA8P1 debug & trace configuration
@@ -159,6 +148,14 @@ cbuild-run:
       // TODO: TPIU PIN CONFIGURATION (ALTERNATE FUNCTION + PULL-UP/DRIVE SETTINGS, ETC)
       //       SEE PmnPFS/PmnPFS_HA/PmnPFS_BY , chapter 21.2.5 in RA8P1 manual.
       //       SEE 
+
+      // Provide from debugger
+      // Temporary variable until __traceout is available from debugger, used for trace mode decision in TraceStart sequence.
+      // https://open-cmsis-pack.github.io/Open-CMSIS-Pack-Spec/main/html/debug_description.html#__traceout
+      //    Bit 0: SWO, Bit 1: Sync Trace Port, Bit 2: Trace Buffer, Bit 16..21: parallel trace port size
+      __var TEMP_TRACEOUT = 0x00000001;  // SWO Trace
+      __var TEMP_TRACECLOCKIN = 48000000; // HOCO: 48MHz
+      __var TEMP_TRACECLOCKOUT = 4000000; //  -> 4MHz // div 12
 
   debug-sequences:
     - name: TraceConfigureClock
@@ -230,8 +227,21 @@ cbuild-run:
           __var LAR_KEY = 0xC5ACCE55;
           __var savedAP = __ap;
           __var selectAP = 0xFFFFFFFF;
+          __var SWO_PRESCALER = 0;
 
           Message(0, "ConfigureSWO sequence");
+
+      - if: TEMP_TRACECLOCKOUT != 0
+        blocks:
+          - if: TEMP_TRACECLOCKIN < TEMP_TRACECLOCKOUT
+            blocks:
+              - execute: |
+                  Message(2, "Error: TEMP_TRACECLOCKIN (0x%08X) is less than TEMP_TRACECLOCKOUT (0x%08X)", TEMP_TRACECLOCKIN, TEMP_TRACECLOCKOUT);
+
+          - execute: |
+              // Calculate SWO prescaler value based on provided trace clock frequencies. 
+              SWO_PRESCALER = (TEMP_TRACECLOCKIN / TEMP_TRACECLOCKOUT) - 1;
+              Message(0, "Calculated SWO prescaler value: %d", SWO_PRESCALER);
 
       - if: ENABLE_TRACE_CPU0 != 0
         blocks:
@@ -292,6 +302,7 @@ cbuild-run:
           __var tracePortWidth = (TEMP_TRACEOUT >> 16) & 0x3F; // Extract parallel trace port size from TEMP_TRACEOUT, TODO: replace with __traceout when available from debugger
           __var ffcrValue = 0x00000000;
           __var etfStatus = 0x00000000;
+          __var TPIU_PRESCALER = 0;
 
           Message(0, "ConfigureSyncTrace sequence");
 
@@ -299,6 +310,18 @@ cbuild-run:
           __ap = 1; // Access "global" trace resources via AP1
       - execute: |
           Sequence("FlushTPIU");
+
+      - if: TEMP_TRACECLOCKOUT != 0
+        blocks:
+          - if: TEMP_TRACECLOCKIN < TEMP_TRACECLOCKOUT
+            blocks:
+              - execute: |
+                  Message(2, "Error: TEMP_TRACECLOCKIN (0x%08X) is less than TEMP_TRACECLOCKOUT (0x%08X)", TEMP_TRACECLOCKIN, TEMP_TRACECLOCKOUT);
+
+          - execute: |
+              // Calculate TPIU prescaler value based on provided trace clock frequencies. 
+              TPIU_PRESCALER = (TEMP_TRACECLOCKIN / TEMP_TRACECLOCKOUT) - 1;
+              Message(0, "Calculated TPIU prescaler value: %d", TPIU_PRESCALER);
 
       - execute: |
           Write32(TPIU_BASE + 0x010, TPIU_PRESCALER);             // TPIU Asynchronous Clock Prescaler Register: No prescaling
