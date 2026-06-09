@@ -97,8 +97,9 @@ cbuild-run:
         pname: CPU1
     trace:
       mode: server
-      input-clock: 250000000 # System Clock at 1 GHz div 4 for TRCK
-      output-clock: 1000000
+      # input-clock: 250000000 # SCKSCR.CKSEL = PLL1, TRCKCR.TRCK = 2 (means 1/4 for TRCK)
+      input-clock: 48000000 # HOCO, 
+      output-clock: 4000000 # HOCO, SWO prescaler 12
       port-type: SWO-UART
       server-port: 3555
   debug-sequences-conf:
@@ -143,14 +144,16 @@ cbuild-run:
       // __var TEMP_TRACEOUT = 0x00040002;  // 4-Bit Sync Trace // Bit 0: SWO, Bit 1: Sync Trace Port, Bit 2: Trace Buffer, Bit 16..21: parallel trace port size
       // __var TEMP_TRACEOUT = 0x00000004;  // Trace Buffer     // Bit 0: SWO, Bit 1: Sync Trace Port, Bit 2: Trace Buffer, Bit 16..21: parallel trace port size
 
-      __var SWO_PRESCALER = 24;  // SWO specific, 250 MHz -> 1 MHz // should be 249 but there is a factor 10 somewhere...
+      // __var SWO_PRESCALER = 24;  // SWO specific, 250 MHz -> 1 MHz // should be 249 but there is a factor 10 somewhere...
+      __var SWO_PRESCALER = 11;  // SWO specific, HOCO: 48MHz -> 4MHz // div 12
       __var TPIU_PRESCALER = 0; // Same register as SWO prescaler, TODO: decide if to merge into single variable
       __var TRACE_BUFFER_SYNCCNT = 0xA; // TODO: Good default!!
 
       // Custom variables for RA8P1 debug & trace configuration
       __var ENABLE_TRACE_CPU0 = 1;
       __var ENABLE_TRACE_CPU1 = 0;
-      __var TRCK_PRESCALER = 2; // Device specific, 2 = 1/4 input clock
+      __var TRCK_PRESCALER = 0; // Device specific, 0 = 1/1 input clock
+      __var TRCK_HOCO = 1; // Device specific, use HOCO (48MHz) not SystemClock
       __var TRC_PIN_DRIVER_SPEED = 0 // Device specific: 0=Low, 1=Middle, 2=High-Speed high-drive, 3=High
 
       // TODO: TPIU PIN CONFIGURATION (ALTERNATE FUNCTION + PULL-UP/DRIVE SETTINGS, ETC)
@@ -179,10 +182,10 @@ cbuild-run:
               trportcr_value |= 0x00010001;  // Enable trace for CPU1
 
       - execute: |
-          Write32(TRPORTCR, trportcr_value);              // Configure custom trace port config
-          Write8(TRCKCR, 0x00 | (TRCK_PRESCALER & 0xF));  // Configure TRCK prescaler (NOT SWO PRESCALER) before enabling TRCK.
-                                                          // (0..3: prescaler, 4: HOCO or SystemClock: 7: TRCKEN)
-          Write8(TRCKCR, 0x80 | (TRCK_PRESCALER & 0xF));  // Enable TRCK before accessing TPIU registers to avoid lockup.
+          Write32(TRPORTCR, trportcr_value);                                 // Configure custom trace port config
+          Write8(TRCKCR, 0x00 | (TRCK_HOCO << 4) | (TRCK_PRESCALER & 0xF));  // Configure TRCK prescaler (NOT SWO PRESCALER) before enabling TRCK.
+                                                                             // (0..3: prescaler, 4: HOCO or SystemClock: 7: TRCKEN)
+          Write8(TRCKCR, 0x80 | (TRCK_HOCO << 4) | (TRCK_PRESCALER & 0xF));  // Enable TRCK before accessing TPIU registers to avoid lockup.
 
           Message(0, "End TraceConfigureClock sequence");
 

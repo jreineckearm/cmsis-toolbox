@@ -28,6 +28,7 @@ set {unsigned int}0xE0000E80 = 0x0001001F
 # !!!Enable all easy to enable sources and sync packets for first test
 # set {unsigned int}0xE0001000 = 0x000FFE67
 # PC Sampling, Exception Trace, highest SYNCTAP, higheset CYCTAP, CYCCNTENA, (random) POSTCNT init/reload
+#### !!!! Caution, this setup can make pyOCD trace decoder crash if bad frequency setup !!!!
 set {unsigned int}0xE0001000 = 0x00011E67
 # Exception Trace, highest SYNCTAP, higheset CYCTAP, CYCCNTENA, (random) POSTCNT init/reload
 # set {unsigned int}0xE0001000 = 0x00010E67
