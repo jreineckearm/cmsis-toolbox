@@ -61,46 +61,48 @@ debug-adapters:
                 value: off
                 description:  Serial I/O disabled
       - section: Trace Interface
-        description: Trace interface setup
-        yml-node: trace-interface
-        select: on
+        description: Interface configuration for trace capture
+        yml-node: trace
         options:
           - name: Mode
-            description: Configure trace interface mode
+            description: Select pyOCD output mode for trace data
             yml-node: mode
             type: enum
-            default: swo-uart
+            default: off
             values:
-              - name: SWO UART
-                value: swo-uart
-                description:  Trace output via SWO UART
-              - name: SWO Manchester
-                value: swo-manchester
-                description:  Trace output via SWO Manchester
-              - name: On-Chip Trace Buffer
-                value: buffer
-                description:  Trace output via On-Chip Trace Buffer
-              - name: Synchronous Trace Port
-                value: trace-port
-                description:  Trace output via Synchronous Trace Port
-          - name: Trace Interface Input Clock (kHz)
+              - name: Off
+                value: off
+                description:  Trace output disabled
+              - name: Server
+                value: server
+                description:  Trace output via TCP/IP server
+              - name: File
+                value: file
+                description:  Trace output to file
+          - name: Input Clock (kHz)
             description: Configure clock that is input to the trace interface component (SWO, Trace Port, or Trace Buffer)
-            yml-node: trace-clock-in
+            yml-node: input-clock
             type: number
-            range: [10, 200000]
+            scale: 1000
             default: 10000
-          - name: Trace Configuration File
-            description: Path to file with trace generation settings
-            yml-node: trace-config-file
+          - name: Output Clock (kHz)
+            description: Configure clock of the output trace signal (SWO or Trace Port), use value of 0 to use same clock as input
+            yml-node: output-clock
+            type: number
+            range: [0, 10000]
+            scale: 1000
+            default: 0
+          - name: Server Port
+            description: Port for the trace server
+            yml-node: server-port
+            type: number
+            default: 5555
+          - name: Trace Output File
+            description: Path of raw trace output file
+            yml-node: file
             type: file
             path-type: relative
-            default: stm32h747_trc_swo.dbgconf
-          #- name: Trace Output Clock (kHz)
-          #  description: Configure clock that is output from the trace interface component
-          #  yml-node: trace-clock-out
-          #  type: number
-          #  range: [10, 20000]
-          #  default: 10000
+            default: "./out/<solution-name>+<target-type>.trace"
 
   - name: "ULINKplus@pyOCD"
     alias-name: ["ULINKplus"]                              # alternative names that map to this debug adapter

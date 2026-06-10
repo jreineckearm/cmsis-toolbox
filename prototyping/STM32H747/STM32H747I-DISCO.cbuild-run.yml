@@ -129,8 +129,6 @@ cbuild-run:
       output-clock: 1500000
       port-type: SWO-UART
       server-port: 3555
-  debug-sequences-conf:
-      fullTraceSetup: true      
   debug-vars:
     vars: |
       // Default values for variables in debug sequences are configured with a *.dbgconf file in the user project
@@ -191,6 +189,8 @@ cbuild-run:
 
       __var TRACE_BUFFER_SYNCCNT = 0xA; // TODO: Good default!!
 
+  debug-sequences-conf:
+      fullTraceSetup: true
 
   debug-sequences:
     - name: DebugDeviceUnlock

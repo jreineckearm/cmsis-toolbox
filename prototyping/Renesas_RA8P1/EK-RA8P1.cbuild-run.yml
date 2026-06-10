@@ -98,12 +98,20 @@ cbuild-run:
     trace:
       mode: server
       # input-clock: 250000000 # SCKSCR.CKSEL = PLL1, TRCKCR.TRCK = 2 (means 1/4 for TRCK)
-      input-clock: 48000000 # HOCO, 
-      output-clock: 4000000 # HOCO, SWO prescaler 12
+      input-clock: 48000000 # HOCO (High-Speed On-Chip Oscillator), 
+      output-clock: 4000000 # HOCO (High-Speed On-Chip Oscillator), SWO prescaler 12
       port-type: SWO-UART
       server-port: 3555
-  debug-sequences-conf:
-      fullTraceSetup: true      
+    debug-vars-set: |
+      // Debug Setup Variables
+        // None in this example
+      // Trace Setup Variables
+      ENABLE_TRACE_CPU0 = 1;
+      ENABLE_TRACE_CPU1 = 0;   // CAUTION, ENABLING WILL FAIL IF CPU1 IS NOT RELEASED FROM RESET!!!!
+      TRCK_PRESCALER = 0;      // Device specific, 0 = 1/1 input clock
+      TRCK_HOCO = 1;           // Device specific, use HOCO (48MHz) not SystemClock
+      TRC_PIN_DRIVER_SPEED = 0 // Device specific: 0=Low, 1=Middle, 2=High-Speed high-drive, 3=High
+
   programming:
     - algorithm: ${CMSIS_PACK_ROOT}/Renesas/RA_DFP/6.4.0/Flash/RA8P1_1M.FLM
       start: 0x02000000
@@ -136,10 +144,8 @@ cbuild-run:
 
   debug-vars:
     vars: |
-      __var TRACE_BUFFER_SYNCCNT = 0xA; // TODO: Good default!!
-
       // Custom variables for RA8P1 debug & trace configuration
-      __var ENABLE_TRACE_CPU0 = 1;
+      __var ENABLE_TRACE_CPU0 = 0;
       __var ENABLE_TRACE_CPU1 = 0;
       __var TRCK_PRESCALER = 0; // Device specific, 0 = 1/1 input clock
       __var TRCK_HOCO = 1; // Device specific, use HOCO (48MHz) not SystemClock
@@ -149,6 +155,9 @@ cbuild-run:
       //       SEE PmnPFS/PmnPFS_HA/PmnPFS_BY , chapter 21.2.5 in RA8P1 manual.
       //       SEE 
 
+      // TODO: Find out what to do with those variables
+      __var TRACE_BUFFER_SYNCCNT = 0xA; // TODO: Good default!!
+
       // Provide from debugger
       // Temporary variable until __traceout is available from debugger, used for trace mode decision in TraceStart sequence.
       // https://open-cmsis-pack.github.io/Open-CMSIS-Pack-Spec/main/html/debug_description.html#__traceout
@@ -156,6 +165,9 @@ cbuild-run:
       __var TEMP_TRACEOUT = 0x00000001;  // SWO Trace
       __var TEMP_TRACECLOCKIN = 48000000; // HOCO: 48MHz
       __var TEMP_TRACECLOCKOUT = 4000000; //  -> 4MHz // div 12
+
+  debug-sequences-conf:
+      fullTraceSetup: true
 
   debug-sequences:
     - name: TraceConfigureClock
@@ -243,13 +255,21 @@ cbuild-run:
               SWO_PRESCALER = (TEMP_TRACECLOCKIN / TEMP_TRACECLOCKOUT) - 1;
               Message(0, "Calculated SWO prescaler value: %d", SWO_PRESCALER);
 
+      - if: ENABLE_TRACE_CPU0 != 0 && ENABLE_TRACE_CPU1 != 0
+        blocks:
+          - execute: |
+              Message(2, "Error: Cannot enable SWO trace for both CPUs at the same time.");
+
       - if: ENABLE_TRACE_CPU0 != 0
         blocks:
           - execute: |
+              Message(0, "Enable SWO trace for CPU0");
               selectAP = 0;
+
       - if: ENABLE_TRACE_CPU1 != 0
         blocks:
           - execute: |
+              Message(0, "Enable SWO trace for CPU1");
               selectAP = 2;
 
       - if: selectAP != 0xFFFFFFFF
@@ -280,10 +300,12 @@ cbuild-run:
       - if: ENABLE_TRACE_CPU0 != 0
         blocks:
           - execute: |
+              Message(0, "Enable CSTF input for CPU0");
               funnelValue |= 0x1 | 0x2; // Enable CPU0 ITM and ETM funnel input
       - if: ENABLE_TRACE_CPU1 != 0
         blocks:
           - execute: |
+              Message(0, "Enable CSTF input for CPU1");
               funnelValue |= 0x4 | 0x8; // Enable CPU1 ITM and ETM funnel input
       - execute: |
           Write32(CSTF_BASE + 0x000, funnelValue); // Configure CoreSight Trace Funnel to enable selected trace sources
