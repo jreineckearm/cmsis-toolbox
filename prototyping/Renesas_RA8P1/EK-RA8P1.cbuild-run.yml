@@ -96,12 +96,12 @@ cbuild-run:
       - port: 3335
         pname: CPU1
     trace:
-      mode: server
-      # input-clock: 250000000 # SCKSCR.CKSEL = PLL1, TRCKCR.TRCK = 2 (means 1/4 for TRCK)
-      input-clock: 48000000 # HOCO (High-Speed On-Chip Oscillator), 
-      output-clock: 4000000 # HOCO (High-Speed On-Chip Oscillator), SWO prescaler 12
-      port-type: swo-uart
-      server-port: 5555
+      - swo-uart:
+        mode: server
+        # input-clock: 250000000 # SCKSCR.CKSEL = PLL1, TRCKCR.TRCK = 2 (means 1/4 for TRCK)
+        input-clock: 48000000 # HOCO (High-Speed On-Chip Oscillator), 
+        output-clock: 4000000 # HOCO (High-Speed On-Chip Oscillator), SWO prescaler 12
+        server-port: 5555
     device-settings:
       ENABLE_TRACE_CPU0: 1
       ENABLE_TRACE_CPU1: 0

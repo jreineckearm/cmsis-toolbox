@@ -124,11 +124,11 @@ cbuild-run:
       - port: 3334
         pname: CM4
     trace:
-      mode: server
-      input-clock: 75000000
-      output-clock: 1500000
-      port-type: swo-uart
-      server-port: 5555
+      - swo-uart:
+        mode: server
+        input-clock: 75000000
+        output-clock: 1500000
+        server-port: 5555
     device-settings:
       # Default values for variables in debug sequences are configured with a *.dbgconf file in the user project
       DbgMCU_CR: 0x0000001F # DBGMCU_CR:       DBGMCU configuration register
