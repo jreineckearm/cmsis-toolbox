@@ -107,6 +107,10 @@ cbuild-run:
       - mode: console
         pname: M55_HP
         port: 4444
+    trace:
+      - trace-buffer:
+        mode: server
+        server-port: 5555
     rtt:
       - pname: M55_HP
         channel:
@@ -114,6 +118,8 @@ cbuild-run:
             mode: stdio
           - number: 1
             mode: systemview
+    device-settings:
+
 
   debug-vars:
     vars: |
@@ -213,6 +219,9 @@ cbuild-run:
         __var APSS_CATU_INPUT_ADDR_HI       = APSS_ETR_BUFFER_ADDRESS_HI;
         __var APSS_CATU_AXI_CTRL = (((APSS_ETR_AXI_CTL >> 16) & 0xF) << 4) | (APSS_ETR_AXI_CTL & 0x3); // [7:4]: ARCACHE, [1:0]: ARPROT (Secure|Privileged)
         __var APSS_CATU_IRQEN               = 0x00000000;                  // [0]: Enable/Disable
+
+  debug-sequences-conf:
+      traceSetup: full
 
   debug-sequences:
     - name: DisableWarmResetHandshake

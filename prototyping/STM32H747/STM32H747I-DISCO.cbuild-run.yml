@@ -127,8 +127,14 @@ cbuild-run:
       mode: server
       input-clock: 75000000
       output-clock: 1500000
-      port-type: SWO-UART
-      server-port: 3555
+      port-type: swo-uart
+      server-port: 5555
+    device-settings:
+      # Default values for variables in debug sequences are configured with a *.dbgconf file in the user project
+      DbgMCU_CR: 0x0000001F # DBGMCU_CR:       DBGMCU configuration register
+      #                  [ 8] DBGSTBY_D3, [ 7] DBGSTOP_D3
+      #                  [ 5] DBGSTBY_D2, [ 4] DBGSTOP_D2,  [ 3] DBGSLEEP_D2
+      #                  [ 2] DBGSTBY_D1, [ 1] DBGSTOP_D1,  [ 0] DBGSLEEP_D1
   debug-vars:
     vars: |
       // Default values for variables in debug sequences are configured with a *.dbgconf file in the user project
@@ -190,7 +196,7 @@ cbuild-run:
       __var TRACE_BUFFER_SYNCCNT = 0xA; // TODO: Good default!!
 
   debug-sequences-conf:
-      fullTraceSetup: true
+      traceSetup: full
 
   debug-sequences:
     - name: DebugDeviceUnlock

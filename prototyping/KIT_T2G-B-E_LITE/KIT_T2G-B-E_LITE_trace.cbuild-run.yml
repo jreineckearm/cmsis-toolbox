@@ -41,6 +41,12 @@ cbuild-run:
         pname: Cortex-M4
       - port: 3334
         pname: Cortex-M0p
+    trace:
+      - trace-buffer:
+        mode: server
+        server-port: 5555
+    device-settings:
+
   debug-vars:
     vars: |
       __var __TPIU_pinlocation = 1;                      // Select one of the possible TPIU pin locations
@@ -92,6 +98,9 @@ cbuild-run:
       __var ETB_ADDRESS       = 0x00000000;
       __var ETB_AP            = 0x00000000;
       __var ETB_TRIGGER_COUNT = 0x0;
+
+  debug-sequences-conf:
+      traceSetup: full
 
   debug-sequences:
     - name: ResetProcessor

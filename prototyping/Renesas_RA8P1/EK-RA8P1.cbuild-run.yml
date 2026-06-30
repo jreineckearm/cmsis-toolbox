@@ -100,47 +100,14 @@ cbuild-run:
       # input-clock: 250000000 # SCKSCR.CKSEL = PLL1, TRCKCR.TRCK = 2 (means 1/4 for TRCK)
       input-clock: 48000000 # HOCO (High-Speed On-Chip Oscillator), 
       output-clock: 4000000 # HOCO (High-Speed On-Chip Oscillator), SWO prescaler 12
-      port-type: SWO-UART
+      port-type: swo-uart
       server-port: 5555
-    debug-vars-set: |
-      // Debug Setup Variables
-        // None in this example
-      // Trace Setup Variables
-      ENABLE_TRACE_CPU0 = 1;
-      ENABLE_TRACE_CPU1 = 0;   // This automatically releases CPU1 from reset but keeps CPUWAIT active.
-      TRCK_PRESCALER = 0;      // Device specific, 0 = 1/1 input clock
-      TRCK_HOCO = 1;           // Device specific, use HOCO (48MHz) not SystemClock
-      TRC_PIN_DRIVER_SPEED = 0 // Device specific: 0=Low, 1=Middle, 2=High-Speed high-drive, 3=High
-
-  programming:
-    - algorithm: ${CMSIS_PACK_ROOT}/Renesas/RA_DFP/6.4.0/Flash/RA8P1_1M.FLM
-      start: 0x02000000
-      size: 0x00100000
-      ram-start: 0x22000000
-      ram-size: 0x00007800
-    - algorithm: ${CMSIS_PACK_ROOT}/Renesas/RA_DFP/6.4.0/Flash/RA8P1_CONF.FLM
-      start: 0x02C9F040
-      size: 0x000007C0
-      ram-start: 0x22000000
-      ram-size: 0x00007800
-    - algorithm: ${CMSIS_PACK_ROOT}/Renesas/RA_DFP/6.4.0/Flash/RA8P1_OTP.FLM
-      start: 0x02E07600
-      size: 0x00010334
-      ram-start: 0x22000000
-      ram-size: 0x00007800
-  debug-topology:
-    debugports:
-      - dpid: 0
-        accessports:
-          - apid: 0
-            index: 0
-          - apid: 2
-            index: 1
-    processors:
-      - pname: CPU0
-        apid: 0
-      - pname: CPU1
-        apid: 1
+    device-settings:
+      ENABLE_TRACE_CPU0: 1
+      ENABLE_TRACE_CPU1: 0
+      TRCK_PRESCALER: 0
+      TRCK_HOCO: 1
+      TRC_PIN_DRIVER_SPEED: 0
 
   debug-vars:
     vars: |
@@ -167,7 +134,7 @@ cbuild-run:
       __var TEMP_TRACECLOCKOUT = 4000000; //  -> 4MHz // div 12
 
   debug-sequences-conf:
-      fullTraceSetup: true
+      traceSetup: full
 
   debug-sequences:
     - name: ReleaseCPU1
@@ -806,3 +773,34 @@ cbuild-run:
             // Sequence("TraceStop");
 
             Message(0, "End DebugCoreStop sequence"); 
+
+  programming:
+    - algorithm: ${CMSIS_PACK_ROOT}/Renesas/RA_DFP/6.4.0/Flash/RA8P1_1M.FLM
+      start: 0x02000000
+      size: 0x00100000
+      ram-start: 0x22000000
+      ram-size: 0x00007800
+    - algorithm: ${CMSIS_PACK_ROOT}/Renesas/RA_DFP/6.4.0/Flash/RA8P1_CONF.FLM
+      start: 0x02C9F040
+      size: 0x000007C0
+      ram-start: 0x22000000
+      ram-size: 0x00007800
+    - algorithm: ${CMSIS_PACK_ROOT}/Renesas/RA_DFP/6.4.0/Flash/RA8P1_OTP.FLM
+      start: 0x02E07600
+      size: 0x00010334
+      ram-start: 0x22000000
+      ram-size: 0x00007800
+  debug-topology:
+    debugports:
+      - dpid: 0
+        accessports:
+          - apid: 0
+            index: 0
+          - apid: 2
+            index: 1
+    processors:
+      - pname: CPU0
+        apid: 0
+      - pname: CPU1
+        apid: 1
+
