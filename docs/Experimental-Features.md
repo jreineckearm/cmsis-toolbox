@@ -355,7 +355,7 @@ The `events:` node enables DWT or PMU event trace for all processors or for a sp
 `- event:`                            |**Required** | Event selector.
 
 Supported DWT event selectors include `CYCCNT`, `CPICNT`, `EXCCNT`, `SLEEPCNT`, `LSUCNT`, and `FOLDCNT`.
-`PMU` events may be added when supported by the target. They are emitted when one or more PMU counters with index 0..7 have an 8-bit overflow.
+`PMU` events may be added when supported by the target. A PMU overflow packet is emitted when the lower eight bits of one or more PMU event counters with index 0..7 overflow.
 
 **Example:**
 
