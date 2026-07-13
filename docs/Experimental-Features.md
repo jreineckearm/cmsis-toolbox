@@ -401,17 +401,15 @@ The `synchronization:` node overrides component-specific synchronization packet 
 Component | Supported Values
 :---------|:------------------------------------
 `DWT`     | `0` (off), `16M`, `64M`, `256M` processor cycles. Default: `256M`.
-`ETM`     | `0` (off), `256`, `512`, `1k`, `2k`, ... , or `512k`, `1M` cycles/bytes. Default `1k`.
 
 !!! Note
-    `k`=`2^10`, `M`=`2^20`
+    `M`=`2^20`
 
 **Example:**
 
 ```yml
 synchronization:
   - period: DWT\16M
-  - period: ETM\1k
 ```
 
 #### `instructions:`
